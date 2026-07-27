@@ -1,0 +1,120 @@
+# .clinerules — Dự án EduLMS
+# Hệ thống Quản lý Học tập và Đánh giá kết quả Sinh viên
+# File này định hướng cho AI (Cline) khi hỗ trợ code cho dự án. Đọc kỹ trước khi thực hiện bất kỳ task nào.
+
+## 1. BỐI CẢNH DỰ ÁN (KHÔNG ĐƯỢC BỎ QUA)
+
+- Tên dự án: **EduLMS**.
+- Đội ngũ: 2 developer, phát triển theo Agile (Scrum/Kanban), chia task theo **module (Vertical Slicing)** — nghĩa là mỗi task nên đi trọn vẹn từ DB → API → UI cho một tính năng, tránh làm dở dang một lớp (layer) rồi bỏ đó.
+- Mục tiêu: tự động hóa quy trình giảng dạy — Giảng viên giao bài/chấm điểm, Sinh viên theo dõi tiến độ, Admin quản lý dữ liệu đào tạo.
+- 3 vai trò cố định: **Admin, Teacher, Student**. Không tự ý thêm role mới nếu không được yêu cầu.
+
+## 2. PHẠM VI — TUYỆT ĐỐI TUÂN THỦ
+
+### Trong phạm vi (được phép code):
+1. Auth & User Management (RBAC)
+2. Class & Course Management
+3. Learning Materials (tài liệu tĩnh: PDF/Word/PPT/Link)
+4. Assignments & Submissions (giao bài, nộp bài qua file/link)
+5. Grading (chấm điểm, feedback, tính điểm tổng kết)
+6. Analytics (báo cáo thống kê cơ bản)
+
+### Ngoài phạm vi — KHÔNG được tự ý implement, kể cả khi "tiện đường":
+- Streaming video bài giảng trực tuyến
+- Live Chat / Message realtime
+- Tích hợp cổng thanh toán học phí
+- Thi trắc nghiệm online có đếm ngược thời gian
+
+Nếu AI thấy một tính năng nào đó "hợp lý nên có" nhưng nằm ngoài danh sách trên, phải **hỏi lại người dùng trước**, không tự thêm vào code hay database schema.
+
+## 3. QUY TẮC PHÂN QUYỀN (RBAC) — BẮT BUỘC
+
+- Mọi endpoint API (trừ đăng nhập) phải kiểm tra JWT Token hợp lệ.
+- Phân quyền phải được kiểm tra ở **2 lớp**: Router/Middleware (Backend) và Route Guard (Frontend). Không được chỉ ẩn UI mà bỏ qua check ở Backend — đây là lỗi bảo mật nghiêm trọng.
+- Bảng phân quyền tham chiếu nhanh:
+
+| Chức năng | Admin | Teacher | Student |
+|---|---|---|---|
+| CRUD tài khoản, khóa/mở khóa | ✅ | ❌ | ❌ |
+| Tạo môn học, mở lớp học phần | ✅ | ❌ | ❌ |
+| Gán giảng viên, import SV (Excel/CSV) | ✅ | ❌ | ❌ |
+| Upload/ẩn-hiện tài liệu lớp mình dạy | ❌ | ✅ | ❌ |
+| Tạo bài tập, chấm điểm, feedback | ❌ | ✅ | ❌ |
+| Nộp bài, xem điểm/tài liệu của lớp mình | ❌ | ❌ | ✅ |
+| Khóa bảng điểm cuối kỳ, xuất báo cáo toàn trường | ✅ | ❌ | ❌ |
+
+- Khi sinh code cho một API mới, **luôn khai báo rõ role nào được phép gọi** trong comment hoặc decorator/middleware.
+
+## 4. QUY TẮC BẢO MẬT (NFR — Security)
+
+- Mật khẩu: **bắt buộc hash bằng Bcrypt** trước khi lưu DB. Không bao giờ lưu plaintext, không tự chế thuật toán hash khác khi không được yêu cầu.
+- Upload file:
+  - Giới hạn dung lượng tối đa **20MB/file**.
+  - Whitelist định dạng theo từng phân hệ (tài liệu: PDF/DOC/DOCX/PPT/PPTX; bài nộp: PDF/DOCX/ZIP hoặc link).
+  - **Chặn tuyệt đối** các định dạng thực thi: `.exe`, `.sh`, `.bat`, và tương tự.
+  - Luôn validate MIME type thực tế của file, không chỉ dựa vào đuôi file.
+- Không hard-code secret/API key/JWT secret trong source code — luôn dùng biến môi trường (`.env`), và nhắc người dùng thêm `.env` vào `.gitignore` nếu chưa có.
+
+## 5. QUY TẮC HIỆU NĂNG (NFR — Performance)
+
+- API thông thường (không phải upload/download) phải phản hồi dưới **500ms** — khi thiết kế query, ưu tiên index hợp lý, tránh N+1 query.
+- Mọi danh sách có khả năng chứa nhiều bản ghi (danh sách sinh viên, lớp học, bài nộp...) **bắt buộc phải phân trang (pagination)**. Không được trả về toàn bộ dữ liệu một lần trừ khi được yêu cầu rõ ràng (ví dụ export Excel).
+
+## 6. QUY TẮC TOÀN VẸN DỮ LIỆU (NFR — Reliability)
+
+- Thao tác ghi điểm (Grading) và bất kỳ thao tác nào ảnh hưởng đồng thời đến nhiều bảng liên quan **phải dùng Database Transaction**, đảm bảo tính ACID. Không được tách thành nhiều lệnh ghi rời rạc không có rollback.
+- Khi Admin "khóa bảng điểm" cuối kỳ, dữ liệu điểm liên quan phải được đánh dấu read-only ở tầng backend, không chỉ ẩn nút ở frontend.
+
+## 7. QUY TẮC NGHIỆP VỤ CẦN NHỚ
+
+- Deadline nộp bài: mặc định **chặn nộp sau deadline**; nếu cho phép nộp muộn thì phải gắn cờ rõ ràng (`is_late = true`) — không được âm thầm chấp nhận bài nộp trễ mà không đánh dấu.
+- Điểm tổng kết môn học phải được tính **tự động dựa trên trọng số các bài tập**, không hard-code công thức cụ thể nếu chưa được xác nhận trọng số từng loại bài tập.
+- Import danh sách sinh viên vào lớp học phần qua Excel/CSV: cần có bước validate dữ liệu (trùng mã số, sai định dạng) trước khi ghi vào DB, và trả về báo cáo lỗi rõ ràng cho Admin.
+- Trạng thái lớp học (Đang diễn ra / Đã kết thúc) cần được hiển thị nhất quán ở cả phía Teacher và Student.
+
+## 8. QUY TẮC LÀM VIỆC VỚI AI (DÀNH CHO CLINE)
+
+1. **Không tự ý mở rộng phạm vi** — nếu task yêu cầu không rõ thuộc phân hệ nào trong 6 phân hệ đã liệt kê, hỏi lại trước khi code.
+2. **Làm theo Vertical Slicing**: khi được giao 1 task/module, cố gắng hoàn thiện đủ DB schema → API → xử lý logic → (nếu có) UI liên quan, thay vì chỉ code một phần.
+3. **Luôn kiểm tra RBAC** trước khi hoàn thành bất kỳ API nào — tự hỏi "role nào được phép gọi endpoint này?" trước khi merge.
+4. **Không tự sinh tính năng ngoài phạm vi** (mục 2) dù trông "hợp lý" đến đâu.
+5. Khi sửa đổi logic tính điểm, phân quyền, hoặc bảo mật — luôn giải thích ngắn gọn thay đổi đó ảnh hưởng gì, vì đây là các phần nhạy cảm của hệ thống.
+6. Đặt tên biến, hàm, route theo đúng thuật ngữ nghiệp vụ đã dùng trong tài liệu (ví dụ: `enrolment`, `submission`, `assignment`, `grading`) để nhất quán xuyên suốt codebase, tránh vừa dùng `class` vừa dùng `course` lẫn lộn không rõ nghĩa.
+7. Trước khi tạo migration/thay đổi schema DB, kiểm tra xem đã có bảng/quan hệ tương đương chưa để tránh trùng lặp.
+
+## 9. LỘ TRÌNH SPRINT (ĐỂ ƯU TIÊN ĐÚNG THỨ TỰ)
+
+| Sprint | Deliverable chính |
+|---|---|
+| Sprint 1 | Base code (BE & FE), Database, Đăng nhập, Quản lý User/Profile |
+| Sprint 2 | Quản lý Môn/Lớp học, phân công giảng dạy, Upload/Download tài liệu |
+| Sprint 3 | Giao bài tập, nộp bài, chấm điểm & nhận xét |
+| Sprint 4 | Dashboard thống kê, testing toàn luồng, fix bug, triển khai |
+
+Khi không rõ nên ưu tiên code phần nào, đối chiếu với sprint hiện tại của nhóm để không code trước phần thuộc sprint sau (trừ khi có phụ thuộc kỹ thuật bắt buộc).
+## 10. Tech Stack & Architecture
+- **Frontend (FE):** React.js (hoặc Vue/Angular), Tailwind CSS. Thiết kế Desktop-first cho Admin/Teacher, Mobile-friendly cho Student.
+- Backend: Java (Spring Boot), Spring Security (JWT), Spring Data JPA.
+- Database: MySQL (chạy trên XAMPP / MySQL Workbench).
+- Build Tool: Maven (pom.xml).
+- **Architecture:** 
+  - Tách biệt rõ ràng Frontend và Backend qua RESTful API.
+  - Áp dụng RBAC (Role-Based Access Control) cho việc phân quyền.
+
+## 11. Coding Standards (Chuẩn viết code)
+- **Ngôn ngữ:** Ưu tiên sử dụng tiếng Anh cho việc đặt tên biến, hàm, class, comment, tên file và commit message. Giao diện người dùng (UI) có thể dùng tiếng Việt theo yêu cầu dự án.
+- **Naming Conventions:**
+  - `camelCase` cho biến và tên hàm (vd: `studentList`, `getGrades()`).
+  - `PascalCase` cho Classes và Component FE (vd: `UserProfile`, `ClassController`).
+  - Tên file rõ ràng, phản ánh đúng chức năng (vd: `assignment.controller.js`, `UserDashboard.jsx`).
+- **Clean Code:**
+  - Không viết các hàm quá dài (tối đa ~50-80 dòng).
+  - Sử dụng async/await thay vì raw Promises (.then/.catch) để xử lý bất đồng bộ.
+  - Bắt buộc phải có Pagination (phân trang) cho mọi danh sách dữ liệu trả về từ API (ví dụ: danh sách sinh viên).
+- **API Response Format:** Mọi API phải trả về dữ liệu theo cấu trúc chuẩn:
+  ```json
+  {
+    "success": true/false,
+    "message": "Mô tả kết quả",
+    "data": { ... } // Dữ liệu trả về (nếu có)
+  }
