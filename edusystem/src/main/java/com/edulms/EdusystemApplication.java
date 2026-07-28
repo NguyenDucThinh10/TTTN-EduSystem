@@ -1,4 +1,4 @@
-package com.example.edusystem;
+package com.edulms;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
