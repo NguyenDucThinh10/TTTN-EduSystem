@@ -6,3 +6,62 @@ Content-Type: application/json
   "username": "admin",
   "password": "admin123"
 }
+
+### Test Lấy danh sách User (Quyền Admin)
+GET http://localhost:8080/api/admin/users?page=0&size=10
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc4NTI5MTcyNCwiZXhwIjoxNzg1Mzc4MTI0fQ.aQ9yDCPGyosCz80slhnBj1HixbhmEg4J54iH30-wUas
+
+### Test Tạo tài khoản mới (Quyền Admin)
+POST http://localhost:8080/api/admin/users
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc4NTI5MTcyNCwiZXhwIjoxNzg1Mzc4MTI0fQ.aQ9yDCPGyosCz80slhnBj1HixbhmEg4J54iH30-wUas
+
+{
+  "username": "gv_nguyenvana",
+  "password": "Password123",
+  "email": "nguyenvana@edulms.com",
+  "fullName": "Nguyễn Văn A",
+  "role": "TEACHER"
+}
+
+### Test Khóa/Mở tài khoản (Quyền Admin)
+PUT http://localhost:8080/api/admin/users/13/status
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc4NTI5MTcyNCwiZXhwIjoxNzg1Mzc4MTI0fQ.aQ9yDCPGyosCz80slhnBj1HixbhmEg4J54iH30-wUas
+
+{
+  "status": "BLOCKED"
+}
+
+### 1. Tạo Môn học (Quyền Admin)
+POST http://localhost:8080/api/admin/courses
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc4NTI5MTcyNCwiZXhwIjoxNzg1Mzc4MTI0fQ.aQ9yDCPGyosCz80slhnBj1HixbhmEg4J54iH30-wUas
+
+{
+  "code": "IT101",
+  "title": "Lập trình Java Cơ bản",
+  "credits": 3
+}
+
+### 2. Xem danh sách Môn học
+GET http://localhost:8080/api/courses
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc4NTI5MTcyNCwiZXhwIjoxNzg1Mzc4MTI0fQ.aQ9yDCPGyosCz80slhnBj1HixbhmEg4J54iH30-wUas
+
+### 1. Tạo Lớp học mới (Quyền Admin)
+# (Lưu ý: courseId và teacherId phải là ID có thật trong database của bạn)
+POST http://localhost:8080/api/admin/classes
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc4NTI5MTcyNCwiZXhwIjoxNzg1Mzc4MTI0fQ.aQ9yDCPGyosCz80slhnBj1HixbhmEg4J54iH30-wUas
+
+{
+  "courseId": 1,
+  "teacherId": 13,
+  "name": "IT101 - Lớp 1",
+  "semester": "Fall 2026",
+  "status": "ONGOING"
+}
+
+### 2. Xem danh sách Lớp học
+GET http://localhost:8080/api/admin/classes
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc4NTI5MTcyNCwiZXhwIjoxNzg1Mzc4MTI0fQ.aQ9yDCPGyosCz80slhnBj1HixbhmEg4J54iH30-wUas

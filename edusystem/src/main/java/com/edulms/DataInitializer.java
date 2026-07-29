@@ -24,6 +24,7 @@ public class DataInitializer implements CommandLineRunner {
             // Create ADMIN
             User admin = new User();
             admin.setUsername("admin");
+            admin.setEmail("admin@edulms.com");
             admin.setPasswordHash(passwordEncoder.encode("admin123"));
             admin.setFullName("System Admin");
             admin.setRole(Role.ADMIN);
@@ -33,6 +34,8 @@ public class DataInitializer implements CommandLineRunner {
             // Create TEACHER
             User teacher = new User();
             teacher.setUsername("teacher");
+
+            teacher.setEmail("teacher@edulms.com");
             teacher.setPasswordHash(passwordEncoder.encode("teacher123"));
             teacher.setFullName("John Doe");
             teacher.setRole(Role.TEACHER);
@@ -42,6 +45,7 @@ public class DataInitializer implements CommandLineRunner {
             // Create STUDENT 1
             User student1 = new User();
             student1.setUsername("student1");
+            student1.setEmail("admin1@edulms.com");
             student1.setPasswordHash(passwordEncoder.encode("student123"));
             student1.setFullName("Alice Smith");
             student1.setRole(Role.STUDENT);
@@ -51,6 +55,7 @@ public class DataInitializer implements CommandLineRunner {
             // Create STUDENT 2
             User student2 = new User();
             student2.setUsername("student2");
+            student2.setEmail("admin2@edulms.com");
             student2.setPasswordHash(passwordEncoder.encode("student123"));
             student2.setFullName("Bob Johnson");
             student2.setRole(Role.STUDENT);
