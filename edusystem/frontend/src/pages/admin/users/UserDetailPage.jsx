@@ -1,1 +1,0 @@
-import PageTemplate from "../../PageTemplate"; export default function UserDetailPage() { return <PageTemplate title="Chi tiết tài khoản" description="Thông tin, vai trò và trạng thái người dùng." />; }

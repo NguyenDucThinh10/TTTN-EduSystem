@@ -1,2 +1,0 @@
-import DataTable from "../../../components/tables/DataTable"; import PageTemplate from "../../PageTemplate";
-export default function SemesterListPage() { return <PageTemplate title="Danh sách học kỳ" description="Quản lý năm học và học kỳ đào tạo."><DataTable data={[{ id: 1, name: "HK1 2026-2027", startDate: "2026-08-15", endDate: "2026-12-30" }]} columns={[{ key: "name", label: "Học kỳ" }, { key: "startDate", label: "Bắt đầu" }, { key: "endDate", label: "Kết thúc" }]} /></PageTemplate>; }

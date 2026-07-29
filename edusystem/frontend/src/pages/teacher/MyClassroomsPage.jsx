@@ -1,2 +1,0 @@
-import DataTable from "../../components/tables/DataTable"; import PageTemplate from "../PageTemplate";
-export default function MyClassroomsPage() { return <PageTemplate title="Lớp giảng viên phụ trách" description="Danh sách lớp học phần của bạn."><DataTable data={[{ id: 1, code: "CS101-01", course: "Nhập môn lập trình", students: 42 }]} columns={[{ key: "code", label: "Mã lớp" }, { key: "course", label: "Học phần" }, { key: "students", label: "Sinh viên" }]} /></PageTemplate>; }

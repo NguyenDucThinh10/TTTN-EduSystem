@@ -1,2 +1,0 @@
-import Input from "../../../components/common/Input"; import Button from "../../../components/common/Button"; import PageTemplate from "../../PageTemplate";
-export default function SemesterFormPage() { return <PageTemplate title="Tạo hoặc sửa học kỳ" description="Thiết lập thời gian đào tạo."><section className="panel grid"><Input label="Tên học kỳ" /><Input label="Ngày bắt đầu" type="date" /><Input label="Ngày kết thúc" type="date" /><Button>Lưu học kỳ</Button></section></PageTemplate>; }

@@ -1,1 +1,0 @@
-import PageTemplate from "../../PageTemplate"; export default function TeacherClassroomDetailPage() { return <PageTemplate title="Chi tiết lớp giảng viên" description="Tổng hợp tài liệu, bài tập, sinh viên và tiến độ của lớp." />; }

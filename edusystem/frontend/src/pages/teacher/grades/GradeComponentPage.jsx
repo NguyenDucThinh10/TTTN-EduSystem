@@ -1,2 +1,0 @@
-import Input from "../../../components/common/Input"; import Button from "../../../components/common/Button"; import PageTemplate from "../../PageTemplate";
-export default function GradeComponentPage() { return <PageTemplate title="Cấu hình thành phần điểm" description="Thiết lập trọng số điểm."><section className="panel grid"><Input label="Quá trình (%)" type="number" defaultValue="30" /><Input label="Giữa kỳ (%)" type="number" defaultValue="20" /><Input label="Cuối kỳ (%)" type="number" defaultValue="50" /><Button>Lưu cấu hình</Button></section></PageTemplate>; }

@@ -1,2 +1,0 @@
-import SubmissionTable from "../../../components/tables/SubmissionTable"; import PageTemplate from "../../PageTemplate";
-export default function SubmissionListPage() { return <PageTemplate title="Danh sách bài nộp" description="Theo dõi bài sinh viên đã nộp."><SubmissionTable submissions={[{ id: 1, student: "Lê Văn C", assignment: "Bài tập vòng lặp", submittedAt: "2026-08-09", status: "SUBMITTED" }]} /></PageTemplate>; }

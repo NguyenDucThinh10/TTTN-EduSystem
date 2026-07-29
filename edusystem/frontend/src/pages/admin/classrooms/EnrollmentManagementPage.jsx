@@ -1,2 +1,0 @@
-import StudentTable from "../../../components/tables/StudentTable"; import PageTemplate from "../../PageTemplate";
-export default function EnrollmentManagementPage() { return <PageTemplate title="Quản lý sinh viên trong lớp" description="Thêm hoặc xóa sinh viên khỏi lớp học phần."><StudentTable students={[{ id: 1, code: "SV001", fullName: "Lê Văn C", email: "student@edulms.local", progress: "72%" }]} /></PageTemplate>; }
