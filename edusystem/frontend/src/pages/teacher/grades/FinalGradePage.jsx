@@ -1,0 +1,2 @@
+import GradeTable from "../../../components/tables/GradeTable"; import Button from "../../../components/common/Button"; import PageTemplate from "../../PageTemplate";
+export default function FinalGradePage() { return <PageTemplate title="Diem tong ket" description="Xem va cong bo diem tong ket."><div className="actions" style={{ marginBottom: 12 }}><Button>Cong bo diem</Button></div><GradeTable grades={[{ id: 1, student: "Le Van C", process: 8, midterm: 7, final: 8, total: 7.7 }]} /></PageTemplate>; }

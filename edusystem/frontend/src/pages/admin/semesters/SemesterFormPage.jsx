@@ -1,0 +1,2 @@
+import Input from "../../../components/common/Input"; import Button from "../../../components/common/Button"; import PageTemplate from "../../PageTemplate";
+export default function SemesterFormPage() { return <PageTemplate title="Tao hoac sua hoc ky" description="Thiet lap thoi gian dao tao."><section className="panel grid"><Input label="Ten hoc ky" /><Input label="Ngay bat dau" type="date" /><Input label="Ngay ket thuc" type="date" /><Button>Luu hoc ky</Button></section></PageTemplate>; }

@@ -1,0 +1,1 @@
+import PageTemplate from "../../PageTemplate"; export default function AssignmentDetailPage() { return <PageTemplate title="Chi tiet bai tap" description="Thong tin yeu cau, han nop va danh sach bai nop." />; }

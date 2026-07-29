@@ -1,0 +1,2 @@
+import CourseTable from "../../../components/tables/CourseTable"; import PageTemplate from "../../PageTemplate";
+export default function CourseListPage() { return <PageTemplate title="Danh sach hoc phan" description="Quan ly hoc phan trong chuong trinh dao tao."><CourseTable courses={[{ id: 1, code: "CS101", name: "Nhap mon lap trinh", credits: 3 }, { id: 2, code: "SE302", name: "Cong nghe phan mem", credits: 4 }]} /></PageTemplate>; }

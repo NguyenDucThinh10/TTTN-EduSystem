@@ -1,0 +1,6 @@
+import Button from "../common/Button";
+import Input from "../common/Input";
+import FileUpload from "../files/FileUpload";
+export default function MaterialForm({ onSubmit = () => {} }) {
+  return <form className="grid" onSubmit={(event) => { event.preventDefault(); onSubmit(new FormData(event.currentTarget)); }}><Input name="title" label="Ten tai lieu" required /><Input name="description" label="Mo ta" /><FileUpload name="file" /><Button type="submit">Luu tai lieu</Button></form>;
+}

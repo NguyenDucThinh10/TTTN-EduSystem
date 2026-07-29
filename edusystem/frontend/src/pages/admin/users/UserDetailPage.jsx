@@ -1,0 +1,1 @@
+import PageTemplate from "../../PageTemplate"; export default function UserDetailPage() { return <PageTemplate title="Chi tiet tai khoan" description="Thong tin, vai tro va trang thai nguoi dung." />; }

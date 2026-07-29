@@ -1,0 +1,1 @@
+import PageTemplate from "../../PageTemplate"; export default function TeacherClassroomDetailPage() { return <PageTemplate title="Chi tiet lop giang vien" description="Tong hop tai lieu, bai tap, sinh vien va tien do cua lop." />; }

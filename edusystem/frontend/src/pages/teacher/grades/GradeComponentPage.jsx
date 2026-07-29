@@ -1,0 +1,2 @@
+import Input from "../../../components/common/Input"; import Button from "../../../components/common/Button"; import PageTemplate from "../../PageTemplate";
+export default function GradeComponentPage() { return <PageTemplate title="Cau hinh thanh phan diem" description="Thiet lap trong so diem."><section className="panel grid"><Input label="Qua trinh (%)" type="number" defaultValue="30" /><Input label="Giua ky (%)" type="number" defaultValue="20" /><Input label="Cuoi ky (%)" type="number" defaultValue="50" /><Button>Luu cau hinh</Button></section></PageTemplate>; }

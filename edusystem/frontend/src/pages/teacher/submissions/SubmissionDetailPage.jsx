@@ -1,0 +1,2 @@
+import GradeForm from "../../../components/forms/GradeForm"; import FilePreview from "../../../components/files/FilePreview"; import PageTemplate from "../../PageTemplate";
+export default function SubmissionDetailPage() { return <PageTemplate title="Cham bai nop" description="Xem file nop bai, nhap diem va nhan xet."><section className="grid"><div className="panel"><FilePreview file={{ name: "baitap1.pdf", type: "application/pdf" }} /></div><div className="panel"><GradeForm /></div></section></PageTemplate>; }

@@ -1,0 +1,1 @@
+import PageTemplate from "../../PageTemplate"; export default function CourseDetailPage() { return <PageTemplate title="Chi tiet hoc phan" description="Thong tin hoc phan, so tin chi va cac lop lien quan." />; }

@@ -1,0 +1,2 @@
+import DataTable from "../../components/tables/DataTable"; import PageTemplate from "../PageTemplate";
+export default function MyClassroomsPage() { return <PageTemplate title="Lop sinh vien tham gia" description="Danh sach lop hoc phan cua ban."><DataTable data={[{ id: 1, code: "CS101-01", course: "Nhap mon lap trinh", teacher: "Tran Thi B" }]} columns={[{ key: "code", label: "Ma lop" }, { key: "course", label: "Hoc phan" }, { key: "teacher", label: "Giang vien" }]} /></PageTemplate>; }
