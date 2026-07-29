@@ -6,3 +6,29 @@ Content-Type: application/json
   "username": "admin",
   "password": "admin123"
 }
+
+### Test Lấy danh sách User (Quyền Admin)
+GET http://localhost:8080/api/admin/users?page=0&size=10
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc4NTI5MTcyNCwiZXhwIjoxNzg1Mzc4MTI0fQ.aQ9yDCPGyosCz80slhnBj1HixbhmEg4J54iH30-wUas
+
+### Test Tạo tài khoản mới (Quyền Admin)
+POST http://localhost:8080/api/admin/users
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc4NTI5MTcyNCwiZXhwIjoxNzg1Mzc4MTI0fQ.aQ9yDCPGyosCz80slhnBj1HixbhmEg4J54iH30-wUas
+
+{
+  "username": "gv_nguyenvana",
+  "password": "Password123",
+  "email": "nguyenvana@edulms.com",
+  "fullName": "Nguyễn Văn A",
+  "role": "TEACHER"
+}
+
+### Test Khóa/Mở tài khoản (Quyền Admin)
+PUT http://localhost:8080/api/admin/users/13/status
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc4NTI5MTcyNCwiZXhwIjoxNzg1Mzc4MTI0fQ.aQ9yDCPGyosCz80slhnBj1HixbhmEg4J54iH30-wUas
+
+{
+  "status": "BLOCKED"
+}
