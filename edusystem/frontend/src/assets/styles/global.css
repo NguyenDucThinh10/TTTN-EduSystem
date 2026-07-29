@@ -56,3 +56,11 @@ th { background: #f1f5f9; font-size: 13px; text-transform: uppercase; }
 .auth-layout { min-height: 100vh; display: grid; place-items: center; padding: 20px; background: #eef6f5; }
 .auth-panel { width: min(420px, 100%); padding: 28px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow); }
 .toast { position: fixed; right: 18px; bottom: 18px; border-radius: var(--radius); background: var(--text); color: #fff; padding: 12px 14px; }
+.auth-switch { margin-top: 16px; text-align: center; }
+.auth-switch a { color: var(--primary-dark); font-weight: 800; }
+.dashboard-list { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.dashboard-list li { display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.dashboard-list li:last-child { border-bottom: 0; }
+.kpi-card { display: grid; gap: 8px; min-height: 132px; }
+.kpi-icon { display: inline-grid; place-items: center; width: 42px; height: 42px; border-radius: 8px; background: #eef6f5; color: var(--primary-dark); }
+.dashboard-section-title { margin: 0 0 12px; font-size: 18px; }

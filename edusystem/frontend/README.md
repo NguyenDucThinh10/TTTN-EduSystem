@@ -11,4 +11,4 @@ cp .env.example .env
 npm run dev
 ```
 
-Backend mac dinh: `http://localhost:8080/api`.
+Backend mac dinh khi chay dev: `/api`, duoc Vite proxy sang `http://localhost:8080/api`.

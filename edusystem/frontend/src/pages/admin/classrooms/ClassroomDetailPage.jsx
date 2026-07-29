@@ -1,1 +1,1 @@
-import PageTemplate from "../../PageTemplate"; export default function ClassroomDetailPage() { return <PageTemplate title="Chi tiet lop hoc" description="Thong tin lop, giang vien, sinh vien va tien do." />; }
+import PageTemplate from "../../PageTemplate"; export default function ClassroomDetailPage() { return <PageTemplate title="Chi tiết lớp học" description="Thông tin lớp, giảng viên, sinh viên và tiến độ." />; }

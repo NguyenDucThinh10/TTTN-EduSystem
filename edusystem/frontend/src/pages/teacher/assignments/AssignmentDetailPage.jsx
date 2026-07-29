@@ -1,1 +1,1 @@
-import PageTemplate from "../../PageTemplate"; export default function AssignmentDetailPage() { return <PageTemplate title="Chi tiet bai tap" description="Thong tin yeu cau, han nop va danh sach bai nop." />; }
+import PageTemplate from "../../PageTemplate"; export default function AssignmentDetailPage() { return <PageTemplate title="Chi tiết bài tập" description="Thông tin yêu cầu, hạn nộp và danh sách bài nộp." />; }

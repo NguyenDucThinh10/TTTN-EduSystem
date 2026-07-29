@@ -1,3 +1,3 @@
-export default function EmptyState({ title = "Chua co du lieu", description = "Hay tao ban ghi moi de bat dau." }) {
+export default function EmptyState({ title = "Chưa có dữ liệu", description = "Hãy tạo bản ghi mới để bắt đầu." }) {
   return <div className="empty-state"><strong>{title}</strong><p>{description}</p></div>;
 }

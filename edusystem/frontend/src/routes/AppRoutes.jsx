@@ -7,6 +7,7 @@ import StudentLayout from "../layouts/StudentLayout";
 import ProtectedRoute from "./ProtectedRoute";
 import RoleRoute from "./RoleRoute";
 import LoginPage from "../pages/auth/LoginPage";
+import RegisterPage from "../pages/auth/RegisterPage";
 import ChangePasswordPage from "../pages/auth/ChangePasswordPage";
 import ProfilePage from "../pages/auth/ProfilePage";
 import NotFoundPage from "../pages/error/NotFoundPage";
@@ -59,7 +60,10 @@ import StudentProgressPage from "../pages/student/grades/StudentProgressPage";
 export default function AppRoutes() {
   return (
     <Routes>
-      <Route element={<AuthLayout />}><Route path="/login" element={<LoginPage />} /></Route>
+      <Route element={<AuthLayout />}>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+      </Route>
       <Route path="/403" element={<ForbiddenPage />} />
       <Route path="/500" element={<ServerErrorPage />} />
       <Route element={<ProtectedRoute />}>
