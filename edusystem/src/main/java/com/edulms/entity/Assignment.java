@@ -50,9 +50,9 @@ public class Assignment {
     private Double weight = 1.0;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "varchar(20) default 'PUBLISHED'")
     private AssignmentStatus status = AssignmentStatus.PUBLISHED;
 
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", nullable = false, columnDefinition = "datetime(6) default current_timestamp(6)")
     private LocalDateTime createdAt = LocalDateTime.now();
 }

@@ -53,6 +53,6 @@ public class Submission {
     private LocalDateTime gradedAt;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "varchar(20) default 'SUBMITTED'")
     private SubmissionStatus status = SubmissionStatus.SUBMITTED;
 }
