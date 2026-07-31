@@ -10,7 +10,9 @@ export default function AuthPage() {
     const [registerData, setRegisterData] = useState({
         username: '',
         email: '',
-        password: ''
+        password: '',
+        fullName: ''
+
     });
 
     // 2. Hàm bắt sự kiện khi người dùng gõ phím
@@ -77,6 +79,13 @@ export default function AuthPage() {
                     <h2 className="title animation" style={{ '--i': 17, '--j': 0 }}>Sign Up</h2>
                     {/* Bắn sự kiện onSubmit vào đây */}
                     <form onSubmit={handleRegisterSubmit}>
+
+                        <div className="input-box animation" style={{ '--i': 17.5, '--j': 0.5 }}>
+                            <input type="text" name="fullName" value={registerData.fullName} onChange={handleRegisterChange} required />
+                            <label>Full Name</label>
+                            <i className='bx bxs-id-card'></i>
+                        </div>
+                        
                         <div className="input-box animation" style={{ '--i': 18, '--j': 1 }}>
                             {/* Thêm thuộc tính name, value và onChange */}
                             <input type="text" name="username" value={registerData.username} onChange={handleRegisterChange} required />

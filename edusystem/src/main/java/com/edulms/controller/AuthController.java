@@ -31,7 +31,7 @@ public class AuthController {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder; // Khai báo thêm công cụ mã hóa mật khẩu
 
-    // Đừng quên Inject PasswordEncoder vào Constructor
+
     public AuthController(AuthenticationManager authenticationManager, 
                           JwtTokenProvider jwtTokenProvider, 
                           UserRepository userRepository,
@@ -72,7 +72,7 @@ public class AuthController {
         User newUser = new User();
         newUser.setUsername(request.getUsername());
         newUser.setEmail(request.getEmail());
-        
+        newUser.setFullName(request.getFullName());
         newUser.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         
         // Cấp quyền mặc định cho người đăng ký tự do là Sinh viên (STUDENT)
