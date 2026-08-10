@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom'; // BỔ SUNG: Import thêm Outlet
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
     const token = localStorage.getItem('token');
@@ -19,7 +19,8 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     }
 
     // 3. Hợp lệ -> Cho phép vào trang
-    return children;
+    // BỔ SUNG: Thêm `|| <Outlet />` để hỗ trợ cả cách viết bọc Component lẫn cách viết Route cha
+    return children || <Outlet />;
 };
 
 export default ProtectedRoute;

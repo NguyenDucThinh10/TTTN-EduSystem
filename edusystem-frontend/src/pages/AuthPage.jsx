@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // BỔ SUNG: Import hook điều hướng
 import './AuthPage.css';
 import axiosClient from '../api/axiosClient'; // Import file cấu hình API của chúng ta
 
 export default function AuthPage() {
+    // BỔ SUNG: Khởi tạo hook điều hướng
+    const navigate = useNavigate();
+
     // State quản lý việc xoay form
     const [isActive, setIsActive] = useState(false);
 
@@ -12,7 +16,6 @@ export default function AuthPage() {
         email: '',
         password: '',
         fullName: ''
-
     });
 
     // 2. Hàm bắt sự kiện khi người dùng gõ phím
@@ -33,8 +36,8 @@ export default function AuthPage() {
                 alert("Đăng ký tài khoản thành công! Bạn có thể đăng nhập ngay.");
                 // Chuyển form về lại mặt Login
                 setIsActive(false); 
-                // Xóa trắng form đăng ký
-                setRegisterData({ username: '', email: '', password: '' });
+                // Xóa trắng form đăng ký (Đã bổ sung xóa luôn fullName)
+                setRegisterData({ username: '', email: '', password: '', fullName: '' });
             }
         } catch (error) {
             console.error("Lỗi đăng ký:", error);
@@ -42,23 +45,65 @@ export default function AuthPage() {
         }
     };
 
+    // --- BỔ SUNG: KHỐI XỬ LÝ ĐĂNG NHẬP ---
+    const [loginData, setLoginData] = useState({
+        username: '',
+        password: ''
+    });
+
+    const handleLoginChange = (e) => {
+        const { name, value } = e.target;
+        setLoginData({ ...loginData, [name]: value });
+    };
+
+    const handleLoginSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await axiosClient.post('/api/auth/login', loginData);
+
+            console.log("Dữ liệu trả về từ API Login:", response);
+
+            const token = response.token || response.accessToken;
+            const role = response.role;
+            const username = response.username;
+
+            // Lưu thông tin vào localStorage
+            localStorage.setItem('token', token);
+            localStorage.setItem('role', role);
+            localStorage.setItem('username', username);
+
+            // Điều hướng dựa trên quyền
+            if (role === 'ADMIN') {
+                navigate('/admin');
+            } else if (role === 'TEACHER') {
+                navigate('/teacher');
+            } else {
+                navigate('/student');
+            }
+        } catch (error) {
+            console.error("Lỗi đăng nhập:", error);
+            alert("Sai tên đăng nhập hoặc mật khẩu! Vui lòng thử lại.");
+        }
+    };
+    // ------------------------------------
+
     return (
         <div className="auth-container">
             <div className={`wrapper ${isActive ? 'active' : ''}`}>
                 <span className="rotate-bg"></span>
                 <span className="rotate-bg2"></span>
 
-                {/* --- KHỐI FORM ĐĂNG NHẬP (Sẽ gắn API sau) --- */}
+                {/* --- KHỐI FORM ĐĂNG NHẬP (Đã gắn State và API) --- */}
                 <div className="form-box login">
                     <h2 className="title animation" style={{ '--i': 0, '--j': 21 }}>Login</h2>
-                    <form>
+                    <form onSubmit={handleLoginSubmit}>
                         <div className="input-box animation" style={{ '--i': 1, '--j': 22 }}>
-                            <input type="text" required />
+                            <input type="text" name="username" value={loginData.username} onChange={handleLoginChange} required />
                             <label>Username</label>
                             <i className='bx bxs-user'></i>
                         </div>
                         <div className="input-box animation" style={{ '--i': 2, '--j': 23 }}>
-                            <input type="password" required />
+                            <input type="password" name="password" value={loginData.password} onChange={handleLoginChange} required />
                             <label>Password</label>
                             <i className='bx bxs-lock-alt'></i>
                         </div>
