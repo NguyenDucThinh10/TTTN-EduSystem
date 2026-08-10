@@ -18,6 +18,13 @@ axiosClient.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // [THÊM MỚI] Chuẩn bị cho task: Upload Danh sách Sinh viên (Excel) và Nộp bài (File)
+    // Nếu dữ liệu gửi đi là một file (FormData), ta phải gỡ 'application/json' để trình duyệt tự nhận diện 'multipart/form-data'
+    if (config.data instanceof FormData) {
+        delete config.headers['Content-Type'];
+    }
+
     return config;
   },
   (error) => {
@@ -31,12 +38,26 @@ axiosClient.interceptors.response.use(
     return response.data; // Chỉ lấy phần data, bỏ qua các config thừa của Axios
   },
   (error) => {
+    // Xử lý lỗi 401 (Chưa đăng nhập hoặc Token giả/hết hạn)
     if (error.response && error.response.status === 401) {
-      // Bị từ chối quyền -> Xóa token cũ và có thể đá về trang Đăng nhập
       console.error("Token hết hạn hoặc không hợp lệ!");
+      
+      // [BỔ SUNG] Dọn sạch két sắt khi bị đá ra ngoài
       localStorage.removeItem('token');
-      // window.location.href = '/login'; 
+      localStorage.removeItem('role'); 
+      localStorage.removeItem('username'); 
+      
+      // [BẬT LÊN & SỬA ĐƯỜNG DẪN] Đá về đúng trang AuthPage của bạn
+      window.location.href = '/auth'; 
     }
+
+    // [THÊM MỚI] Xử lý lỗi 403 (Phân quyền)
+    // Dành cho trường hợp Sinh viên (STUDENT) cố tình gọi API của Quản trị viên (ADMIN)
+    if (error.response && error.response.status === 403) {
+        console.error("Bạn không có đủ thẩm quyền thực hiện hành động này!");
+        // (Tùy chọn) Có thể bắn một thông báo lỗi màu đỏ góc màn hình tại đây sau này
+    }
+
     return Promise.reject(error);
   }
 );

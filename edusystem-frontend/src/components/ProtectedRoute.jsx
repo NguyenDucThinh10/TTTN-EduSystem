@@ -1,0 +1,25 @@
+import React from 'react';
+import { Navigate } from 'react-router-dom';
+
+const ProtectedRoute = ({ children, allowedRoles }) => {
+    const token = localStorage.getItem('token');
+    const userRole = localStorage.getItem('role');
+
+    // 1. Nếu chưa đăng nhập -> Chuyển hướng về trang Auth/Login
+    if (!token) {
+        return <Navigate to="/" replace />;
+    }
+
+    // 2. Nếu đã đăng nhập nhưng vai trò không nằm trong danh sách được phép
+    if (allowedRoles && !allowedRoles.includes(userRole)) {
+        // Đẩy về đúng trang theo Role hiện tại để tránh truy cập trái phép
+        if (userRole === 'ADMIN') return <Navigate to="/admin" replace />;
+        if (userRole === 'TEACHER') return <Navigate to="/teacher" replace />;
+        return <Navigate to="/student" replace />;
+    }
+
+    // 3. Hợp lệ -> Cho phép vào trang
+    return children;
+};
+
+export default ProtectedRoute;
