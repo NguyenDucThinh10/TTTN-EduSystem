@@ -8,4 +8,6 @@ import com.edulms.dto.ClassResponse;
 public interface ClassService {
     ClassResponse createClass(ClassRequest request);
     List<ClassResponse> getAllClasses();
+    List<ClassResponse> getMyClasses();
+    ClassResponse getClassById(Long id);
 }

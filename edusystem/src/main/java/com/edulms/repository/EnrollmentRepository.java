@@ -9,6 +9,7 @@ import com.edulms.entity.Enrollment;
 
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     List<Enrollment> findByClassEntityId(Long classId);
+    List<Enrollment> findByStudentId(Long studentId);
     Optional<Enrollment> findByClassEntityIdAndStudentId(Long classId, Long studentId);
     long countByClassEntityId(Long classId);
 }
