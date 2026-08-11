@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.edulms.dto.CreateUserRequest;
 import com.edulms.dto.UpdateStatusRequest;
@@ -40,6 +41,15 @@ public class AdminUserController {
         UserResponse createdUser = userService.createUser(request);
         return ResponseEntity.ok(createdUser);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<UserResponse> updateUser(
+            @PathVariable Long id,
+            @RequestBody CreateUserRequest request) {
+        
+        UserResponse updatedUser = userService.updateUser(id, request);
+        return ResponseEntity.ok(updatedUser);
+    }
     
     @PutMapping("/{id}/status")
     public ResponseEntity<UserResponse> changeUserStatus(
@@ -48,5 +58,17 @@ public class AdminUserController {
         
         UserResponse updatedUser = userService.changeUserStatus(id, request.getStatus());
         return ResponseEntity.ok(updatedUser);
+    }
+
+    // Endpoint Import User từ Excel
+
+    @PostMapping("/import")
+    public ResponseEntity<?> importUsers(@RequestParam("file") MultipartFile file) {
+        try {
+            userService.importUsersFromExcel(file);
+            return ResponseEntity.ok("Import danh sách sinh viên thành công!");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }
