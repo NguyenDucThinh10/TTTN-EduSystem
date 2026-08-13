@@ -10,6 +10,8 @@ import com.edulms.dto.SubmissionStudentResponse;
 
 public interface SubmissionService {
     SubmissionResponse submitAssignment(Long assignmentId, MultipartFile file);
+    SubmissionResponse resubmitAssignment(Long assignmentId, MultipartFile file);
+    void cancelSubmission(Long submissionId);
     List<SubmissionResponse> getMySubmissions();
     List<SubmissionResponse> getSubmissionsByAssignment(Long assignmentId);
     List<SubmissionStudentResponse> getSubmissionStudents(Long assignmentId);

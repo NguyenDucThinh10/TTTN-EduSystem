@@ -13,26 +13,39 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class FileStorageServiceImpl implements FileStorageService {
-    private final Path uploadDir;
+    private final Path submissionsDir;
+    private final Path assignmentsDir;
 
-    public FileStorageServiceImpl(@Value("${edulms.upload.submissions-dir:uploads/submissions}") String uploadDir) {
-        this.uploadDir = Path.of(uploadDir).toAbsolutePath().normalize();
+    public FileStorageServiceImpl(
+            @Value("${edulms.upload.submissions-dir:uploads/submissions}") String submissionsDir,
+            @Value("${edulms.upload.assignments-dir:uploads/assignments}") String assignmentsDir) {
+        this.submissionsDir = Path.of(submissionsDir).toAbsolutePath().normalize();
+        this.assignmentsDir = Path.of(assignmentsDir).toAbsolutePath().normalize();
     }
 
     @Override
     public String storeSubmissionFile(MultipartFile file) {
+        return storeFile(file, submissionsDir, "/uploads/submissions/");
+    }
+
+    @Override
+    public String storeAssignmentFile(MultipartFile file) {
+        return storeFile(file, assignmentsDir, "/uploads/assignments/");
+    }
+
+    private String storeFile(MultipartFile file, Path uploadDir, String publicPath) {
         try {
             Files.createDirectories(uploadDir);
-            String originalName = StringUtils.cleanPath(file.getOriginalFilename() == null ? "submission" : file.getOriginalFilename());
+            String originalName = StringUtils.cleanPath(file.getOriginalFilename() == null ? "file" : file.getOriginalFilename());
             String filename = UUID.randomUUID() + "-" + originalName;
             Path target = uploadDir.resolve(filename).normalize();
             if (!target.startsWith(uploadDir)) {
-                throw new InvalidFileException("Tên file không hợp lệ");
+                throw new InvalidFileException("Ten file khong hop le");
             }
             Files.copy(file.getInputStream(), target, StandardCopyOption.REPLACE_EXISTING);
-            return "/uploads/submissions/" + filename;
+            return publicPath + filename;
         } catch (IOException ex) {
-            throw new InvalidFileException("Không thể lưu file bài nộp");
+            throw new InvalidFileException("Khong the luu file");
         }
     }
 }

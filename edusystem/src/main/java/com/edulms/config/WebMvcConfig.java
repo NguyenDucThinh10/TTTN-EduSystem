@@ -10,9 +10,13 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
     private final String submissionsDir;
+    private final String assignmentsDir;
 
-    public WebMvcConfig(@Value("${edulms.upload.submissions-dir:uploads/submissions}") String submissionsDir) {
+    public WebMvcConfig(
+            @Value("${edulms.upload.submissions-dir:uploads/submissions}") String submissionsDir,
+            @Value("${edulms.upload.assignments-dir:uploads/assignments}") String assignmentsDir) {
         this.submissionsDir = submissionsDir;
+        this.assignmentsDir = assignmentsDir;
     }
 
     @Override
@@ -20,5 +24,9 @@ public class WebMvcConfig implements WebMvcConfigurer {
         String location = Path.of(submissionsDir).toAbsolutePath().normalize().toUri().toString();
         registry.addResourceHandler("/uploads/submissions/**")
                 .addResourceLocations(location);
+
+        String assignmentLocation = Path.of(assignmentsDir).toAbsolutePath().normalize().toUri().toString();
+        registry.addResourceHandler("/uploads/assignments/**")
+                .addResourceLocations(assignmentLocation);
     }
 }

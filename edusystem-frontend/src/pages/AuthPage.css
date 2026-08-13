@@ -76,6 +76,22 @@
   gap: 14px;
 }
 
+.demo-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.demo-actions button {
+  min-height: 40px;
+  border: 1px solid #ccd6e2;
+  border-radius: 6px;
+  background: #f8fafc;
+  color: #27415f;
+  font-weight: 800;
+  cursor: pointer;
+}
+
 .auth-form label {
   display: grid;
   gap: 6px;

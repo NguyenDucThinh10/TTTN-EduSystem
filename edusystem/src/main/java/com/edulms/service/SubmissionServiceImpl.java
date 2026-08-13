@@ -82,6 +82,47 @@ public class SubmissionServiceImpl implements SubmissionService {
     }
 
     @Override
+    public SubmissionResponse resubmitAssignment(Long assignmentId, MultipartFile file) {
+        User student = currentUserService.getCurrentUser();
+        if (student.getRole() != Role.STUDENT) {
+            throw new UnauthorizedClassAccessException("Chi sinh vien duoc nop lai bai");
+        }
+
+        Assignment assignment = getAssignmentOrThrow(assignmentId);
+        requireStudentInClass(assignment.getClassEntity(), student);
+        submissionValidator.validateDeadline(assignment);
+        fileValidator.validate(file);
+
+        Submission submission = submissionRepository.findByAssignmentIdAndStudentId(assignmentId, student.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Chua co bai nop de nop lai"));
+        submission.setFileUrl(fileStorageService.storeSubmissionFile(file));
+        submission.setSubmittedAt(dateTimeUtils.now());
+        submission.setIsLate(false);
+        submission.setScore(null);
+        submission.setFeedback(null);
+        submission.setGradedAt(null);
+        submission.setStatus(SubmissionStatus.SUBMITTED);
+        gradeRepository.findBySubmissionId(submission.getId()).ifPresent(gradeRepository::delete);
+        return mapToResponse(submissionRepository.save(submission));
+    }
+
+    @Override
+    public void cancelSubmission(Long submissionId) {
+        User student = currentUserService.getCurrentUser();
+        if (student.getRole() != Role.STUDENT) {
+            throw new UnauthorizedClassAccessException("Chi sinh vien duoc huy bai nop");
+        }
+
+        Submission submission = getSubmissionOrThrow(submissionId);
+        if (!submission.getStudent().getId().equals(student.getId())) {
+            throw new UnauthorizedClassAccessException("Sinh vien chi duoc huy bai nop cua chinh minh");
+        }
+        submissionValidator.validateDeadline(submission.getAssignment());
+        gradeRepository.findBySubmissionId(submissionId).ifPresent(gradeRepository::delete);
+        submissionRepository.delete(submission);
+    }
+
+    @Override
     public List<SubmissionResponse> getMySubmissions() {
         User user = currentUserService.getCurrentUser();
         return submissionRepository.findByStudentId(user.getId()).stream()

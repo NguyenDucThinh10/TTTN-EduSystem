@@ -1,0 +1,88 @@
+.page-section,
+.assignment-info,
+.submission-detail,
+.grade-summary,
+.empty-state {
+  display: grid;
+  gap: 12px;
+}
+
+.assignment-card,
+.submission-card,
+.grade-card {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid #e0e6ee;
+  border-radius: 8px;
+  background: #fbfcfe;
+}
+
+.assignment-card {
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+
+.empty-state {
+  place-items: center;
+  padding: 24px;
+  color: #657386;
+  text-align: center;
+}
+
+.empty-state img {
+  width: min(180px, 60vw);
+  aspect-ratio: 1;
+  object-fit: contain;
+}
+
+.grade-summary {
+  grid-template-columns: repeat(3, minmax(120px, 1fr));
+}
+
+.grade-summary div,
+.submission-chart {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid #e0e6ee;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.bar-chart,
+.grade-table {
+  display: grid;
+  gap: 8px;
+}
+
+.bar-row {
+  display: grid;
+  grid-template-columns: 160px 1fr 48px;
+  align-items: center;
+  gap: 10px;
+}
+
+.bar-row div,
+.progress-chart {
+  position: relative;
+  min-height: 12px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e8eef6;
+}
+
+.bar-row i,
+.progress-chart div {
+  display: block;
+  min-height: 12px;
+  border-radius: inherit;
+  background: #1967d2;
+}
+
+.progress-chart span {
+  display: block;
+  margin-top: 6px;
+  color: #657386;
+  font-weight: 800;
+}
