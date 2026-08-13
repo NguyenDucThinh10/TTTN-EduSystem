@@ -43,4 +43,14 @@ public class FileController {
         String fileUrl = fileStorageService.storeAssignmentFile(file);
         return ResponseEntity.ok(Map.of("fileUrl", fileUrl));
     }
+
+    @PostMapping("/upload")
+    public ResponseEntity<Map<String, String>> uploadFile(@RequestParam("file") MultipartFile file) {
+        fileValidator.validate(file);
+        String fileUrl = fileStorageService.storeAssignmentFile(file);
+        return ResponseEntity.ok(Map.of(
+                "fileUrl", fileUrl,
+                "url", fileUrl,
+                "fileName", fileUrl.substring(fileUrl.lastIndexOf('/') + 1)));
+    }
 }

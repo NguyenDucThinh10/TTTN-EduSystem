@@ -31,22 +31,32 @@ export default function AuthPage({ onAuthenticated }) {
 
     try {
       const response = await axiosClient.post('/api/auth/login', loginData);
-      localStorage.setItem('token', response.accessToken);
+      const token = response.token || response.accessToken;
+
+      if (token) {
+        localStorage.setItem('token', token);
+      }
+
       let profile = {};
       try {
         profile = await axiosClient.get('/api/me');
       } catch {
         profile = {};
       }
+
       const authUser = {
         id: profile.id || null,
-        username: profile.username || response.username,
-        fullName: profile.fullName,
+        username: profile.username || response.username || loginData.username,
+        fullName: profile.fullName || response.fullName,
         role: profile.role || response.role,
         tokenType: response.tokenType,
       };
+
+      localStorage.setItem('role', authUser.role);
+      localStorage.setItem('username', authUser.username);
       localStorage.setItem('user', JSON.stringify(authUser));
-      onAuthenticated(authUser);
+
+      onAuthenticated?.(authUser);
     } catch (error) {
       setMessage(error.response?.data?.message || 'Dang nhap that bai. Kiem tra lai tai khoan va mat khau.');
     } finally {
