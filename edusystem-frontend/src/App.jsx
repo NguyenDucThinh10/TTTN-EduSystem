@@ -1,6 +1,12 @@
 import { useState } from 'react';
+import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import AuthPage from './pages/AuthPage';
-import PartBWorkspace from './pages/PartBWorkspace';
+import AboutPage from './pages/home/AboutPage';
+import ContactPage from './pages/home/ContactPage';
+import CoursesPage from './pages/home/CoursesPage';
+import HomePage from './pages/home/HomePage';
+import NewsPage from './pages/home/NewsPage';
+import LearningPage from './pages/learning/LearningPage';
 
 function readStoredUser() {
   try {
@@ -13,21 +19,46 @@ function readStoredUser() {
 function App() {
   const [user, setUser] = useState(readStoredUser());
 
+  return (
+    <BrowserRouter>
+      <AppRoutes user={user} setUser={setUser} />
+    </BrowserRouter>
+  );
+}
+
+function AppRoutes({ user, setUser }) {
+  const navigate = useNavigate();
+
   const handleAuthenticated = (authUser) => {
     setUser(authUser);
+    navigate('/learning');
   };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
+    navigate('/');
   };
 
-  if (!user) {
-    return <AuthPage onAuthenticated={handleAuthenticated} />;
-  }
-
-  return <PartBWorkspace user={user} onLogout={handleLogout} />;
+  return (
+    <Routes>
+      <Route path="/" element={<HomePage user={user} onLogout={handleLogout} />} />
+      <Route path="/gioi-thieu" element={<AboutPage user={user} onLogout={handleLogout} />} />
+      <Route path="/khoa-hoc" element={<CoursesPage user={user} onLogout={handleLogout} />} />
+      <Route path="/tin-tuc" element={<NewsPage user={user} onLogout={handleLogout} />} />
+      <Route path="/lien-he" element={<ContactPage user={user} onLogout={handleLogout} />} />
+      <Route
+        path="/login"
+        element={user ? <Navigate replace to="/learning" /> : <AuthPage onAuthenticated={handleAuthenticated} />}
+      />
+      <Route
+        path="/learning"
+        element={user ? <LearningPage user={user} onLogout={handleLogout} /> : <Navigate replace to="/login" />}
+      />
+      <Route path="*" element={<Navigate replace to="/" />} />
+    </Routes>
+  );
 }
 
 export default App;

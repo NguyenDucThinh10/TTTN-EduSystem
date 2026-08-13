@@ -91,7 +91,7 @@ export default function AuthPage({ onAuthenticated }) {
           <span className="brand-mark">E</span>
           <div>
             <h1>EduSystem</h1>
-            <p>Phan B: bai tap, nop bai, cham diem va thong ke.</p>
+            <p>Bai tap, nop bai, cham diem va thong ke hoc tap.</p>
           </div>
         </div>
 
