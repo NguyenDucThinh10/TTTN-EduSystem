@@ -10,7 +10,14 @@ import LearningPage from './pages/learning/LearningPage';
 
 function readStoredUser() {
   try {
-    return JSON.parse(localStorage.getItem('user'));
+    const token = localStorage.getItem('token');
+    const storedUser = JSON.parse(localStorage.getItem('user'));
+    if (!token || !storedUser?.role) {
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+      return null;
+    }
+    return storedUser;
   } catch {
     return null;
   }

@@ -71,19 +71,6 @@ export default function AuthPage({ onAuthenticated }) {
     }
   };
 
-  const openDemo = (role) => {
-    const authUser = {
-      id: role === 'STUDENT' ? 3 : role === 'TEACHER' ? 2 : 1,
-      username: role === 'STUDENT' ? 'student.demo' : role === 'TEACHER' ? 'teacher.demo' : 'admin.demo',
-      fullName: role === 'STUDENT' ? 'Student Demo' : role === 'TEACHER' ? 'Teacher Demo' : 'Admin Demo',
-      role,
-      demo: true,
-    };
-    localStorage.removeItem('token');
-    localStorage.setItem('user', JSON.stringify(authUser));
-    onAuthenticated(authUser);
-  };
-
   return (
     <main className="auth-shell">
       <section className="auth-panel">
@@ -126,11 +113,6 @@ export default function AuthPage({ onAuthenticated }) {
             <button className="primary-action" type="submit" disabled={loading}>
               {loading ? 'Dang xu ly...' : 'Dang nhap'}
             </button>
-            <div className="demo-actions">
-              <button type="button" onClick={() => openDemo('ADMIN')}>Demo Admin</button>
-              <button type="button" onClick={() => openDemo('TEACHER')}>Demo Teacher</button>
-              <button type="button" onClick={() => openDemo('STUDENT')}>Demo Student</button>
-            </div>
           </form>
         ) : (
           <form className="auth-form" onSubmit={handleRegisterSubmit}>
