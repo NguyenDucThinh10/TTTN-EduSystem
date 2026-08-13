@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps, react-hooks/set-state-in-effect */
 import { useEffect, useMemo, useState } from 'react';
-import axiosClient from '../../api/axiosClient';
-import { toApiDate } from './learningHelpers';
+import axiosClient from '../api/axiosClient';
+import { toApiDate } from '../utils/dateUtils';
 
 const emptyAssignment = {
   title: '',
@@ -12,7 +12,7 @@ const emptyAssignment = {
   fileUrl: '',
 };
 
-export default function useLearningWorkflow(user) {
+export default function useDashboardWorkflow(user) {
   const isTeacher = user.role === 'TEACHER' || user.role === 'ADMIN';
   const isStudent = user.role === 'STUDENT';
   const [classes, setClasses] = useState([]);

@@ -52,10 +52,10 @@ public class DataInitializer implements CommandLineRunner {
             teacher.setStatus(UserStatus.ACTIVE);
 
             User student = new User();
-            student.setUsername("student1");
+            student.setUsername("student");
             student.setPasswordHash(passwordEncoder.encode("123456"));
-            student.setFullName("Sinh viên 01");
-            student.setEmail("student1@edulms.com");
+            student.setFullName("Student Demo");
+            student.setEmail("student@edulms.com");
             student.setRole(Role.STUDENT);
             student.setStatus(UserStatus.ACTIVE);
 

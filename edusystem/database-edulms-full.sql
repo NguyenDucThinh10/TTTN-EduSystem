@@ -144,8 +144,7 @@ CREATE TABLE grades (
 INSERT INTO users (id, username, email, password_hash, full_name, role, status) VALUES
   (1, 'admin', 'admin@edulms.local', '$2a$10$spWksaOF2vEAV/aRBpRtIuZib0ovTLVJ7On62uF4qqMo3bm7ZC47a', 'System Admin', 'ADMIN', 'ACTIVE'),
   (2, 'teacher', 'teacher@edulms.local', '$2a$10$bMZ5348hyETVxRYnSzo2Ue.PZx4eV1yIvfEYHZ8HxM1Cenk5QwI/O', 'Teacher Demo', 'TEACHER', 'ACTIVE'),
-  (3, 'student1', 'student1@edulms.local', '$2a$10$0pb/g8krAYiINpdSks0jQOY0YuwEqzMxPlXCI.mIUjvi/.j3y7l1O', 'Student One', 'STUDENT', 'ACTIVE'),
-  (4, 'student2', 'student2@edulms.local', '$2a$10$0pb/g8krAYiINpdSks0jQOY0YuwEqzMxPlXCI.mIUjvi/.j3y7l1O', 'Student Two', 'STUDENT', 'ACTIVE');
+  (3, 'student', 'student@edulms.local', '$2a$10$0pb/g8krAYiINpdSks0jQOY0YuwEqzMxPlXCI.mIUjvi/.j3y7l1O', 'Student Demo', 'STUDENT', 'ACTIVE');
 
 INSERT INTO courses (id, code, title, credits) VALUES
   (1, 'CS101', 'Nhap mon lap trinh', 3),
@@ -159,9 +158,8 @@ INSERT INTO classes (id, course_id, teacher_id, name, semester, status) VALUES
 
 INSERT INTO enrollments (id, class_id, student_id, enrolled_at) VALUES
   (1, 1, 3, '2026-07-30 13:13:39'),
-  (2, 1, 4, '2026-07-30 13:13:39'),
-  (3, 2, 3, '2026-07-30 13:13:39'),
-  (4, 3, 4, '2026-07-30 13:13:39');
+  (2, 2, 3, '2026-07-30 13:13:39'),
+  (3, 3, 3, '2026-07-30 13:13:39');
 
 INSERT INTO materials (id, class_id, title, file_url, file_type, is_visible) VALUES
   (1, 1, 'Slide chuong 1 - Tong quan lap trinh', '/uploads/materials/cs101-chuong-1.pdf', 'PDF', 1),
@@ -174,19 +172,17 @@ INSERT INTO assignments (id, class_id, title, description, file_url, due_date, m
   (3, 3, 'Thiet ke co so du lieu', 'Ve ERD va chuyen sang mo hinh quan he.', '/uploads/assignments/db201-erd.pdf', '2026-08-25 23:59:00', 10, 1, 'PUBLISHED', '2026-07-30 13:20:47.606531');
 
 INSERT INTO submissions (id, assignment_id, student_id, file_url, submitted_at, is_late, score, feedback, graded_at, status) VALUES
-  (1, 1, 3, '/uploads/submissions/student1-loop.pdf', '2026-08-12 09:30:00', 0, 8.5, 'Bai lam tot, can toi uu ten bien.', '2026-08-13 10:00:00', 'GRADED'),
-  (2, 1, 4, '/uploads/submissions/student2-loop.pdf', '2026-08-12 10:15:00', 0, 7.5, 'Dung yeu cau, can bo sung giai thich.', '2026-08-13 10:20:00', 'GRADED'),
-  (3, 2, 3, '/uploads/submissions/student1-requirements.pdf', '2026-08-13 08:00:00', 0, NULL, NULL, NULL, 'SUBMITTED');
+  (1, 1, 3, '/uploads/submissions/student-loop.pdf', '2026-08-12 09:30:00', 0, 8.5, 'Bai lam tot, can toi uu ten bien.', '2026-08-13 10:00:00', 'GRADED'),
+  (2, 2, 3, '/uploads/submissions/student-requirements.pdf', '2026-08-13 08:00:00', 0, NULL, NULL, NULL, 'SUBMITTED');
 
 INSERT INTO grades (id, feedback, graded_at, graded_by, score, submission_id) VALUES
-  (1, 'Bai lam tot, can toi uu ten bien.', '2026-08-13 10:00:00.000000', 'teacher', 8.5, 1),
-  (2, 'Dung yeu cau, can bo sung giai thich.', '2026-08-13 10:20:00.000000', 'teacher', 7.5, 2);
+  (1, 'Bai lam tot, can toi uu ten bien.', '2026-08-13 10:00:00.000000', 'teacher', 8.5, 1);
 
-ALTER TABLE users AUTO_INCREMENT = 5;
+ALTER TABLE users AUTO_INCREMENT = 4;
 ALTER TABLE courses AUTO_INCREMENT = 4;
 ALTER TABLE classes AUTO_INCREMENT = 4;
-ALTER TABLE enrollments AUTO_INCREMENT = 5;
+ALTER TABLE enrollments AUTO_INCREMENT = 4;
 ALTER TABLE materials AUTO_INCREMENT = 4;
 ALTER TABLE assignments AUTO_INCREMENT = 4;
-ALTER TABLE submissions AUTO_INCREMENT = 4;
-ALTER TABLE grades AUTO_INCREMENT = 3;
+ALTER TABLE submissions AUTO_INCREMENT = 3;
+ALTER TABLE grades AUTO_INCREMENT = 2;

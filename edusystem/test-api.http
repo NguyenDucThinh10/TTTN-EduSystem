@@ -79,13 +79,13 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JT
 ###
 ### Du lieu mau dang co:
 ### teacher / teacher123
-### student1 / student123
+### student / student123
 ### classId = 1
-### student1 da duoc enroll vao classId = 1
+### student da duoc enroll vao classId = 1
 
 @baseUrl = http://localhost:8080
 @teacherToken = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZWFjaGVyIiwicm9sZSI6IlRFQUNIRVIiLCJpYXQiOjE3ODUzOTQ0NDksImV4cCI6MTc4NTQ4MDg0OX0.qCef_DCaLtXeBlmsUrBPR7JkG6HdByxir1glm6Th1BM
-@studentToken = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdHVkZW50MSIsInJvbGUiOiJTVFVERU5UIiwiaWF0IjoxNzg1Mzk0NTI5LCJleHAiOjE3ODU0ODA5Mjl9.ESNOCZHBIeFG4nwJUa2y7kqbylc8GNjNpwwpS7kETKo
+@studentToken = paste_student_token_here
 @classId = 1
 @assignmentId = 4
 @submissionId = 4
@@ -105,7 +105,7 @@ POST {{baseUrl}}/api/auth/login
 Content-Type: application/json
 
 {
-  "username": "student1",
+  "username": "student",
   "password": "student123"
 }
 

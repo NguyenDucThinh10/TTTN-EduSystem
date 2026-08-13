@@ -1,10 +1,10 @@
 import HomeLayout from './HomeLayout';
 
 const values = [
-  'So hoa quy trinh giao day va hoc tap',
-  'Minh bach diem so, phan hoi va tien do hoc tap',
-  'Ho tro giang vien quan ly lop hoc nhanh gon',
-  'Tang trai nghiem tu hoc cho sinh vien',
+  'Số hóa quy trình giảng dạy và học tập',
+  'Minh bạch điểm số, phản hồi và tiến độ học tập',
+  'Hỗ trợ giảng viên quản lý lớp học nhanh gọn',
+  'Tăng trải nghiệm tự học cho sinh viên',
 ];
 
 export default function AboutPage({ user, onLogout }) {
@@ -12,17 +12,17 @@ export default function AboutPage({ user, onLogout }) {
     <HomeLayout user={user} onLogout={onLogout}>
       <main>
         <section className="home-page-hero about">
-          <p className="home-eyebrow">Gioi thieu</p>
-          <h1>Ve EduLMS</h1>
-          <p>EduLMS la nen tang giao duc so chuyen nghiep, ho tro nha truong quan ly hoc phan, bai tap, nop bai va danh gia ket qua hoc tap.</p>
+          <p className="home-eyebrow">Giới thiệu</p>
+          <h1>Về EduLMS</h1>
+          <p>EduLMS là nền tảng giáo dục số chuyên nghiệp, hỗ trợ nhà trường quản lý học phần, bài tập, nộp bài và đánh giá kết quả học tập.</p>
         </section>
 
         <section className="home-section home-split">
           <div>
-            <p className="home-eyebrow">Tam nhin</p>
-            <h2>Nen tang hoc tap dong bo cho moi vai tro</h2>
+            <p className="home-eyebrow">Tầm nhìn</p>
+            <h2>Nền tảng học tập đồng bộ cho mọi vai trò</h2>
             <p>
-              He thong duoc dinh huong de giam thao tac thu cong, giup giang vien tap trung vao chat luong giang day va giup sinh vien nam ro tien do cua minh.
+              Hệ thống được định hướng để giảm thao tác thủ công, giúp giảng viên tập trung vào chất lượng giảng dạy và giúp sinh viên nắm rõ tiến độ của mình.
             </p>
           </div>
           <div className="home-value-grid">
@@ -37,18 +37,18 @@ export default function AboutPage({ user, onLogout }) {
         <section className="home-section home-process">
           <div>
             <span>01</span>
-            <h3>Tao lop va giao bai</h3>
-            <p>Giang vien tao hoc phan, mo bai tap va thiet lap han nop.</p>
+            <h3>Tạo lớp và giao bài</h3>
+            <p>Giảng viên tạo học phần, mở bài tập và thiết lập hạn nộp.</p>
           </div>
           <div>
             <span>02</span>
-            <h3>Nop bai va phan hoi</h3>
-            <p>Sinh vien gui bai lam, xem trang thai va nhan gop y truc tiep.</p>
+            <h3>Nộp bài và phản hồi</h3>
+            <p>Sinh viên gửi bài làm, xem trạng thái và nhận góp ý trực tiếp.</p>
           </div>
           <div>
             <span>03</span>
-            <h3>Theo doi ket qua</h3>
-            <p>Diem so va thong ke giup cac ben nam bat tien do hoc tap.</p>
+            <h3>Theo dõi kết quả</h3>
+            <p>Điểm số và thống kê giúp các bên nắm bắt tiến độ học tập.</p>
           </div>
         </section>
       </main>

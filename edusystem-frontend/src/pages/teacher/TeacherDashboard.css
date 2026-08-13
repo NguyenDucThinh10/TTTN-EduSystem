@@ -1,37 +1,42 @@
 .teacher-grid {
-  grid-template-columns: minmax(300px, 420px) 1fr;
+  grid-template-columns: minmax(320px, 420px) minmax(0, 1fr);
+}
+
+.submissions-view {
+  grid-template-columns: minmax(300px, 420px) minmax(0, 1fr);
 }
 
 .assignment-list {
   display: grid;
   gap: 10px;
-  max-height: 440px;
+  max-height: 460px;
   overflow: auto;
 }
 
 .assignment-item,
 .compact-list article {
-  border: 1px solid #e0e6ee;
+  border: 1px solid #edf0f5;
   border-radius: 8px;
   background: #fbfcfe;
 }
 
 .assignment-item {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 10px;
-  padding: 10px;
+  gap: 12px;
+  padding: 12px;
 }
 
 .assignment-item.selected {
-  border-color: #1967d2;
-  background: #f2f7ff;
+  border-color: #1677ff;
+  background: #f0f7ff;
 }
 
 .assignment-main {
   display: grid;
   gap: 4px;
+  min-width: 0;
   border: 0;
   background: transparent;
   color: inherit;
@@ -39,11 +44,18 @@
   cursor: pointer;
 }
 
+.assignment-main strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .assignment-actions,
 .row-actions {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .submission-table {
@@ -55,25 +67,31 @@
 .table-head,
 .table-row {
   display: grid;
-  grid-template-columns: 1.1fr 120px 96px 1fr 160px;
+  grid-template-columns: minmax(150px, 1.1fr) 120px 96px minmax(180px, 1fr) minmax(170px, auto);
   align-items: center;
   gap: 10px;
-  min-width: 760px;
+  min-width: 820px;
 }
 
 .table-head {
-  color: #657386;
+  color: #64748b;
   font-size: 13px;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .table-row {
-  padding: 8px 0;
-  border-top: 1px solid #e3e9f0;
+  padding: 10px 0;
+  border-top: 1px solid #edf0f5;
 }
 
 .compact-list article {
   display: grid;
   gap: 4px;
-  padding: 10px;
+  padding: 12px;
+}
+
+@media (max-width: 960px) {
+  .assignment-item {
+    grid-template-columns: 1fr;
+  }
 }

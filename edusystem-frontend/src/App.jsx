@@ -10,7 +10,8 @@ import ContactPage from './pages/home/ContactPage';
 import CoursesPage from './pages/home/CoursesPage';
 import HomePage from './pages/home/HomePage';
 import NewsPage from './pages/home/NewsPage';
-import LearningPage from './pages/learning/LearningPage';
+import StudentDashboardPage from './pages/student/StudentDashboardPage';
+import TeacherDashboardPage from './pages/teacher/TeacherDashboardPage';
 
 function readStoredUser() {
   try {
@@ -31,7 +32,8 @@ function readStoredUser() {
 
 const roleHomePath = (role) => {
   if (role === 'ADMIN') return '/admin';
-  if (role === 'TEACHER' || role === 'STUDENT') return '/learning';
+  if (role === 'TEACHER') return '/teacher';
+  if (role === 'STUDENT') return '/student';
   return '/';
 };
 
@@ -78,10 +80,6 @@ function AppRoutes({ user, setUser }) {
         element={user ? <Navigate replace to={roleHomePath(user.role)} /> : <AuthPage onAuthenticated={handleAuthenticated} />}
       />
       <Route
-        path="/learning"
-        element={user ? <LearningPage user={user} onLogout={handleLogout} /> : <Navigate replace to="/login" />}
-      />
-      <Route
         path="/admin/*"
         element={
           <ProtectedRoute allowedRoles={['ADMIN']}>
@@ -97,7 +95,7 @@ function AppRoutes({ user, setUser }) {
         path="/teacher/*"
         element={
           <ProtectedRoute allowedRoles={['TEACHER']}>
-            <LearningPage user={user} onLogout={handleLogout} />
+            <TeacherDashboardPage user={user} onLogout={handleLogout} />
           </ProtectedRoute>
         }
       />
@@ -105,7 +103,7 @@ function AppRoutes({ user, setUser }) {
         path="/student/*"
         element={
           <ProtectedRoute allowedRoles={['STUDENT']}>
-            <LearningPage user={user} onLogout={handleLogout} />
+            <StudentDashboardPage user={user} onLogout={handleLogout} />
           </ProtectedRoute>
         }
       />

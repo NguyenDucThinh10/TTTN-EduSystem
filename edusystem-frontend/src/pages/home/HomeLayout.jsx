@@ -2,6 +2,13 @@ import { Link, NavLink } from 'react-router-dom';
 import { navItems } from './homeContent';
 import './HomePages.css';
 
+const roleHomePath = (role) => {
+  if (role === 'ADMIN') return '/admin';
+  if (role === 'TEACHER') return '/teacher';
+  if (role === 'STUDENT') return '/student';
+  return '/login';
+};
+
 export default function HomeLayout({ children, user, onLogout }) {
   return (
     <div className="home-shell">
@@ -11,7 +18,7 @@ export default function HomeLayout({ children, user, onLogout }) {
           <span>EduLMS</span>
         </Link>
 
-        <nav className="home-nav" aria-label="Dieu huong trang chu">
+        <nav className="home-nav" aria-label="Điều hướng trang chủ">
           {navItems.map((item) => (
             <NavLink
               className={({ isActive }) => (isActive ? 'home-nav-link active' : 'home-nav-link')}
@@ -26,16 +33,16 @@ export default function HomeLayout({ children, user, onLogout }) {
 
         {user ? (
           <div className="home-actions">
-            <Link className="home-secondary-action" to="/learning">
-              Vao he thong
+            <Link className="home-secondary-action" to={roleHomePath(user.role)}>
+              Vào hệ thống
             </Link>
             <button className="home-primary-action" onClick={onLogout} type="button">
-              Dang xuat
+              Đăng xuất
             </button>
           </div>
         ) : (
           <Link className="home-primary-action" to="/login">
-            Dang nhap
+            Đăng nhập
           </Link>
         )}
       </header>
@@ -45,7 +52,7 @@ export default function HomeLayout({ children, user, onLogout }) {
       <footer className="home-footer">
         <div>
           <h2>EduLMS</h2>
-          <p>Cong thong tin hoc tap, quan ly bai tap, nop bai va diem so cho giang vien va sinh vien.</p>
+          <p>Cổng thông tin học tập, quản lý bài tập, nộp bài và điểm số cho giảng viên và sinh viên.</p>
         </div>
         <div className="home-footer-links">
           {navItems.map((item) => (

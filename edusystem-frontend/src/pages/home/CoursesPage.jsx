@@ -6,17 +6,17 @@ export default function CoursesPage({ user, onLogout }) {
     <HomeLayout user={user} onLogout={onLogout}>
       <main>
         <section className="home-page-hero courses">
-          <p className="home-eyebrow">Danh muc dao tao</p>
-          <h1>Khoa hoc Cong nghe thong tin</h1>
-          <p>Cac hoc phan mau duoc to chuc theo huong thuc hanh, co thong tin thoi luong, cap do va noi dung trong tam.</p>
+          <p className="home-eyebrow">Danh mục đào tạo</p>
+          <h1>Khóa học Công nghệ thông tin</h1>
+          <p>Các học phần mẫu được tổ chức theo hướng thực hành, có thông tin thời lượng, cấp độ và nội dung trọng tâm.</p>
         </section>
 
         <section className="home-section">
           <div className="home-toolbar">
-            <button type="button">Tat ca</button>
-            <button type="button">Lap trinh</button>
-            <button type="button">Du lieu</button>
-            <button type="button">Bao mat</button>
+            <button type="button">Tất cả</button>
+            <button type="button">Lập trình</button>
+            <button type="button">Dữ liệu</button>
+            <button type="button">Bảo mật</button>
           </div>
 
           <div className="home-card-grid courses">
@@ -29,11 +29,11 @@ export default function CoursesPage({ user, onLogout }) {
                   <p>{course.description}</p>
                   <dl>
                     <div>
-                      <dt>Thoi luong</dt>
+                      <dt>Thời lượng</dt>
                       <dd>{course.duration}</dd>
                     </div>
                     <div>
-                      <dt>Cap do</dt>
+                      <dt>Cấp độ</dt>
                       <dd>{course.level}</dd>
                     </div>
                   </dl>

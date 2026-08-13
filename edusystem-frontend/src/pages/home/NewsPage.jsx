@@ -2,9 +2,9 @@ import HomeLayout from './HomeLayout';
 import { latestNews } from './homeContent';
 
 const guides = [
-  'Huong dan dang nhap va cap nhat thong tin ca nhan',
-  'Quy trinh nop bai tap va xem trang thai cham diem',
-  'Cach theo doi diem thanh phan va tien do hoc tap',
+  'Hướng dẫn đăng nhập và cập nhật thông tin cá nhân',
+  'Quy trình nộp bài tập và xem trạng thái chấm điểm',
+  'Cách theo dõi điểm thành phần và tiến độ học tập',
 ];
 
 export default function NewsPage({ user, onLogout }) {
@@ -14,9 +14,9 @@ export default function NewsPage({ user, onLogout }) {
     <HomeLayout user={user} onLogout={onLogout}>
       <main>
         <section className="home-page-hero news">
-          <p className="home-eyebrow">Tin tuc va thong bao</p>
-          <h1>Cap nhat moi tu EduLMS</h1>
-          <p>Theo doi thong bao hoc vu, lich huong dan va cac tai lieu su dung he thong cho giang vien, sinh vien.</p>
+          <p className="home-eyebrow">Tin tức và thông báo</p>
+          <h1>Cập nhật mới từ EduLMS</h1>
+          <p>Theo dõi thông báo học vụ, lịch hướng dẫn và các tài liệu sử dụng hệ thống cho giảng viên, sinh viên.</p>
         </section>
 
         <section className="home-section">
@@ -44,7 +44,7 @@ export default function NewsPage({ user, onLogout }) {
               ))}
             </div>
             <aside className="home-guide-panel">
-              <h2>Tai lieu huong dan</h2>
+              <h2>Tài liệu hướng dẫn</h2>
               {guides.map((guide) => (
                 <p key={guide}>{guide}</p>
               ))}
