@@ -22,8 +22,10 @@ const { Header, Sider, Content, Footer } = Layout;
 
 const pageTitles = {
   overview: 'Tổng quan',
+  classes: 'Lớp phụ trách',
   assignments: 'Bài tập',
-  submissions: 'Chấm điểm',
+  submissions: 'Bài nộp',
+  grading: 'Chấm điểm',
   analytics: 'Thống kê',
 };
 
@@ -37,10 +39,13 @@ export default function TeacherDashboardPage({ user, onLogout }) {
 
   const menuItems = useMemo(() => [
     { key: 'overview', icon: <DashboardOutlined />, label: 'Tổng quan' },
+    { key: 'classes', icon: <TeamOutlined />, label: 'Lớp phụ trách' },
     { key: 'assignments', icon: <BookOutlined />, label: 'Bài tập' },
-    { key: 'submissions', icon: <FileDoneOutlined />, label: 'Chấm điểm' },
+    { key: 'submissions', icon: <FileDoneOutlined />, label: 'Bài nộp' },
+    { key: 'grading', icon: <FileDoneOutlined />, label: 'Chấm điểm' },
     { key: 'analytics', icon: <BarChartOutlined />, label: 'Thống kê' },
   ], []);
+
   const userName = user.username || 'teacher';
   const userMenu = {
     items: [
@@ -98,8 +103,10 @@ export default function TeacherDashboardPage({ user, onLogout }) {
             {workflow.notice && <div className="notice">{workflow.notice}</div>}
             {workflow.loading && <div className="loading-line">Đang tải dữ liệu...</div>}
             {activeView === 'overview' && <TeacherOverview workflow={workflow} />}
+            {activeView === 'classes' && <TeacherClasses workflow={workflow} />}
             {activeView === 'assignments' && <TeacherAssignments workflow={workflow} />}
             {activeView === 'submissions' && <TeacherSubmissions workflow={workflow} />}
+            {activeView === 'grading' && <TeacherGrading workflow={workflow} />}
             {activeView === 'analytics' && <AnalyticsPanel classAnalytics={workflow.classAnalytics} dashboard={workflow.dashboard} />}
           </div>
         </Content>
@@ -111,16 +118,64 @@ export default function TeacherDashboardPage({ user, onLogout }) {
 }
 
 function TeacherOverview({ workflow }) {
+  const pendingCount = workflow.assignmentDetail?.submissions?.filter((row) => row.submission && row.submission.status !== 'GRADED').length ?? 0;
+
   return (
     <section className="overview-panel">
       <p>Chào mừng đến trang giảng viên EduSystem.</p>
       <div className="overview-stats">
         <div><strong>{workflow.classes.length}</strong><span>Lớp phụ trách</span></div>
-        <div><strong>{workflow.assignments.length}</strong><span>Bài tập trong lớp đang chọn</span></div>
-        <div><strong>{workflow.dashboard?.submissionCount ?? '-'}</strong><span>Bài nộp</span></div>
+        <div><strong>{workflow.classStudents.length}</strong><span>Sinh viên lớp đang chọn</span></div>
+        <div><strong>{workflow.assignments.length}</strong><span>Bài tập lớp đang chọn</span></div>
+        <div><strong>{pendingCount}</strong><span>Bài nộp chưa chấm</span></div>
+        <div><strong>{workflow.dashboard?.submissionCount ?? '-'}</strong><span>Tổng bài nộp</span></div>
         <div><strong>{score(workflow.classAnalytics?.classAverage)}</strong><span>Điểm TB lớp</span></div>
       </div>
     </section>
+  );
+}
+
+function TeacherClasses({ workflow }) {
+  return (
+    <div className="workspace-grid teacher-grid">
+      <section className="panel">
+        <div className="panel-heading">
+          <h2>Danh sách lớp phụ trách</h2>
+          <span>{workflow.classes.length} lớp</span>
+        </div>
+        <div className="compact-list">
+          {workflow.classes.map((item) => (
+            <article key={item.id}>
+              <strong>{item.name}</strong>
+              <span>{item.courseCode || 'N/A'} - {item.courseTitle} | {item.courseCredits || 0} tín chỉ</span>
+              <span>{item.semester || 'Học kỳ'} | {statusLabel(item.status)} | {item.studentCount ?? 0} sinh viên</span>
+              <button type="button" onClick={() => workflow.setSelectedClassId(item.id)}>Chọn lớp</button>
+            </article>
+          ))}
+          {workflow.classes.length === 0 && <p className="empty">Bạn chưa được phân công lớp nào.</p>}
+        </div>
+      </section>
+
+      <section className="panel">
+        <div className="panel-heading">
+          <h2>Sinh viên trong lớp</h2>
+          <span>{workflow.selectedClass?.name || 'Chọn lớp'}</span>
+        </div>
+        <div className="submission-table">
+          <div className="table-head"><span>Mã SV</span><span>Họ tên</span><span>Email</span><span>Trạng thái</span><span></span></div>
+          {workflow.classStudents.map((student) => (
+            <div className="table-row" key={student.id}>
+              <span>{student.username}</span>
+              <span>{student.fullName || '-'}</span>
+              <span>{student.email || '-'}</span>
+              <span className={`badge ${student.status}`}>{student.status}</span>
+              <span></span>
+            </div>
+          ))}
+          {workflow.classStudents.length === 0 && <p className="empty">Lớp này chưa có sinh viên.</p>}
+        </div>
+      </section>
+    </div>
   );
 }
 
@@ -137,7 +192,9 @@ function TeacherAssignments({ workflow }) {
     onStartEdit,
     onSubmitAssignmentForm,
     selectedAssignmentId,
+    selectedClass,
   } = workflow;
+  const classCompleted = selectedClass?.status === 'COMPLETED';
 
   return (
     <div className="workspace-grid teacher-grid">
@@ -146,16 +203,17 @@ function TeacherAssignments({ workflow }) {
           <h2>{editingId ? 'Sửa bài tập' : 'Tạo bài tập'}</h2>
           {editingId && <button type="button" className="ghost-button" onClick={onCancelEdit}>Hủy sửa</button>}
         </div>
+        {classCompleted && <p className="notice">Lớp đã kết thúc, không thể tạo hoặc chỉnh sửa bài tập.</p>}
         <form className="assignment-form" onSubmit={onSubmitAssignmentForm}>
-          <label>Tiêu đề<input name="title" value={form.title} onChange={handleAssignmentChange} required /></label>
-          <label>Mô tả<textarea name="description" value={form.description} onChange={handleAssignmentChange} rows="4" /></label>
+          <label>Tiêu đề<input name="title" value={form.title} onChange={handleAssignmentChange} required disabled={classCompleted} /></label>
+          <label>Mô tả<textarea name="description" value={form.description} onChange={handleAssignmentChange} rows="4" disabled={classCompleted} /></label>
           <div className="form-row">
-            <label>Hạn nộp<input name="dueDate" type="datetime-local" value={form.dueDate} onChange={handleAssignmentChange} /></label>
-            <label>Điểm tối đa<input name="maxScore" type="number" min="1" step="0.5" value={form.maxScore} onChange={handleAssignmentChange} /></label>
+            <label>Hạn nộp<input name="dueDate" type="datetime-local" value={form.dueDate} onChange={handleAssignmentChange} disabled={classCompleted} /></label>
+            <label>Điểm tối đa<input name="maxScore" type="number" min="1" step="0.5" value={form.maxScore} onChange={handleAssignmentChange} disabled={classCompleted} /></label>
           </div>
-          <label>File/link đề bài<input name="fileUrl" value={form.fileUrl} onChange={handleAssignmentChange} placeholder="https://..." /></label>
-          <label>Upload file đề bài<input type="file" onChange={(event) => onAssignmentFileChange(event.target.files?.[0] || null)} /></label>
-          <button className="primary-action" type="submit">{editingId ? 'Lưu thay đổi' : 'Tạo bài tập'}</button>
+          <label>File/link đề bài<input name="fileUrl" value={form.fileUrl} onChange={handleAssignmentChange} placeholder="https://..." disabled={classCompleted} /></label>
+          <label>Upload file đề bài<input type="file" onChange={(event) => onAssignmentFileChange(event.target.files?.[0] || null)} disabled={classCompleted} /></label>
+          <button className="primary-action" type="submit" disabled={classCompleted}>{editingId ? 'Lưu thay đổi' : 'Tạo bài tập'}</button>
         </form>
       </section>
 
@@ -164,9 +222,10 @@ function TeacherAssignments({ workflow }) {
         <AssignmentList
           assignments={assignments}
           selectedAssignmentId={selectedAssignmentId}
-          onDeleteAssignment={onDeleteAssignment}
+          onDeleteAssignment={classCompleted ? null : onDeleteAssignment}
           onSelectAssignment={onSelectAssignment}
-          onStartEdit={onStartEdit}
+          onStartEdit={classCompleted ? null : onStartEdit}
+          showActions
         />
       </section>
     </div>
@@ -181,14 +240,34 @@ function TeacherSubmissions({ workflow }) {
         <AssignmentList
           assignments={workflow.assignments}
           selectedAssignmentId={workflow.selectedAssignmentId}
-          onDeleteAssignment={workflow.onDeleteAssignment}
           onSelectAssignment={workflow.onSelectAssignment}
-          onStartEdit={workflow.onStartEdit}
         />
       </section>
       <section className="panel">
         <div className="panel-heading">
-          <h2>Bài nộp và chấm điểm</h2>
+          <h2>Danh sách bài nộp</h2>
+          <span>{workflow.assignmentDetail?.assignment?.title || 'Chọn bài tập'}</span>
+        </div>
+        <SubmissionListTable workflow={workflow} />
+      </section>
+    </div>
+  );
+}
+
+function TeacherGrading({ workflow }) {
+  return (
+    <div className="workspace-grid teacher-grid submissions-view">
+      <section className="panel">
+        <div className="panel-heading"><h2>Bài tập</h2><span>{workflow.assignments.length} bài</span></div>
+        <AssignmentList
+          assignments={workflow.assignments}
+          selectedAssignmentId={workflow.selectedAssignmentId}
+          onSelectAssignment={workflow.onSelectAssignment}
+        />
+      </section>
+      <section className="panel">
+        <div className="panel-heading">
+          <h2>Chấm điểm</h2>
           <span>{workflow.assignmentDetail?.assignment?.title || 'Chọn bài tập'}</span>
         </div>
         <SubmissionGradingTable workflow={workflow} />
@@ -197,23 +276,43 @@ function TeacherSubmissions({ workflow }) {
   );
 }
 
-function AssignmentList({ assignments, selectedAssignmentId, onDeleteAssignment, onSelectAssignment, onStartEdit }) {
+function AssignmentList({ assignments, selectedAssignmentId, onDeleteAssignment, onSelectAssignment, onStartEdit, showActions = false }) {
   return (
     <div className="assignment-list">
       {assignments.map((assignment) => (
         <article className={`assignment-item ${String(selectedAssignmentId) === String(assignment.id) ? 'selected' : ''}`} key={assignment.id}>
           <button type="button" className="assignment-main" onClick={() => onSelectAssignment(assignment.id)}>
             <strong>{assignment.title}</strong>
-            <span>{formatDate(assignment.dueDate)} | {assignment.submissionCount || 0} bài nộp</span>
+            <span>{formatDate(assignment.dueDate)} | {assignment.submissionCount || 0} bài nộp | Điểm {score(assignment.maxScore)}</span>
           </button>
           <div className="assignment-actions">
             {assignment.fileUrl && <a href={fileHref(assignment.fileUrl)} target="_blank" rel="noreferrer">Tải đề</a>}
-            <button type="button" onClick={() => onStartEdit(assignment)}>Sửa</button>
-            <button type="button" className="danger" onClick={() => onDeleteAssignment(assignment.id)}>Xóa</button>
+            {showActions && onStartEdit && <button type="button" onClick={() => onStartEdit(assignment)}>Sửa</button>}
+            {showActions && onDeleteAssignment && <button type="button" className="danger" onClick={() => onDeleteAssignment(assignment.id)}>Xóa</button>}
           </div>
         </article>
       ))}
       {assignments.length === 0 && <p className="empty">Lớp này chưa có bài tập.</p>}
+    </div>
+  );
+}
+
+function SubmissionListTable({ workflow }) {
+  const { assignmentDetail } = workflow;
+
+  return (
+    <div className="submission-table">
+      <div className="table-head"><span>Sinh viên</span><span>Trạng thái</span><span>Điểm</span><span>File</span><span>Thời gian</span></div>
+      {assignmentDetail?.submissions?.map((row) => (
+        <div className="table-row" key={row.studentId}>
+          <span>{row.studentName}</span>
+          <span className={`badge ${row.submission?.status || 'missing'}`}>{row.submitted ? statusLabel(row.submission?.status) : 'Chưa nộp'}</span>
+          <span>{row.submission?.score != null ? score(row.submission.score) : '-'}</span>
+          <span>{row.submission?.fileUrl ? <a href={fileHref(row.submission.fileUrl)} target="_blank" rel="noreferrer">Tải bài</a> : '-'}</span>
+          <span>{row.submission?.submittedAt ? formatDate(row.submission.submittedAt) : '-'}</span>
+        </div>
+      ))}
+      {!assignmentDetail && <p className="empty">Chọn một bài tập để xem danh sách bài nộp.</p>}
     </div>
   );
 }
@@ -230,7 +329,7 @@ function SubmissionGradingTable({ workflow }) {
           <span className={`badge ${row.submission?.status || 'missing'}`}>{row.submitted ? statusLabel(row.submission?.status) : 'Chưa nộp'}</span>
           {row.submission ? (
             <>
-              <input type="number" min="0" step="0.5" value={gradeForms[row.submission.id]?.score ?? ''} onChange={(event) => updateGradeForm(row.submission.id, 'score', event.target.value)} />
+              <input type="number" min="0" max={assignmentDetail.assignment?.maxScore || 10} step="0.5" value={gradeForms[row.submission.id]?.score ?? ''} onChange={(event) => updateGradeForm(row.submission.id, 'score', event.target.value)} />
               <input value={gradeForms[row.submission.id]?.feedback ?? ''} onChange={(event) => updateGradeForm(row.submission.id, 'feedback', event.target.value)} placeholder="Nhận xét" />
               <div className="row-actions">
                 {row.submission.fileUrl && <a href={fileHref(row.submission.fileUrl)} target="_blank" rel="noreferrer">Tải bài</a>}
@@ -242,7 +341,7 @@ function SubmissionGradingTable({ workflow }) {
           )}
         </div>
       ))}
-      {!assignmentDetail && <p className="empty">Chọn một bài tập để xem danh sách nộp bài.</p>}
+      {!assignmentDetail && <p className="empty">Chọn một bài tập để chấm điểm.</p>}
     </div>
   );
 }

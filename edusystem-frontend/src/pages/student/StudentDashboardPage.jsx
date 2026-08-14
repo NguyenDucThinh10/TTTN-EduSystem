@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react';
-import { Avatar, Badge, Breadcrumb, Button, Dropdown, Layout, Menu, Space, theme, Typography } from 'antd';
+import { Avatar, Badge, Breadcrumb, Button, Dropdown, Layout, Menu, Space, theme } from 'antd';
 import {
   BarChartOutlined,
   BellOutlined,
+  BookOutlined,
   DashboardOutlined,
   FileDoneOutlined,
   LogoutOutlined,
@@ -18,14 +19,17 @@ import '../../styles/roleDashboard.css';
 import './StudentDashboard.css';
 
 const { Header, Sider, Content, Footer } = Layout;
-const { Text } = Typography;
 
 const pageTitles = {
   overview: 'Tổng quan',
-  assignments: 'Bài tập của lớp',
+  registration: 'Đăng ký học phần',
+  classes: 'Lớp của tôi',
+  assignments: 'Bài tập',
   submissions: 'Bài đã nộp',
   grades: 'Điểm của tôi',
 };
+
+const isPastDue = (dueDate) => dueDate && new Date(dueDate).getTime() < Date.now();
 
 export default function StudentDashboardPage({ user, onLogout }) {
   const workflow = useDashboardWorkflow(user);
@@ -37,10 +41,13 @@ export default function StudentDashboardPage({ user, onLogout }) {
 
   const menuItems = useMemo(() => [
     { key: 'overview', icon: <DashboardOutlined />, label: 'Tổng quan' },
-    { key: 'assignments', icon: <ReadOutlined />, label: 'Bài tập của lớp' },
+    { key: 'registration', icon: <BookOutlined />, label: 'Đăng ký học phần' },
+    { key: 'classes', icon: <ReadOutlined />, label: 'Lớp của tôi' },
+    { key: 'assignments', icon: <ReadOutlined />, label: 'Bài tập' },
     { key: 'submissions', icon: <FileDoneOutlined />, label: 'Bài đã nộp' },
     { key: 'grades', icon: <BarChartOutlined />, label: 'Điểm của tôi' },
   ], []);
+
   const userName = user.username || 'student';
   const userMenu = {
     items: [
@@ -50,7 +57,7 @@ export default function StudentDashboardPage({ user, onLogout }) {
     ],
   };
 
-  const showClassSelector = activeView !== 'overview';
+  const showClassSelector = ['assignments', 'submissions', 'grades'].includes(activeView);
 
   return (
     <Layout className="role-dashboard">
@@ -98,6 +105,8 @@ export default function StudentDashboardPage({ user, onLogout }) {
             {workflow.notice && <div className="notice">{workflow.notice}</div>}
             {workflow.loading && <div className="loading-line">Đang tải dữ liệu...</div>}
             {activeView === 'overview' && <StudentOverview workflow={workflow} />}
+            {activeView === 'registration' && <CourseRegistration workflow={workflow} />}
+            {activeView === 'classes' && <MyClasses workflow={workflow} />}
             {activeView === 'assignments' && <StudentAssignments workflow={workflow} />}
             {activeView === 'submissions' && <StudentSubmissions workflow={workflow} />}
             {activeView === 'grades' && <StudentGrades workflow={workflow} />}
@@ -111,14 +120,75 @@ export default function StudentDashboardPage({ user, onLogout }) {
 }
 
 function StudentOverview({ workflow }) {
+  const submittedIds = new Set(workflow.mySubmissions.map((item) => item.assignmentId));
+  const missingCount = workflow.assignments.filter((item) => !submittedIds.has(item.id)).length;
+
   return (
     <section className="overview-panel">
       <p>Chào mừng đến trang sinh viên EduSystem.</p>
       <div className="overview-stats">
-        <div><strong>{workflow.classes.length}</strong><span>Lớp đã ghi danh</span></div>
-        <div><strong>{workflow.assignments.length}</strong><span>Bài tập trong lớp đang chọn</span></div>
+        <div><strong>{workflow.classes.length}</strong><span>Lớp đã đăng ký</span></div>
+        <div><strong>{workflow.assignments.length}</strong><span>Bài tập lớp đang chọn</span></div>
         <div><strong>{workflow.mySubmissions.length}</strong><span>Bài đã nộp</span></div>
+        <div><strong>{missingCount}</strong><span>Bài chưa nộp</span></div>
         <div><strong>{score(workflow.studentGrades?.averageScore)}</strong><span>Điểm trung bình</span></div>
+      </div>
+    </section>
+  );
+}
+
+function CourseRegistration({ workflow }) {
+  return (
+    <section className="panel wide">
+      <div className="panel-heading">
+        <h2>Học phần đang mở</h2>
+        <span>{workflow.openClasses.length} lớp</span>
+      </div>
+      <div className="student-assignment-list">
+        {workflow.openClasses.map((classItem) => (
+          <article className="student-assignment" key={classItem.id}>
+            <div>
+              <h3>{classItem.courseCode || 'N/A'} - {classItem.courseTitle}</h3>
+              <p>{classItem.name} | {classItem.courseCredits || 0} tín chỉ</p>
+              <span>{classItem.teacherName || 'Chưa phân công'} | {classItem.semester || 'Học kỳ'} | {classItem.studentCount ?? 0} sinh viên</span>
+            </div>
+            <div className="submit-box">
+              <span className={`badge ${classItem.enrolled ? 'GRADED' : ''}`}>{classItem.enrolled ? 'Đã đăng ký' : statusLabel(classItem.status)}</span>
+              <button type="button" onClick={() => workflow.onRegisterClass(classItem.id)} disabled={classItem.enrolled}>
+                {classItem.enrolled ? 'Đã đăng ký' : 'Đăng ký'}
+              </button>
+            </div>
+          </article>
+        ))}
+        {workflow.openClasses.length === 0 && <p className="empty">Hiện chưa có lớp/học phần đang mở.</p>}
+      </div>
+    </section>
+  );
+}
+
+function MyClasses({ workflow }) {
+  return (
+    <section className="panel wide">
+      <div className="panel-heading">
+        <h2>Lớp của tôi</h2>
+        <span>{workflow.classes.length} lớp</span>
+      </div>
+      <div className="student-assignment-list">
+        {workflow.classes.map((classItem) => (
+          <article className="student-assignment" key={classItem.id}>
+            <div>
+              <h3>{classItem.name}</h3>
+              <p>{classItem.courseCode || 'N/A'} - {classItem.courseTitle}</p>
+              <span>{classItem.courseCredits || 0} tín chỉ | {classItem.teacherName || 'Chưa phân công'} | {classItem.semester || 'Học kỳ'} | {statusLabel(classItem.status)}</span>
+            </div>
+            <div className="submit-box">
+              <span className="badge GRADED">Đã đăng ký</span>
+              <button type="button" onClick={() => workflow.setSelectedClassId(classItem.id)}>Chọn lớp</button>
+              <button type="button" className="danger" onClick={() => workflow.onCancelRegistration(classItem.id)}>Hủy đăng ký</button>
+            </div>
+          </article>
+        ))}
+        {workflow.classes.length === 0 && <p className="empty">Bạn chưa đăng ký lớp nào.</p>}
       </div>
     </section>
   );
@@ -136,36 +206,43 @@ function StudentAssignments({ workflow }) {
     uploadFiles,
   } = workflow;
 
+  const classClosed = selectedClass?.status === 'COMPLETED';
+
   return (
     <section className="panel wide">
       <div className="panel-heading"><h2>Bài tập của lớp</h2><span>{selectedClass?.name || ''}</span></div>
       <div className="student-assignment-list">
         {assignments.map((assignment) => {
           const submission = submittedByAssignment[assignment.id];
+          const overdue = isPastDue(assignment.dueDate);
+          const locked = classClosed || overdue;
           return (
             <article className="student-assignment" key={assignment.id}>
               <div>
                 <h3>{assignment.title}</h3>
                 <p>{assignment.description || 'Không có mô tả.'}</p>
                 <span>Hạn nộp: {formatDate(assignment.dueDate)} | Điểm: {score(assignment.maxScore)}</span>
+                <span className={`badge ${submission?.status || (overdue ? 'LATE' : 'missing')}`}>
+                  {submission ? statusLabel(submission.status) : overdue ? 'Quá hạn' : 'Chưa nộp'}
+                </span>
                 {assignment.fileUrl && <a href={fileHref(assignment.fileUrl)} target="_blank" rel="noreferrer">Tải đề bài</a>}
               </div>
               <div className="submit-box">
                 {submission ? (
                   <>
-                    <span className={`badge ${submission.status}`}>{statusLabel(submission.status)}</span>
                     <strong>{submission.score != null ? `${score(submission.score)} điểm` : 'Chưa chấm'}</strong>
                     {submission.fileUrl && <a href={fileHref(submission.fileUrl)} target="_blank" rel="noreferrer">File đã nộp</a>}
-                    <input type="file" onChange={(event) => onFileChange(assignment.id, event.target.files?.[0])} />
-                    <button type="button" onClick={() => onResubmit(assignment.id)} disabled={!uploadFiles[assignment.id]}>Nộp lại</button>
-                    <button type="button" className="danger" onClick={() => onCancelSubmission(submission.id)}>Hủy nộp</button>
+                    <input type="file" onChange={(event) => onFileChange(assignment.id, event.target.files?.[0])} disabled={locked} />
+                    <button type="button" onClick={() => onResubmit(assignment.id)} disabled={locked || !uploadFiles[assignment.id]}>Nộp lại</button>
+                    <button type="button" className="danger" onClick={() => onCancelSubmission(submission.id)} disabled={locked}>Hủy nộp</button>
                   </>
                 ) : (
                   <>
-                    <input type="file" onChange={(event) => onFileChange(assignment.id, event.target.files?.[0])} />
-                    <button type="button" onClick={() => onUpload(assignment.id)} disabled={!uploadFiles[assignment.id]}>Nộp bài</button>
+                    <input type="file" onChange={(event) => onFileChange(assignment.id, event.target.files?.[0])} disabled={locked} />
+                    <button type="button" onClick={() => onUpload(assignment.id)} disabled={locked || !uploadFiles[assignment.id]}>Nộp bài</button>
                   </>
                 )}
+                {locked && <span>{classClosed ? 'Lớp đã kết thúc' : 'Đã quá hạn nộp'}</span>}
               </div>
             </article>
           );
@@ -185,6 +262,7 @@ function StudentSubmissions({ workflow }) {
           <article key={submission.id}>
             <strong>{submission.assignmentTitle}</strong>
             <span>{formatDate(submission.submittedAt)} | {statusLabel(submission.status)}</span>
+            <span>{submission.score != null ? `${score(submission.score)} điểm` : 'Chưa chấm'}</span>
             {submission.fileUrl && <a href={fileHref(submission.fileUrl)} target="_blank" rel="noreferrer">Tải file</a>}
           </article>
         ))}
@@ -202,7 +280,8 @@ function StudentGrades({ workflow }) {
         {workflow.studentGrades?.grades?.map((grade) => (
           <article key={grade.id}>
             <strong>{grade.assignmentTitle}</strong>
-            <span>{score(grade.score)} / {score(grade.maxScore)} | {grade.feedback || 'Chưa có nhận xét'}</span>
+            <span>{score(grade.score)} / {score(grade.maxScore)}</span>
+            <span>{grade.feedback || 'Chưa có nhận xét'}</span>
           </article>
         ))}
         {(!workflow.studentGrades?.grades || workflow.studentGrades.grades.length === 0) && <p className="empty">Chưa có điểm.</p>}

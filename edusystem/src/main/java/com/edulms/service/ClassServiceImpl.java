@@ -25,6 +25,7 @@ import com.edulms.entity.User;
 import com.edulms.repository.ClassRepository;
 import com.edulms.repository.CourseRepository;
 import com.edulms.repository.EnrollmentRepository;
+import com.edulms.repository.SubmissionRepository;
 import com.edulms.repository.UserRepository;
 
 @Service
@@ -34,6 +35,7 @@ public class ClassServiceImpl implements ClassService {
     private final CourseRepository courseRepository;
     private final UserRepository userRepository;
     private final EnrollmentRepository enrollmentRepository;
+    private final SubmissionRepository submissionRepository;
     private final CurrentUserService currentUserService;
 
     public ClassServiceImpl(
@@ -41,11 +43,13 @@ public class ClassServiceImpl implements ClassService {
             CourseRepository courseRepository,
             UserRepository userRepository,
             EnrollmentRepository enrollmentRepository,
+            SubmissionRepository submissionRepository,
             CurrentUserService currentUserService) {
         this.classRepository = classRepository;
         this.courseRepository = courseRepository;
         this.userRepository = userRepository;
         this.enrollmentRepository = enrollmentRepository;
+        this.submissionRepository = submissionRepository;
         this.currentUserService = currentUserService;
     }
 
@@ -90,6 +94,17 @@ public class ClassServiceImpl implements ClassService {
     }
 
     @Override
+    public List<ClassResponse> getOpenClassesForRegistration() {
+        User user = currentUserService.getCurrentUser();
+        if (user.getRole() != Role.STUDENT) {
+            throw new UnauthorizedClassAccessException("Chi sinh vien duoc dang ky hoc phan");
+        }
+        return classRepository.findByStatus(ClassStatus.ONGOING).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public ClassResponse getClassById(Long id) {
         ClassEntity classEntity = classRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Khong tim thay lop hoc"));
@@ -122,6 +137,7 @@ public class ClassServiceImpl implements ClassService {
     public List<UserResponse> getClassStudents(Long classId) {
         ClassEntity classEntity = classRepository.findById(classId)
                 .orElseThrow(() -> new ResourceNotFoundException("Khong tim thay lop hoc"));
+        requireClassAccess(classEntity);
         return enrollmentRepository.findByClassEntityId(classEntity.getId()).stream()
                 .map(enrollment -> mapUserToResponse(enrollment.getStudent()))
                 .collect(Collectors.toList());
@@ -213,6 +229,40 @@ public class ClassServiceImpl implements ClassService {
         enrollmentRepository.delete(enrollment);
     }
 
+    @Override
+    public ClassResponse selfEnroll(Long classId) {
+        User student = currentUserService.getCurrentUser();
+        if (student.getRole() != Role.STUDENT) {
+            throw new UnauthorizedClassAccessException("Chi sinh vien duoc dang ky hoc phan");
+        }
+        ClassEntity classEntity = classRepository.findById(classId)
+                .orElseThrow(() -> new ResourceNotFoundException("Khong tim thay lop hoc"));
+        if (classEntity.getStatus() != ClassStatus.ONGOING) {
+            throw new RuntimeException("Lop hoc da ket thuc, khong the dang ky");
+        }
+        if (!enrollmentRepository.existsByStudentIdAndClassEntityId(student.getId(), classId)) {
+            Enrollment enrollment = new Enrollment();
+            enrollment.setClassEntity(classEntity);
+            enrollment.setStudent(student);
+            enrollmentRepository.save(enrollment);
+        }
+        return mapToResponse(classEntity);
+    }
+
+    @Override
+    public void cancelSelfEnrollment(Long classId) {
+        User student = currentUserService.getCurrentUser();
+        if (student.getRole() != Role.STUDENT) {
+            throw new UnauthorizedClassAccessException("Chi sinh vien duoc huy dang ky hoc phan");
+        }
+        if (submissionRepository.existsByStudentIdAndAssignmentClassEntityId(student.getId(), classId)) {
+            throw new RuntimeException("Khong the huy dang ky vi da co bai nop trong lop");
+        }
+        Enrollment enrollment = enrollmentRepository.findByClassEntityIdAndStudentId(classId, student.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Ban chua dang ky lop nay"));
+        enrollmentRepository.delete(enrollment);
+    }
+
     private void requireClassAccess(ClassEntity classEntity) {
         User user = currentUserService.getCurrentUser();
         if (user.getRole() == Role.ADMIN || classEntity.getTeacher().getId().equals(user.getId())) {
@@ -237,6 +287,12 @@ public class ClassServiceImpl implements ClassService {
         String teacherName = entity.getTeacher().getFullName();
         response.setTeacherName(teacherName != null ? teacherName : entity.getTeacher().getUsername());
         response.setStudentCount(enrollmentRepository.countByClassEntityId(entity.getId()));
+        User currentUser = currentUserService.getCurrentUser();
+        if (currentUser.getRole() == Role.STUDENT) {
+            response.setEnrolled(enrollmentRepository.existsByStudentIdAndClassEntityId(currentUser.getId(), entity.getId()));
+        } else {
+            response.setEnrolled(false);
+        }
 
         return response;
     }

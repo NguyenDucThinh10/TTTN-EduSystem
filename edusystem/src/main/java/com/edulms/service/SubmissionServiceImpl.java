@@ -11,6 +11,7 @@ import com.edulms.dto.SubmissionResponse;
 import com.edulms.dto.SubmissionStudentResponse;
 import com.edulms.entity.Assignment;
 import com.edulms.entity.ClassEntity;
+import com.edulms.entity.ClassStatus;
 import com.edulms.entity.Enrollment;
 import com.edulms.entity.Grade;
 import com.edulms.entity.Role;
@@ -67,6 +68,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 
         Assignment assignment = getAssignmentOrThrow(assignmentId);
         requireStudentInClass(assignment.getClassEntity(), student);
+        requireOpenClass(assignment.getClassEntity());
         submissionRepository.findByAssignmentIdAndStudentId(assignmentId, student.getId())
                 .ifPresent(existing -> {
                     throw new DuplicateSubmissionException("Sinh viên đã nộp bài tập này");
@@ -93,6 +95,7 @@ public class SubmissionServiceImpl implements SubmissionService {
 
         Assignment assignment = getAssignmentOrThrow(assignmentId);
         requireStudentInClass(assignment.getClassEntity(), student);
+        requireOpenClass(assignment.getClassEntity());
         submissionValidator.validateDeadline(assignment);
         fileValidator.validate(file);
 
@@ -120,6 +123,7 @@ public class SubmissionServiceImpl implements SubmissionService {
         if (!submission.getStudent().getId().equals(student.getId())) {
             throw new UnauthorizedClassAccessException("Sinh vien chi duoc huy bai nop cua chinh minh");
         }
+        requireOpenClass(submission.getAssignment().getClassEntity());
         submissionValidator.validateDeadline(submission.getAssignment());
         gradeRepository.findBySubmissionId(submissionId).ifPresent(gradeRepository::delete);
         submissionRepository.delete(submission);
@@ -199,6 +203,12 @@ public class SubmissionServiceImpl implements SubmissionService {
     private void requireStudentInClass(ClassEntity classEntity, User student) {
         enrollmentRepository.findByClassEntityIdAndStudentId(classEntity.getId(), student.getId())
                 .orElseThrow(() -> new UnauthorizedClassAccessException("Sinh viên không thuộc lớp học này"));
+    }
+
+    private void requireOpenClass(ClassEntity classEntity) {
+        if (classEntity.getStatus() == ClassStatus.COMPLETED) {
+            throw new DeadlineExceededException("Lop hoc da ket thuc");
+        }
     }
 
     private Assignment getAssignmentOrThrow(Long assignmentId) {

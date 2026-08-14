@@ -11,6 +11,7 @@ import com.edulms.dto.SubmissionStudentResponse;
 import com.edulms.dto.UpdateAssignmentRequest;
 import com.edulms.entity.Assignment;
 import com.edulms.entity.ClassEntity;
+import com.edulms.entity.ClassStatus;
 import com.edulms.entity.Role;
 import com.edulms.entity.User;
 import com.edulms.repository.AssignmentRepository;
@@ -51,6 +52,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         ClassEntity classEntity = classRepository.findById(request.getClassId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy lớp học"));
         requireTeacherOfClass(classEntity);
+        requireOpenClass(classEntity);
 
         Assignment assignment = new Assignment();
         assignment.setClassEntity(classEntity);
@@ -68,6 +70,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         assignmentValidator.validateUpdate(request);
         Assignment assignment = getAssignmentOrThrow(assignmentId);
         requireTeacherOfClass(assignment.getClassEntity());
+        requireOpenClass(assignment.getClassEntity());
 
         if (request.getTitle() != null) {
             assignment.setTitle(request.getTitle());
@@ -117,6 +120,7 @@ public class AssignmentServiceImpl implements AssignmentService {
     public void deleteAssignment(Long assignmentId) {
         Assignment assignment = getAssignmentOrThrow(assignmentId);
         requireTeacherOfClass(assignment.getClassEntity());
+        requireOpenClass(assignment.getClassEntity());
         assignmentRepository.delete(assignment);
     }
 
@@ -142,6 +146,12 @@ public class AssignmentServiceImpl implements AssignmentService {
         }
         enrollmentRepository.findByClassEntityIdAndStudentId(classEntity.getId(), user.getId())
                 .orElseThrow(() -> new UnauthorizedClassAccessException("Bạn không thuộc lớp học này"));
+    }
+
+    private void requireOpenClass(ClassEntity classEntity) {
+        if (classEntity.getStatus() == ClassStatus.COMPLETED) {
+            throw new InvalidGradeException("Lop hoc da ket thuc, khong the thay doi bai tap");
+        }
     }
 
     private AssignmentResponse mapToResponse(Assignment assignment) {

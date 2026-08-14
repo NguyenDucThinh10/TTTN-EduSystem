@@ -17,4 +17,5 @@ public class ClassResponse {
     private Long teacherId;
     private String teacherName; // Tên giảng viên
     private Long studentCount;
+    private Boolean enrolled;
 }

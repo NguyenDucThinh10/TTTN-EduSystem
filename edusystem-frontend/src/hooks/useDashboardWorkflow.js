@@ -15,12 +15,14 @@ export default function useDashboardWorkflow(user) {
   const isTeacher = user.role === 'TEACHER' || user.role === 'ADMIN';
   const isStudent = user.role === 'STUDENT';
   const [classes, setClasses] = useState([]);
+  const [openClasses, setOpenClasses] = useState([]);
   const [selectedClassId, setSelectedClassId] = useState('');
   const [assignments, setAssignments] = useState([]);
   const [selectedAssignmentId, setSelectedAssignmentId] = useState('');
   const [assignmentDetail, setAssignmentDetail] = useState(null);
   const [mySubmissions, setMySubmissions] = useState([]);
   const [studentGrades, setStudentGrades] = useState(null);
+  const [classStudents, setClassStudents] = useState([]);
   const [classAnalytics, setClassAnalytics] = useState(null);
   const [dashboard, setDashboard] = useState(null);
   const [form, setForm] = useState(emptyAssignment);
@@ -64,7 +66,13 @@ export default function useDashboardWorkflow(user) {
     const data = await run(() => axiosClient.get('/api/classes/me'));
     if (!data) return;
     setClasses(data);
-    setSelectedClassId((current) => current || data[0]?.id || '');
+    setSelectedClassId((current) => (data.some((item) => String(item.id) === String(current)) ? current : data[0]?.id || ''));
+  };
+
+  const loadOpenClasses = async () => {
+    if (!isStudent) return;
+    const data = await run(() => axiosClient.get('/api/classes/open'));
+    setOpenClasses(Array.isArray(data) ? data : []);
   };
 
   const loadAssignments = async (classId = selectedClassId) => {
@@ -116,6 +124,15 @@ export default function useDashboardWorkflow(user) {
     }
   };
 
+  const loadClassStudents = async (classId = selectedClassId) => {
+    if (!classId || !isTeacher) {
+      setClassStudents([]);
+      return;
+    }
+    const data = await run(() => axiosClient.get(`/api/classes/${classId}/students`));
+    setClassStudents(Array.isArray(data) ? data : []);
+  };
+
   const loadAnalytics = async (classId = selectedClassId) => {
     if (!classId || !isTeacher) return;
     const [classData, dashboardData] = await Promise.all([
@@ -128,11 +145,13 @@ export default function useDashboardWorkflow(user) {
 
   useEffect(() => {
     loadClasses();
+    loadOpenClasses();
   }, []);
 
   useEffect(() => {
     if (!selectedClassId) return;
     loadAssignments(selectedClassId);
+    loadClassStudents(selectedClassId);
     loadAnalytics(selectedClassId);
     loadStudentData(selectedClassId);
   }, [selectedClassId]);
@@ -274,10 +293,28 @@ export default function useDashboardWorkflow(user) {
     await loadAnalytics();
   };
 
+  const registerClass = async (classId) => {
+    await run(() => axiosClient.post(`/api/classes/${classId}/register`), 'Đã đăng ký học phần.');
+    await loadClasses();
+    await loadOpenClasses();
+  };
+
+  const cancelRegistration = async (classId) => {
+    await run(() => axiosClient.delete(`/api/classes/${classId}/register`), 'Đã hủy đăng ký học phần.');
+    if (String(selectedClassId) === String(classId)) {
+      setSelectedClassId('');
+      setAssignments([]);
+      setStudentGrades(null);
+    }
+    await loadClasses();
+    await loadOpenClasses();
+  };
+
   return {
     assignments,
     assignmentDetail,
     classAnalytics,
+    classStudents,
     classes,
     dashboard,
     editingId,
@@ -289,12 +326,15 @@ export default function useDashboardWorkflow(user) {
     loading,
     mySubmissions,
     notice,
+    openClasses,
     onAssignmentFileChange: (file) => setAssignmentFiles({ form: file }),
     onCancelEdit: () => resetAssignmentForm(),
+    onCancelRegistration: cancelRegistration,
     onCancelSubmission: cancelSubmission,
     onDeleteAssignment: deleteAssignment,
     onFileChange: (assignmentId, file) => setUploadFiles((current) => ({ ...current, [assignmentId]: file })),
     onGrade: gradeSubmission,
+    onRegisterClass: registerClass,
     onResubmit: resubmitSubmission,
     onSelectAssignment: setSelectedAssignmentId,
     onStartEdit: startEdit,

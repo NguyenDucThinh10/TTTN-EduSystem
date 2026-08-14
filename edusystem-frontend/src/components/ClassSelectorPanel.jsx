@@ -7,7 +7,7 @@ const { Text, Title } = Typography;
 export default function ClassSelectorPanel({ classes, selectedClass, selectedClassId, onClassChange }) {
   const options = classes.map((item) => ({
     value: item.id,
-    label: `${item.name} - ${item.semester || 'Hoc ky'}`,
+    label: `${item.name} - ${item.courseCode || item.courseTitle || 'Hoc phan'} - ${item.semester || 'Hoc ky'}`,
   }));
 
   return (
@@ -43,8 +43,10 @@ export default function ClassSelectorPanel({ classes, selectedClass, selectedCla
               <Space size="middle" wrap>
                 <span className="class-icon"><BookOutlined /></span>
                 <div>
-                  <Title level={4}>{selectedClass.courseTitle}</Title>
+                  <Title level={4}>{selectedClass.name}</Title>
                   <Space wrap>
+                    <Text strong>{selectedClass.courseCode || 'N/A'} - {selectedClass.courseTitle}</Text>
+                    {selectedClass.courseCredits && <Text type="secondary">{selectedClass.courseCredits} tín chỉ</Text>}
                     <Text type="secondary"><UserOutlined /> {selectedClass.teacherName}</Text>
                     <Text type="secondary"><CalendarOutlined /> {selectedClass.semester || 'Hoc ky'}</Text>
                     <Tag color={selectedClass.status === 'ONGOING' ? 'green' : 'default'}>

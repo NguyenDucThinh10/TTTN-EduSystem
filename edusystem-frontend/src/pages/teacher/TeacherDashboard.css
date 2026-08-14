@@ -90,6 +90,19 @@
   padding: 12px;
 }
 
+.compact-list article button {
+  width: fit-content;
+  min-height: 32px;
+  margin-top: 6px;
+  padding: 0 12px;
+  border: 1px solid #1677ff;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #1677ff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
 @media (max-width: 960px) {
   .assignment-item {
     grid-template-columns: 1fr;

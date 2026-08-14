@@ -15,6 +15,8 @@ public interface ClassService {
 
     List<ClassResponse> getMyClasses();
 
+    List<ClassResponse> getOpenClassesForRegistration();
+
     ClassResponse getClassById(Long id);
 
     ClassResponse updateClass(Long id, ClassRequest request);
@@ -26,4 +28,8 @@ public interface ClassService {
     String enrollStudentsFromExcel(Long classId, MultipartFile file);
 
     void removeStudentFromClass(Long classId, Long studentId);
+
+    ClassResponse selfEnroll(Long classId);
+
+    void cancelSelfEnrollment(Long classId);
 }
