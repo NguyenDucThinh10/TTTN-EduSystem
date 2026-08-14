@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { BrowserRouter, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import axiosClient from './api/axiosClient';
 import AdminDashboard from './components/AdminDashboard';
 import AdminOverview from './components/AdminOverview';
 import ClassManagement from './components/ClassManagement';
@@ -19,16 +20,12 @@ function readStoredUser() {
   try {
     const token = localStorage.getItem('token');
     const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
-    const role = normalizeRole(storedUser?.role || localStorage.getItem('role'));
-    const username = storedUser?.username || localStorage.getItem('username');
-    const fullName = storedUser?.fullName || localStorage.getItem('fullName');
+    const role = normalizeRole(localStorage.getItem('role') || storedUser?.role);
+    const username = localStorage.getItem('username') || storedUser?.username;
+    const fullName = localStorage.getItem('fullName') || storedUser?.fullName;
 
     if (!token || !role) {
-      localStorage.removeItem('user');
-      localStorage.removeItem('token');
-      localStorage.removeItem('role');
-      localStorage.removeItem('username');
-      localStorage.removeItem('fullName');
+      clearStoredAuth();
       return null;
     }
 
@@ -44,6 +41,23 @@ function readStoredUser() {
 }
 
 const normalizeRole = (role) => String(role || '').replace(/^ROLE_/, '').toUpperCase();
+
+const clearStoredAuth = () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('role');
+  localStorage.removeItem('username');
+  localStorage.removeItem('fullName');
+  localStorage.removeItem('user');
+};
+
+const persistUser = (nextUser) => {
+  const normalizedUser = { ...nextUser, role: normalizeRole(nextUser?.role) };
+  localStorage.setItem('user', JSON.stringify(normalizedUser));
+  localStorage.setItem('role', normalizedUser.role);
+  if (normalizedUser.username) localStorage.setItem('username', normalizedUser.username);
+  if (normalizedUser.fullName) localStorage.setItem('fullName', normalizedUser.fullName);
+  return normalizedUser;
+};
 
 const roleHomePath = (role) => {
   const normalizedRole = normalizeRole(role);
@@ -65,19 +79,53 @@ function App() {
 
 function AppRoutes({ user, setUser }) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isAuthenticated = Boolean(user);
+
+  useEffect(() => {
+    let active = true;
+    const token = localStorage.getItem('token');
+
+    if (!token || !isAuthenticated) return undefined;
+
+    axiosClient
+      .get('/api/me')
+      .then((profile) => {
+        if (!active) return;
+        const syncedUser = persistUser({
+          id: profile.id,
+          username: profile.username,
+          fullName: profile.fullName,
+          role: profile.role,
+        });
+        setUser(syncedUser);
+
+        const expectedPath = roleHomePath(syncedUser.role);
+        const isRoleDashboard = ['/admin', '/teacher', '/student'].some((path) => location.pathname.startsWith(path));
+        if (isRoleDashboard && !location.pathname.startsWith(expectedPath)) {
+          navigate(expectedPath, { replace: true });
+        }
+      })
+      .catch(() => {
+        if (!active) return;
+        clearStoredAuth();
+        setUser(null);
+        navigate('/auth', { replace: true });
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [isAuthenticated, location.pathname, navigate, setUser]);
 
   const handleAuthenticated = (authUser) => {
-    const normalizedUser = { ...authUser, role: normalizeRole(authUser?.role) };
+    const normalizedUser = persistUser(authUser);
     setUser(normalizedUser);
     navigate(roleHomePath(normalizedUser.role), { replace: true });
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('role');
-    localStorage.removeItem('username');
-    localStorage.removeItem('fullName');
-    localStorage.removeItem('user');
+    clearStoredAuth();
     setUser(null);
     navigate('/');
   };

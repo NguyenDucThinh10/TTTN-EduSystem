@@ -85,7 +85,12 @@ public class AuthController {
         newUser.setFullName(request.getFullName());
         newUser.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         
-        newUser.setRole(Role.STUDENT); 
+        Role requestedRole = request.getRole() == null ? Role.STUDENT : request.getRole();
+        if (requestedRole == Role.ADMIN) {
+            return ResponseEntity.badRequest().body("Khong the dang ky tai khoan quan tri vien!");
+        }
+
+        newUser.setRole(requestedRole); 
         newUser.setStatus(UserStatus.ACTIVE); 
 
         userRepository.save(newUser);

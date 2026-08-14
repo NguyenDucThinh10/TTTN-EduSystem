@@ -25,7 +25,8 @@ export default function AuthPage({ onAuthenticated }) {
         username: '',
         email: '',
         password: '',
-        fullName: ''
+        fullName: '',
+        role: 'STUDENT'
     });
 
     // 2. Hàm bắt sự kiện khi người dùng gõ phím
@@ -47,7 +48,7 @@ export default function AuthPage({ onAuthenticated }) {
                 // Chuyển form về lại mặt Login
                 setIsActive(false); 
                 // Xóa trắng form đăng ký (Đã bổ sung xóa luôn fullName)
-                setRegisterData({ username: '', email: '', password: '', fullName: '' });
+                setRegisterData({ username: '', email: '', password: '', fullName: '', role: 'STUDENT' });
             }
         } catch (error) {
             console.error("Lỗi đăng ký:", error);
@@ -163,6 +164,14 @@ export default function AuthPage({ onAuthenticated }) {
                             <input type="password" name="password" value={registerData.password} onChange={handleRegisterChange} required />
                             <label>Password</label>
                             <i className='bx bxs-lock-alt'></i>
+                        </div>
+                        <div className="input-box role-box animation" style={{ '--i': 20.5, '--j': 3.5 }}>
+                            <select name="role" value={registerData.role} onChange={handleRegisterChange} required>
+                                <option value="STUDENT">Sinh viên</option>
+                                <option value="TEACHER">Giảng viên</option>
+                            </select>
+                            <label>Vai trò</label>
+                            <i className='bx bxs-user-badge'></i>
                         </div>
                         <button type="submit" className="btn animation" style={{ '--i': 21, '--j': 4 }}>Sign Up</button>
                         <div className="linkTxt animation" style={{ '--i': 22, '--j': 5 }}>

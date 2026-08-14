@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps, react-hooks/set-state-in-effect */
 import { useEffect, useMemo, useState } from 'react';
 import axiosClient from '../api/axiosClient';
-import { toApiDate } from '../utils/dateUtils';
+import { isPastDate, toApiDate } from '../utils/dateUtils';
 
 const emptyAssignment = {
   title: '',
@@ -78,12 +78,13 @@ export default function useDashboardWorkflow(user) {
   const loadAssignments = async (classId = selectedClassId) => {
     if (!classId) {
       setAssignments([]);
+      setSelectedAssignmentId('');
       return;
     }
     const data = await run(() => axiosClient.get(`/api/assignments/class/${classId}`));
     if (data) {
       setAssignments(data);
-      setSelectedAssignmentId((current) => current || data[0]?.id || '');
+      setSelectedAssignmentId((current) => (data.some((item) => String(item.id) === String(current)) ? current : data[0]?.id || ''));
     }
   };
 
@@ -181,6 +182,19 @@ export default function useDashboardWorkflow(user) {
 
   const submitAssignmentForm = async (event) => {
     event.preventDefault();
+    if (!selectedClassId) {
+      setNotice('Chon lop hoc truoc khi tao bai tap.');
+      return;
+    }
+    if (isPastDate(form.dueDate)) {
+      setNotice('Deadline phai sau thoi diem hien tai.');
+      return;
+    }
+    if (Number(form.maxScore) <= 0) {
+      setNotice('Diem toi da phai lon hon 0.');
+      return;
+    }
+
     let uploadedFileUrl = form.fileUrl;
     const selectedFile = assignmentFiles.form;
     if (selectedFile) {
@@ -203,13 +217,18 @@ export default function useDashboardWorkflow(user) {
       weight: 1,
     };
 
-    if (editingId) {
-      await run(() => axiosClient.put(`/api/assignments/${editingId}`, payload), 'Da cap nhat bai tap.');
+    let savedAssignment;
+    const assignmentStillExists = editingId && assignments.some((item) => String(item.id) === String(editingId));
+    if (assignmentStillExists) {
+      savedAssignment = await run(() => axiosClient.put(`/api/assignments/${editingId}`, payload), 'Da cap nhat bai tap.');
     } else {
-      await run(() => axiosClient.post('/api/assignments', payload), 'Da tao bai tap.');
+      savedAssignment = await run(() => axiosClient.post('/api/assignments', payload), 'Da tao bai tap.');
     }
+    if (!savedAssignment) return;
+
     resetAssignmentForm();
-    await loadAssignments();
+    await loadAssignments(selectedClassId);
+    setSelectedAssignmentId(savedAssignment.id || '');
   };
 
   const resetAssignmentForm = (message) => {
@@ -218,6 +237,14 @@ export default function useDashboardWorkflow(user) {
     setAssignmentFiles({});
     setEditingId(null);
   };
+
+  useEffect(() => {
+    if (!editingId) return;
+    const assignmentStillExists = assignments.some((item) => String(item.id) === String(editingId));
+    if (!assignmentStillExists) {
+      resetAssignmentForm('Bai tap dang sua khong con ton tai, vui long tao moi.');
+    }
+  }, [assignments, editingId]);
 
   const startEdit = (assignment) => {
     setEditingId(assignment.id);

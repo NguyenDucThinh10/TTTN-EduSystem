@@ -12,17 +12,20 @@ public class FileValidator {
 
     public void validate(MultipartFile file) {
         if (file == null || file.isEmpty()) {
-            throw new InvalidFileException("File bài nộp không được để trống");
+            throw new InvalidFileException("File khong duoc de trong");
         }
         if (file.getSize() > MAX_SIZE) {
-            throw new InvalidFileException("File không được vượt quá 20MB");
+            throw new InvalidFileException("File khong duoc vuot qua 20MB");
         }
+        if (!ALLOWED_EXTENSIONS.contains(extensionOf(file))) {
+            throw new InvalidFileException("Dinh dang file khong hop le");
+        }
+    }
+
+    private String extensionOf(MultipartFile file) {
         String filename = file.getOriginalFilename();
-        String extension = filename == null || !filename.contains(".")
+        return filename == null || !filename.contains(".")
                 ? ""
                 : filename.substring(filename.lastIndexOf('.') + 1).toLowerCase();
-        if (!ALLOWED_EXTENSIONS.contains(extension)) {
-            throw new InvalidFileException("Định dạng file không hợp lệ");
-        }
     }
 }
