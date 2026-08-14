@@ -15,7 +15,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.edulms.dto.ClassRequest;
 import com.edulms.dto.ClassResponse;
+import com.edulms.dto.UserResponse;
 import com.edulms.entity.ClassEntity;
+import com.edulms.entity.ClassStatus;
 import com.edulms.entity.Course;
 import com.edulms.entity.Enrollment;
 import com.edulms.entity.Role;
@@ -59,7 +61,7 @@ public class ClassServiceImpl implements ClassService {
         newClass.setTeacher(teacher);
         newClass.setName(request.getName());
         newClass.setSemester(request.getSemester());
-        newClass.setStatus(request.getStatus());
+        newClass.setStatus(request.getStatus() != null ? request.getStatus() : ClassStatus.ONGOING);
 
         return mapToResponse(classRepository.save(newClass));
     }
@@ -93,6 +95,36 @@ public class ClassServiceImpl implements ClassService {
                 .orElseThrow(() -> new ResourceNotFoundException("Khong tim thay lop hoc"));
         requireClassAccess(classEntity);
         return mapToResponse(classEntity);
+    }
+
+    @Override
+    public ClassResponse updateClass(Long id, ClassRequest request) {
+        ClassEntity classEntity = classRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Khong tim thay lop hoc"));
+
+        Course course = courseRepository.findById(request.getCourseId())
+                .orElseThrow(() -> new ResourceNotFoundException("Khong tim thay hoc phan"));
+        User teacher = userRepository.findById(request.getTeacherId())
+                .orElseThrow(() -> new ResourceNotFoundException("Khong tim thay giang vien"));
+        if (teacher.getRole() != Role.TEACHER) {
+            throw new RuntimeException("Nguoi duoc phan cong khong phai giang vien");
+        }
+
+        classEntity.setCourse(course);
+        classEntity.setTeacher(teacher);
+        classEntity.setName(request.getName());
+        classEntity.setSemester(request.getSemester());
+        classEntity.setStatus(request.getStatus() != null ? request.getStatus() : ClassStatus.ONGOING);
+        return mapToResponse(classRepository.save(classEntity));
+    }
+
+    @Override
+    public List<UserResponse> getClassStudents(Long classId) {
+        ClassEntity classEntity = classRepository.findById(classId)
+                .orElseThrow(() -> new ResourceNotFoundException("Khong tim thay lop hoc"));
+        return enrollmentRepository.findByClassEntityId(classEntity.getId()).stream()
+                .map(enrollment -> mapUserToResponse(enrollment.getStudent()))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -174,6 +206,13 @@ public class ClassServiceImpl implements ClassService {
         }
     }
 
+    @Override
+    public void removeStudentFromClass(Long classId, Long studentId) {
+        Enrollment enrollment = enrollmentRepository.findByClassEntityIdAndStudentId(classId, studentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Sinh vien chua duoc ghi danh vao lop nay"));
+        enrollmentRepository.delete(enrollment);
+    }
+
     private void requireClassAccess(ClassEntity classEntity) {
         User user = currentUserService.getCurrentUser();
         if (user.getRole() == Role.ADMIN || classEntity.getTeacher().getId().equals(user.getId())) {
@@ -189,11 +228,27 @@ public class ClassServiceImpl implements ClassService {
         response.setName(entity.getName());
         response.setSemester(entity.getSemester());
         response.setStatus(entity.getStatus());
+        response.setCourseId(entity.getCourse().getId());
+        response.setCourseCode(entity.getCourse().getCode());
         response.setCourseTitle(entity.getCourse().getTitle());
+        response.setCourseCredits(entity.getCourse().getCredits());
+        response.setTeacherId(entity.getTeacher().getId());
 
         String teacherName = entity.getTeacher().getFullName();
         response.setTeacherName(teacherName != null ? teacherName : entity.getTeacher().getUsername());
+        response.setStudentCount(enrollmentRepository.countByClassEntityId(entity.getId()));
 
+        return response;
+    }
+
+    private UserResponse mapUserToResponse(User user) {
+        UserResponse response = new UserResponse();
+        response.setId(user.getId());
+        response.setUsername(user.getUsername());
+        response.setFullName(user.getFullName());
+        response.setEmail(user.getEmail());
+        response.setRole(user.getRole());
+        response.setStatus(user.getStatus());
         return response;
     }
 }

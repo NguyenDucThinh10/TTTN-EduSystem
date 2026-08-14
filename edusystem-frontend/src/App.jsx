@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import AdminDashboard from './components/AdminDashboard';
+import AdminOverview from './components/AdminOverview';
 import ClassManagement from './components/ClassManagement';
+import CourseManagement from './components/CourseManagement';
 import ProtectedRoute from './components/ProtectedRoute';
 import UserManagement from './components/UserManagement';
 import AuthPage from './pages/AuthPage';
@@ -99,8 +101,9 @@ function AppRoutes({ user, setUser }) {
           </ProtectedRoute>
         }
       >
-        <Route index element={<div>Chao mung den trang quan tri EduSystem.</div>} />
+        <Route index element={<AdminOverview />} />
         <Route path="users" element={<UserManagement />} />
+        <Route path="courses" element={<CourseManagement />} />
         <Route path="classes" element={<ClassManagement />} />
       </Route>
       <Route

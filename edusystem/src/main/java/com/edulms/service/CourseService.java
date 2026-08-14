@@ -8,4 +8,6 @@ import com.edulms.dto.CourseResponse;
 public interface CourseService {
     CourseResponse createCourse(CourseRequest request);
     List<CourseResponse> getAllCourses();
+    CourseResponse updateCourse(Long id, CourseRequest request);
+    void deleteCourse(Long id);
 }

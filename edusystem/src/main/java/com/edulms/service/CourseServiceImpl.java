@@ -39,6 +39,24 @@ public class CourseServiceImpl implements CourseService {
     }
 
     // Hàm phụ trợ map dữ liệu
+    @Override
+    public CourseResponse updateCourse(Long id, CourseRequest request) {
+        Course course = courseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Khong tim thay hoc phan"));
+        course.setCode(request.getCode());
+        course.setTitle(request.getTitle());
+        course.setCredits(request.getCredits());
+        return mapToResponse(courseRepository.save(course));
+    }
+
+    @Override
+    public void deleteCourse(Long id) {
+        if (!courseRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Khong tim thay hoc phan");
+        }
+        courseRepository.deleteById(id);
+    }
+
     private CourseResponse mapToResponse(Course course) {
         CourseResponse response = new CourseResponse();
         response.setId(course.getId());
