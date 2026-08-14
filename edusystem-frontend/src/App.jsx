@@ -21,19 +21,22 @@ function readStoredUser() {
     const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
     const role = normalizeRole(storedUser?.role || localStorage.getItem('role'));
     const username = storedUser?.username || localStorage.getItem('username');
+    const fullName = storedUser?.fullName || localStorage.getItem('fullName');
 
     if (!token || !role) {
       localStorage.removeItem('user');
       localStorage.removeItem('token');
       localStorage.removeItem('role');
       localStorage.removeItem('username');
+      localStorage.removeItem('fullName');
       return null;
     }
 
-    const user = { ...storedUser, username, role };
+    const user = { ...storedUser, username, fullName, role };
     localStorage.setItem('user', JSON.stringify(user));
     localStorage.setItem('role', role);
     if (username) localStorage.setItem('username', username);
+    if (fullName) localStorage.setItem('fullName', fullName);
     return user;
   } catch {
     return null;
@@ -73,6 +76,7 @@ function AppRoutes({ user, setUser }) {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
     localStorage.removeItem('username');
+    localStorage.removeItem('fullName');
     localStorage.removeItem('user');
     setUser(null);
     navigate('/');

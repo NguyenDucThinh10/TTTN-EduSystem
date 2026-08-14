@@ -160,6 +160,20 @@ export default function useDashboardWorkflow(user) {
     loadAssignmentDetail(selectedAssignmentId);
   }, [selectedAssignmentId]);
 
+  const refreshAll = async () => {
+    await loadClasses();
+    await loadOpenClasses();
+    if (selectedClassId) {
+      await loadAssignments(selectedClassId);
+      await loadClassStudents(selectedClassId);
+      await loadAnalytics(selectedClassId);
+      await loadStudentData(selectedClassId);
+    }
+    if (selectedAssignmentId) {
+      await loadAssignmentDetail(selectedAssignmentId);
+    }
+  };
+
   const handleAssignmentChange = (event) => {
     const { name, value } = event.target;
     setForm((current) => ({ ...current, [name]: value }));
@@ -335,6 +349,7 @@ export default function useDashboardWorkflow(user) {
     onFileChange: (assignmentId, file) => setUploadFiles((current) => ({ ...current, [assignmentId]: file })),
     onGrade: gradeSubmission,
     onRegisterClass: registerClass,
+    onRefresh: refreshAll,
     onResubmit: resubmitSubmission,
     onSelectAssignment: setSelectedAssignmentId,
     onStartEdit: startEdit,

@@ -59,7 +59,13 @@ public class AuthController {
             User user = userRepository.findByUsername(loginRequest.getUsername()).get();
             String token = jwtTokenProvider.generateToken(user.getUsername(), user.getRole().name());
 
-            return ResponseEntity.ok(new JwtAuthResponse(token, "Bearer", user.getUsername(), user.getRole().name()));
+            return ResponseEntity.ok(new JwtAuthResponse(
+                    token,
+                    "Bearer",
+                    user.getId(),
+                    user.getUsername(),
+                    user.getFullName(),
+                    user.getRole().name()));
             
         } catch (AuthenticationException ex) {
             // BẮT LỖI: Trả về mã 401 Unauthorized thay vì 403 Forbidden nếu sai mật khẩu

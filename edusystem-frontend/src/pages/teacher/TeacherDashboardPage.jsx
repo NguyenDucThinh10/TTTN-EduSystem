@@ -88,7 +88,10 @@ export default function TeacherDashboardPage({ user, onLogout }) {
         <Content className="role-content">
           <div className="role-titlebar">
             <h1>{pageTitles[activeView]}</h1>
-            <Breadcrumb items={[{ title: 'Teacher' }, { title: pageTitles[activeView] }]} />
+            <Space>
+              <Button onClick={workflow.onRefresh} loading={workflow.loading}>Làm mới</Button>
+              <Breadcrumb items={[{ title: 'Teacher' }, { title: pageTitles[activeView] }]} />
+            </Space>
           </div>
 
           <div className="role-content-card" style={{ background: colorBgContainer, borderRadius: borderRadiusLG }}>

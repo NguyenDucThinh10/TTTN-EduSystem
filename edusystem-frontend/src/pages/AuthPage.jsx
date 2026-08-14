@@ -76,9 +76,11 @@ export default function AuthPage({ onAuthenticated }) {
             const token = response.token || response.accessToken;
             const role = normalizeRole(response.role);
             const username = response.username;
+            const fullName = response.fullName;
             const user = {
                 id: response.id,
                 username,
+                fullName,
                 role,
             };
 
@@ -86,6 +88,7 @@ export default function AuthPage({ onAuthenticated }) {
             localStorage.setItem('token', token);
             localStorage.setItem('role', role);
             localStorage.setItem('username', username);
+            if (fullName) localStorage.setItem('fullName', fullName);
             localStorage.setItem('user', JSON.stringify(user));
 
             // Điều hướng dựa trên quyền

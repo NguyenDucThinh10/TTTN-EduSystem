@@ -39,6 +39,7 @@ axiosClient.interceptors.response.use(
       localStorage.removeItem('role');
       localStorage.removeItem('user'); 
       localStorage.removeItem('username'); 
+      localStorage.removeItem('fullName');
       
       // [BẬT LÊN & SỬA ĐƯỜNG DẪN] Đá về đúng trang AuthPage của bạn
       window.location.href = '/auth'; 

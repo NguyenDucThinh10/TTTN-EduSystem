@@ -39,6 +39,7 @@ export default function AdminDashboard({ onLogout }) {
         localStorage.removeItem('token');
         localStorage.removeItem('role');
         localStorage.removeItem('username');
+        localStorage.removeItem('fullName');
         localStorage.removeItem('user');
         navigate('/');
     };
