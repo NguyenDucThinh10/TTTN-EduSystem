@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, Outlet, useLocation } from 'react-router-dom';
 import { Layout, Menu, Button, theme, Dropdown, Avatar, Space, Badge, Breadcrumb } from 'antd';
 import {
@@ -14,7 +14,7 @@ import {
 
 const { Header, Sider, Content, Footer } = Layout;
 
-export default function AdminDashboard() {
+export default function AdminDashboard({ onLogout }) {
     const [collapsed, setCollapsed] = useState(false);
     const navigate = useNavigate();
     const location = useLocation(); // Hook lấy đường dẫn hiện tại
@@ -23,8 +23,16 @@ export default function AdminDashboard() {
     const username = localStorage.getItem('username') || 'Admin';
 
     const handleLogout = () => {
-        localStorage.clear();
-        navigate('/auth');
+        if (onLogout) {
+            onLogout();
+            return;
+        }
+
+        localStorage.removeItem('token');
+        localStorage.removeItem('role');
+        localStorage.removeItem('username');
+        localStorage.removeItem('user');
+        navigate('/');
     };
 
     // Nâng cấp Menu User

@@ -7,8 +7,3 @@ export function average(items, selector = (item) => item) {
   if (!values.length) return 0;
   return values.reduce((total, value) => total + value, 0) / values.length;
 }
-
-export function weightedScore(scoreValue, maxScore = 10, weight = 1) {
-  if (!Number.isFinite(Number(scoreValue)) || !Number(maxScore)) return 0;
-  return (Number(scoreValue) / Number(maxScore)) * Number(weight || 1);
-}

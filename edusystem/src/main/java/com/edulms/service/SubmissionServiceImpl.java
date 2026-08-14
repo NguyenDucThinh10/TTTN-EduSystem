@@ -33,6 +33,7 @@ public class SubmissionServiceImpl implements SubmissionService {
     private final FileValidator fileValidator;
     private final FileStorageService fileStorageService;
     private final DateTimeUtils dateTimeUtils;
+    private final GradeCalculator gradeCalculator;
 
     public SubmissionServiceImpl(
             SubmissionRepository submissionRepository,
@@ -43,7 +44,8 @@ public class SubmissionServiceImpl implements SubmissionService {
             SubmissionValidator submissionValidator,
             FileValidator fileValidator,
             FileStorageService fileStorageService,
-            DateTimeUtils dateTimeUtils) {
+            DateTimeUtils dateTimeUtils,
+            GradeCalculator gradeCalculator) {
         this.submissionRepository = submissionRepository;
         this.assignmentRepository = assignmentRepository;
         this.enrollmentRepository = enrollmentRepository;
@@ -53,6 +55,7 @@ public class SubmissionServiceImpl implements SubmissionService {
         this.fileValidator = fileValidator;
         this.fileStorageService = fileStorageService;
         this.dateTimeUtils = dateTimeUtils;
+        this.gradeCalculator = gradeCalculator;
     }
 
     @Override
@@ -237,7 +240,7 @@ public class SubmissionServiceImpl implements SubmissionService {
         response.setStudentName(displayName(submission.getStudent()));
         response.setScore(grade.getScore());
         response.setMaxScore(assignment.getMaxScore());
-        response.setWeightedScore(grade.getScore() / assignment.getMaxScore() * assignment.getWeight());
+        response.setWeightedScore(gradeCalculator.weightedScore(grade));
         response.setFeedback(grade.getFeedback());
         response.setGradedAt(grade.getGradedAt());
         response.setGradedBy(grade.getGradedBy());

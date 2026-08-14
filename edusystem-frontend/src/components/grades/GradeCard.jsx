@@ -6,7 +6,6 @@ export default function GradeCard({ grade }) {
     <article className="grade-card">
       <strong>{grade.assignmentTitle}</strong>
       <span>{score(grade.score)} / {score(grade.maxScore)}</span>
-      <span>Trong so: {score(grade.weightedScore)}</span>
       <FeedbackBox feedback={grade.feedback} />
     </article>
   );

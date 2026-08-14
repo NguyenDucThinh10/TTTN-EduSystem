@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Avatar, Badge, Breadcrumb, Button, Dropdown, Layout, Menu, Space, theme, Typography } from 'antd';
+import { Avatar, Badge, Breadcrumb, Button, Dropdown, Layout, Menu, Space, theme } from 'antd';
 import {
   BarChartOutlined,
   BellOutlined,
@@ -19,7 +19,6 @@ import '../../styles/roleDashboard.css';
 import './TeacherDashboard.css';
 
 const { Header, Sider, Content, Footer } = Layout;
-const { Text } = Typography;
 
 const pageTitles = {
   overview: 'Tổng quan',
@@ -154,10 +153,7 @@ function TeacherAssignments({ workflow }) {
             <label>Hạn nộp<input name="dueDate" type="datetime-local" value={form.dueDate} onChange={handleAssignmentChange} /></label>
             <label>Điểm tối đa<input name="maxScore" type="number" min="1" step="0.5" value={form.maxScore} onChange={handleAssignmentChange} /></label>
           </div>
-          <div className="form-row">
-            <label>Trọng số<input name="weight" type="number" min="0.1" step="0.1" value={form.weight} onChange={handleAssignmentChange} /></label>
-            <label>File/link đề bài<input name="fileUrl" value={form.fileUrl} onChange={handleAssignmentChange} placeholder="https://..." /></label>
-          </div>
+          <label>File/link đề bài<input name="fileUrl" value={form.fileUrl} onChange={handleAssignmentChange} placeholder="https://..." /></label>
           <label>Upload file đề bài<input type="file" onChange={(event) => onAssignmentFileChange(event.target.files?.[0] || null)} /></label>
           <button className="primary-action" type="submit">{editingId ? 'Lưu thay đổi' : 'Tạo bài tập'}</button>
         </form>

@@ -17,7 +17,7 @@ export const assignmentService = {
       classId: Number(payload.classId),
       dueDate: toApiDate(payload.dueDate),
       maxScore: Number(payload.maxScore),
-      weight: Number(payload.weight),
+      weight: 1,
       fileUrl,
     };
 

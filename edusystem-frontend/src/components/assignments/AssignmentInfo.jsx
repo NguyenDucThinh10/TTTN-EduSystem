@@ -9,7 +9,7 @@ export default function AssignmentInfo({ assignment }) {
       <h2>{assignment.title}</h2>
       <p>{assignment.description || 'Khong co mo ta.'}</p>
       <span>Han nop: <DeadlineDisplay dueDate={assignment.dueDate} /></span>
-      <span>Diem: {score(assignment.maxScore)} | Trong so: {assignment.weight}</span>
+      <span>Diem: {score(assignment.maxScore)}</span>
       <FileDownload fileUrl={assignment.fileUrl} label="Tai de bai" />
     </section>
   );

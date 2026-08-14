@@ -16,24 +16,35 @@ import TeacherDashboardPage from './pages/teacher/TeacherDashboardPage';
 function readStoredUser() {
   try {
     const token = localStorage.getItem('token');
-    const storedUser = JSON.parse(localStorage.getItem('user'));
-    if (!token || !storedUser?.role) {
+    const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
+    const role = normalizeRole(storedUser?.role || localStorage.getItem('role'));
+    const username = storedUser?.username || localStorage.getItem('username');
+
+    if (!token || !role) {
       localStorage.removeItem('user');
       localStorage.removeItem('token');
       localStorage.removeItem('role');
       localStorage.removeItem('username');
       return null;
     }
-    return storedUser;
+
+    const user = { ...storedUser, username, role };
+    localStorage.setItem('user', JSON.stringify(user));
+    localStorage.setItem('role', role);
+    if (username) localStorage.setItem('username', username);
+    return user;
   } catch {
     return null;
   }
 }
 
+const normalizeRole = (role) => String(role || '').replace(/^ROLE_/, '').toUpperCase();
+
 const roleHomePath = (role) => {
-  if (role === 'ADMIN') return '/admin';
-  if (role === 'TEACHER') return '/teacher';
-  if (role === 'STUDENT') return '/student';
+  const normalizedRole = normalizeRole(role);
+  if (normalizedRole === 'ADMIN') return '/admin';
+  if (normalizedRole === 'TEACHER') return '/teacher';
+  if (normalizedRole === 'STUDENT') return '/student';
   return '/';
 };
 
@@ -51,8 +62,9 @@ function AppRoutes({ user, setUser }) {
   const navigate = useNavigate();
 
   const handleAuthenticated = (authUser) => {
-    setUser(authUser);
-    navigate(roleHomePath(authUser.role), { replace: true });
+    const normalizedUser = { ...authUser, role: normalizeRole(authUser?.role) };
+    setUser(normalizedUser);
+    navigate(roleHomePath(normalizedUser.role), { replace: true });
   };
 
   const handleLogout = () => {
@@ -83,7 +95,7 @@ function AppRoutes({ user, setUser }) {
         path="/admin/*"
         element={
           <ProtectedRoute allowedRoles={['ADMIN']}>
-            <AdminDashboard />
+            <AdminDashboard onLogout={handleLogout} />
           </ProtectedRoute>
         }
       >

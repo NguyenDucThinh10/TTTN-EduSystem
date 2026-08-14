@@ -2,14 +2,7 @@ import { Link, NavLink } from 'react-router-dom';
 import { navItems } from './homeContent';
 import './HomePages.css';
 
-const roleHomePath = (role) => {
-  if (role === 'ADMIN') return '/admin';
-  if (role === 'TEACHER') return '/teacher';
-  if (role === 'STUDENT') return '/student';
-  return '/login';
-};
-
-export default function HomeLayout({ children, user, onLogout }) {
+export default function HomeLayout({ children }) {
   return (
     <div className="home-shell">
       <header className="home-header">
@@ -31,20 +24,9 @@ export default function HomeLayout({ children, user, onLogout }) {
           ))}
         </nav>
 
-        {user ? (
-          <div className="home-actions">
-            <Link className="home-secondary-action" to={roleHomePath(user.role)}>
-              Vào hệ thống
-            </Link>
-            <button className="home-primary-action" onClick={onLogout} type="button">
-              Đăng xuất
-            </button>
-          </div>
-        ) : (
-          <Link className="home-primary-action" to="/login">
-            Đăng nhập
-          </Link>
-        )}
+        <Link className="home-primary-action" to="/login">
+          Đăng nhập
+        </Link>
       </header>
 
       {children}

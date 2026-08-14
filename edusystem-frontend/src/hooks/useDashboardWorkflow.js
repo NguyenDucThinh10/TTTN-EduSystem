@@ -8,7 +8,6 @@ const emptyAssignment = {
   description: '',
   dueDate: '',
   maxScore: 10,
-  weight: 1,
   fileUrl: '',
 };
 
@@ -168,7 +167,7 @@ export default function useDashboardWorkflow(user) {
       fileUrl: uploadedFileUrl,
       dueDate: toApiDate(form.dueDate),
       maxScore: Number(form.maxScore),
-      weight: Number(form.weight),
+      weight: 1,
     };
 
     if (editingId) {
@@ -194,7 +193,6 @@ export default function useDashboardWorkflow(user) {
       description: assignment.description || '',
       dueDate: assignment.dueDate ? assignment.dueDate.slice(0, 16) : '',
       maxScore: assignment.maxScore || 10,
-      weight: assignment.weight || 1,
       fileUrl: assignment.fileUrl || '',
     });
   };
