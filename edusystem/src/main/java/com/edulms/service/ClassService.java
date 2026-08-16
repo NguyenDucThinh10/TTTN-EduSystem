@@ -12,4 +12,5 @@ public interface ClassService {
     List<ClassResponse> getAllClasses();
     void enrollStudentsToClass(Long classId, List<Long> studentIds);
     String enrollStudentsFromExcel(Long classId, MultipartFile file);
+    List<com.edulms.dto.UserResponse> getStudentsByClass(Long classId);
 }

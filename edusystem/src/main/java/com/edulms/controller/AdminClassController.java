@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.edulms.dto.ClassRequest;
 import com.edulms.dto.ClassResponse;
+import com.edulms.dto.UserResponse;
 import com.edulms.service.ClassService;
 
 @RestController
@@ -64,4 +65,9 @@ public class AdminClassController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @GetMapping("/{id}/students")
+    public ResponseEntity<List<UserResponse>> getStudentsInClass(@PathVariable Long id) {
+        return ResponseEntity.ok(classService.getStudentsByClass(id));
+}
 }

@@ -7,7 +7,7 @@ export default function FileUpload({
     onUploadSuccess, 
     buttonText = "Tải file lên", 
     accept = "*", 
-    uploadUrl = '/api/files/upload' // Đã khai báo uploadUrl ở đây
+    uploadUrl = '/api/files/upload' 
 }) {
     const [uploading, setUploading] = useState(false);
 

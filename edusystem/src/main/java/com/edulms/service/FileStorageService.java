@@ -1,15 +1,15 @@
 package com.edulms.service;
 
-import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class FileStorageService {
@@ -52,5 +52,10 @@ public class FileStorageService {
         } catch (IOException ex) {
             throw new RuntimeException("Không thể lưu file " + originalFileName + ". Vui lòng thử lại!", ex);
         }
+    }
+
+    //  Hàm lấy đường dẫn vật lý của file để phục vụ việc Download
+    public Path getFilePath(String fileName) {
+        return this.fileStorageLocation.resolve(fileName).normalize();
     }
 }
