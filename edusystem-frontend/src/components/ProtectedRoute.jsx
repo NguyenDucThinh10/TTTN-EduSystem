@@ -3,8 +3,8 @@ import { Navigate, Outlet } from 'react-router-dom'; // BỔ SUNG: Import thêm 
 const normalizeRole = (role) => String(role || '').replace(/^ROLE_/, '').toUpperCase();
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
-    const token = localStorage.getItem('token');
-    const userRole = normalizeRole(localStorage.getItem('role'));
+    const token = sessionStorage.getItem('token');
+    const userRole = normalizeRole(sessionStorage.getItem('role'));
     const normalizedAllowedRoles = allowedRoles?.map(normalizeRole);
 
     // 1. Nếu chưa đăng nhập -> Chuyển hướng về trang Auth/Login

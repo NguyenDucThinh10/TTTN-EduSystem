@@ -85,12 +85,12 @@ export default function AuthPage({ onAuthenticated }) {
                 role,
             };
 
-            // Lưu thông tin vào localStorage
-            localStorage.setItem('token', token);
-            localStorage.setItem('role', role);
-            localStorage.setItem('username', username);
-            if (fullName) localStorage.setItem('fullName', fullName);
-            localStorage.setItem('user', JSON.stringify(user));
+            // Lưu thông tin vào sessionStorage để mỗi tab có auth riêng biệt
+            sessionStorage.setItem('token', token);
+            sessionStorage.setItem('role', role);
+            sessionStorage.setItem('username', username);
+            if (fullName) sessionStorage.setItem('fullName', fullName);
+            sessionStorage.setItem('user', JSON.stringify(user));
 
             // Điều hướng dựa trên quyền
             if (onAuthenticated) {

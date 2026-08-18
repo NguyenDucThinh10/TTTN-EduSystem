@@ -291,7 +291,16 @@ function AssignmentList({ assignments, selectedAssignmentId, onDeleteAssignment,
           <div className="assignment-actions">
             {assignment.fileUrl && <a href={fileHref(assignment.fileUrl)} target="_blank" rel="noreferrer">Tải đề</a>}
             {showActions && onStartEdit && <button type="button" onClick={() => onStartEdit(assignment)}>Sửa</button>}
-            {showActions && onDeleteAssignment && <button type="button" className="danger" onClick={() => onDeleteAssignment(assignment.id)}>Xóa</button>}
+            {showActions && onDeleteAssignment && (
+              <button
+                type="button"
+                className="danger"
+                title="Xóa bài tập"
+                onClick={() => onDeleteAssignment(assignment.id)}
+              >
+                Xóa
+              </button>
+            )}
           </div>
         </article>
       ))}

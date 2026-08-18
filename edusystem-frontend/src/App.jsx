@@ -18,11 +18,11 @@ import TeacherDashboardPage from './pages/teacher/TeacherDashboardPage';
 
 function readStoredUser() {
   try {
-    const token = localStorage.getItem('token');
-    const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
-    const role = normalizeRole(localStorage.getItem('role') || storedUser?.role);
-    const username = localStorage.getItem('username') || storedUser?.username;
-    const fullName = localStorage.getItem('fullName') || storedUser?.fullName;
+    const token = sessionStorage.getItem('token');
+    const storedUser = JSON.parse(sessionStorage.getItem('user') || 'null');
+    const role = normalizeRole(sessionStorage.getItem('role') || storedUser?.role);
+    const username = sessionStorage.getItem('username') || storedUser?.username;
+    const fullName = sessionStorage.getItem('fullName') || storedUser?.fullName;
 
     if (!token || !role) {
       clearStoredAuth();
@@ -30,10 +30,10 @@ function readStoredUser() {
     }
 
     const user = { ...storedUser, username, fullName, role };
-    localStorage.setItem('user', JSON.stringify(user));
-    localStorage.setItem('role', role);
-    if (username) localStorage.setItem('username', username);
-    if (fullName) localStorage.setItem('fullName', fullName);
+    sessionStorage.setItem('user', JSON.stringify(user));
+    sessionStorage.setItem('role', role);
+    if (username) sessionStorage.setItem('username', username);
+    if (fullName) sessionStorage.setItem('fullName', fullName);
     return user;
   } catch {
     return null;
@@ -43,19 +43,19 @@ function readStoredUser() {
 const normalizeRole = (role) => String(role || '').replace(/^ROLE_/, '').toUpperCase();
 
 const clearStoredAuth = () => {
-  localStorage.removeItem('token');
-  localStorage.removeItem('role');
-  localStorage.removeItem('username');
-  localStorage.removeItem('fullName');
-  localStorage.removeItem('user');
+  sessionStorage.removeItem('token');
+  sessionStorage.removeItem('role');
+  sessionStorage.removeItem('username');
+  sessionStorage.removeItem('fullName');
+  sessionStorage.removeItem('user');
 };
 
 const persistUser = (nextUser) => {
   const normalizedUser = { ...nextUser, role: normalizeRole(nextUser?.role) };
-  localStorage.setItem('user', JSON.stringify(normalizedUser));
-  localStorage.setItem('role', normalizedUser.role);
-  if (normalizedUser.username) localStorage.setItem('username', normalizedUser.username);
-  if (normalizedUser.fullName) localStorage.setItem('fullName', normalizedUser.fullName);
+  sessionStorage.setItem('user', JSON.stringify(normalizedUser));
+  sessionStorage.setItem('role', normalizedUser.role);
+  if (normalizedUser.username) sessionStorage.setItem('username', normalizedUser.username);
+  if (normalizedUser.fullName) sessionStorage.setItem('fullName', normalizedUser.fullName);
   return normalizedUser;
 };
 
@@ -84,7 +84,7 @@ function AppRoutes({ user, setUser }) {
 
   useEffect(() => {
     let active = true;
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
 
     if (!token || !isAuthenticated) return undefined;
 

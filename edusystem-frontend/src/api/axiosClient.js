@@ -9,7 +9,7 @@ const axiosClient = axios.create({
 
 axiosClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -35,11 +35,11 @@ axiosClient.interceptors.response.use(
       console.error("Token hết hạn hoặc không hợp lệ!");
       
       // [BỔ SUNG] Dọn sạch két sắt khi bị đá ra ngoài
-      localStorage.removeItem('token');
-      localStorage.removeItem('role');
-      localStorage.removeItem('user'); 
-      localStorage.removeItem('username'); 
-      localStorage.removeItem('fullName');
+      sessionStorage.removeItem('token');
+      sessionStorage.removeItem('role');
+      sessionStorage.removeItem('user'); 
+      sessionStorage.removeItem('username'); 
+      sessionStorage.removeItem('fullName');
       
       // [BẬT LÊN & SỬA ĐƯỜNG DẪN] Đá về đúng trang AuthPage của bạn
       window.location.href = '/auth'; 

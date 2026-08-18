@@ -230,6 +230,11 @@ textarea {
   color: #cf1322 !important;
 }
 
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .badge {
   width: fit-content;
   padding: 4px 10px;

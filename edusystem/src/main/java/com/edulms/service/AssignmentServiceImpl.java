@@ -3,6 +3,7 @@ package com.edulms.service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.edulms.dto.AssignmentDetailResponse;
 import com.edulms.dto.AssignmentResponse;
@@ -13,10 +14,12 @@ import com.edulms.entity.Assignment;
 import com.edulms.entity.ClassEntity;
 import com.edulms.entity.ClassStatus;
 import com.edulms.entity.Role;
+import com.edulms.entity.Submission;
 import com.edulms.entity.User;
 import com.edulms.repository.AssignmentRepository;
 import com.edulms.repository.ClassRepository;
 import com.edulms.repository.EnrollmentRepository;
+import com.edulms.repository.GradeRepository;
 import com.edulms.repository.SubmissionRepository;
 
 @Service
@@ -24,6 +27,7 @@ public class AssignmentServiceImpl implements AssignmentService {
     private final AssignmentRepository assignmentRepository;
     private final ClassRepository classRepository;
     private final EnrollmentRepository enrollmentRepository;
+    private final GradeRepository gradeRepository;
     private final SubmissionRepository submissionRepository;
     private final CurrentUserService currentUserService;
     private final AssignmentValidator assignmentValidator;
@@ -33,6 +37,7 @@ public class AssignmentServiceImpl implements AssignmentService {
             AssignmentRepository assignmentRepository,
             ClassRepository classRepository,
             EnrollmentRepository enrollmentRepository,
+            GradeRepository gradeRepository,
             SubmissionRepository submissionRepository,
             CurrentUserService currentUserService,
             AssignmentValidator assignmentValidator,
@@ -40,6 +45,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         this.assignmentRepository = assignmentRepository;
         this.classRepository = classRepository;
         this.enrollmentRepository = enrollmentRepository;
+        this.gradeRepository = gradeRepository;
         this.submissionRepository = submissionRepository;
         this.currentUserService = currentUserService;
         this.assignmentValidator = assignmentValidator;
@@ -117,10 +123,15 @@ public class AssignmentServiceImpl implements AssignmentService {
     }
 
     @Override
+    @Transactional
     public void deleteAssignment(Long assignmentId) {
         Assignment assignment = getAssignmentOrThrow(assignmentId);
         requireTeacherOfClass(assignment.getClassEntity());
         requireOpenClass(assignment.getClassEntity());
+        List<Submission> submissions = submissionRepository.findByAssignmentId(assignmentId);
+        submissions.forEach(submission ->
+                gradeRepository.findBySubmissionId(submission.getId()).ifPresent(gradeRepository::delete));
+        submissionRepository.deleteAll(submissions);
         assignmentRepository.delete(assignment);
     }
 
