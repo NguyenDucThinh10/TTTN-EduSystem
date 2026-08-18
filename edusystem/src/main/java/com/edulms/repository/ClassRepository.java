@@ -5,4 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.edulms.entity.ClassEntity;
 
 public interface ClassRepository extends JpaRepository<ClassEntity, Long> {
+    // Đếm lớp học theo Trạng thái (ONGOING)
+    long countByStatus(String status);
 }
