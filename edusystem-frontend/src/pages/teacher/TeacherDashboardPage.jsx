@@ -1,9 +1,11 @@
-import { useMemo, useState } from 'react';
-import { Avatar, Badge, Breadcrumb, Button, Dropdown, Layout, Menu, Space, theme } from 'antd';
+import { Fragment, useEffect, useMemo, useState } from 'react';
+import { Avatar, Badge, Breadcrumb, Button, Dropdown, Layout, Menu, Select, Space, theme, message } from 'antd';
 import {
   BarChartOutlined,
   BellOutlined,
   BookOutlined,
+  CalendarOutlined,
+  CheckSquareOutlined,
   DashboardOutlined,
   FileDoneOutlined,
   LogoutOutlined,
@@ -13,6 +15,7 @@ import {
   UserOutlined,
 } from '@ant-design/icons';
 import ClassSelectorPanel from '../../components/ClassSelectorPanel';
+import axiosClient from '../../api/axiosClient';
 import useDashboardWorkflow from '../../hooks/useDashboardWorkflow';
 import { fileHref, formatDate, score, statusLabel } from '../../utils/dashboardDisplay';
 import '../../styles/roleDashboard.css';
@@ -23,16 +26,41 @@ const { Header, Sider, Content, Footer } = Layout;
 const pageTitles = {
   overview: 'Tổng quan',
   classes: 'Lớp phụ trách',
+  schedule: 'Thời khóa biểu',
+  attendance: 'Điểm danh',
   assignments: 'Bài tập',
   submissions: 'Bài nộp',
   grading: 'Chấm điểm',
   analytics: 'Thống kê',
 };
 
+const weekDays = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ nhật'];
+
+const attendanceMeta = {
+  PRESENT: { label: 'Có mặt', short: 'C', className: 'present' },
+  ABSENT: { label: 'Vắng', short: 'V', className: 'absent' },
+  LATE: { label: 'Đi trễ', short: 'T', className: 'late' },
+  EXCUSED: { label: 'Có phép', short: 'P', className: 'excused' },
+  PENDING: { label: 'Chờ duyệt', short: '?', className: 'late' },
+};
+
+const dayLabels = {
+  MONDAY: 'Thứ 2',
+  TUESDAY: 'Thứ 3',
+  WEDNESDAY: 'Thứ 4',
+  THURSDAY: 'Thứ 5',
+  FRIDAY: 'Thứ 6',
+  SATURDAY: 'Thứ 7',
+  SUNDAY: 'Chủ nhật',
+};
+
 export default function TeacherDashboardPage({ user, onLogout }) {
   const workflow = useDashboardWorkflow(user);
   const [collapsed, setCollapsed] = useState(false);
   const [activeView, setActiveView] = useState('overview');
+  const [schedules, setSchedules] = useState([]);
+  const [attendanceRecords, setAttendanceRecords] = useState([]);
+  const [attendanceDate, setAttendanceDate] = useState(new Date().toISOString().slice(0, 10));
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
@@ -40,6 +68,8 @@ export default function TeacherDashboardPage({ user, onLogout }) {
   const menuItems = useMemo(() => [
     { key: 'overview', icon: <DashboardOutlined />, label: 'Tổng quan' },
     { key: 'classes', icon: <TeamOutlined />, label: 'Lớp phụ trách' },
+    { key: 'schedule', icon: <CalendarOutlined />, label: 'Thời khóa biểu' },
+    { key: 'attendance', icon: <CheckSquareOutlined />, label: 'Điểm danh' },
     { key: 'assignments', icon: <BookOutlined />, label: 'Bài tập' },
     { key: 'submissions', icon: <FileDoneOutlined />, label: 'Bài nộp' },
     { key: 'grading', icon: <FileDoneOutlined />, label: 'Chấm điểm' },
@@ -56,6 +86,40 @@ export default function TeacherDashboardPage({ user, onLogout }) {
   };
 
   const showClassSelector = activeView !== 'overview';
+
+  useEffect(() => {
+    axiosClient.get('/api/schedules/me')
+      .then((data) => setSchedules(Array.isArray(data) ? data : []))
+      .catch(() => message.error('Không thể tải thời khóa biểu'));
+  }, []);
+
+  useEffect(() => {
+    if (!workflow.selectedClassId) return;
+    axiosClient.get(`/api/attendance/classes/${workflow.selectedClassId}`)
+      .then((data) => setAttendanceRecords(Array.isArray(data) ? data : []))
+      .catch(() => {
+        if (activeView === 'attendance') message.error('Không thể tải dữ liệu điểm danh');
+      });
+  }, [activeView, workflow.selectedClassId]);
+
+  const onTeacherMarkAttendance = async (studentId, status) => {
+    try {
+      const saved = await axiosClient.post('/api/attendance/teacher', {
+        classId: workflow.selectedClassId,
+        studentId,
+        attendanceDate,
+        status,
+      });
+      setAttendanceRecords((records) => {
+        const next = records.filter((item) => item.id !== saved.id);
+        return [saved, ...next];
+      });
+      message.success('Đã lưu điểm danh');
+    } catch (error) {
+      console.error(error);
+      message.error(error.response?.data?.message || error.response?.data || 'Lưu điểm danh thất bại');
+    }
+  };
 
   return (
     <Layout className="role-dashboard">
@@ -107,6 +171,16 @@ export default function TeacherDashboardPage({ user, onLogout }) {
             {workflow.loading && <div className="loading-line">Đang tải dữ liệu...</div>}
             {activeView === 'overview' && <TeacherOverview workflow={workflow} />}
             {activeView === 'classes' && <TeacherClasses workflow={workflow} />}
+            {activeView === 'schedule' && <TeacherSchedule workflow={workflow} schedules={schedules} />}
+            {activeView === 'attendance' && (
+              <TeacherAttendance
+                workflow={workflow}
+                attendanceDate={attendanceDate}
+                attendanceRecords={attendanceRecords}
+                onAttendanceDateChange={setAttendanceDate}
+                onTeacherMarkAttendance={onTeacherMarkAttendance}
+              />
+            )}
             {activeView === 'assignments' && <TeacherAssignments workflow={workflow} />}
             {activeView === 'submissions' && <TeacherSubmissions workflow={workflow} />}
             {activeView === 'grading' && <TeacherGrading workflow={workflow} />}
@@ -179,6 +253,93 @@ function TeacherClasses({ workflow }) {
         </div>
       </section>
     </div>
+  );
+}
+
+function TeacherSchedule({ workflow, schedules }) {
+  const classes = workflow.classes.length ? workflow.classes.map((item) => item.name) : ['Toán 8', 'Toán 9', 'Toán 7'];
+  const visibleSchedule = schedules.filter((slot) => classes.includes(slot.className) || workflow.classes.length === 0);
+
+  return (
+    <section className="panel wide">
+      <div className="panel-heading">
+        <h2>Thời khóa biểu tuần</h2>
+        <span>{visibleSchedule.length} buổi dạy</span>
+      </div>
+      <div className="schedule-board">
+        <div className="schedule-head">Lớp</div>
+        {weekDays.map((day) => <div className="schedule-head" key={day}>{day}</div>)}
+        {classes.map((className) => (
+          <div className="schedule-row" key={className}>
+            <div className="schedule-class">{className}</div>
+            {weekDays.map((day) => {
+              const slots = visibleSchedule.filter((slot) => slot.className === className && dayLabels[slot.dayOfWeek] === day);
+              return (
+                <div className="schedule-cell" key={`${className}-${day}`}>
+                  {slots.map((slot) => (
+                    <article className="schedule-slot" key={slot.id}>
+                      <strong>{slot.startTime?.slice(0, 5)} - {slot.endTime?.slice(0, 5)}</strong>
+                      <span>{slot.subject || slot.courseTitle}</span>
+                      <span>{slot.room || 'Chưa có phòng'}</span>
+                    </article>
+                  ))}
+                </div>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function TeacherAttendance({ workflow, attendanceDate, attendanceRecords, onAttendanceDateChange, onTeacherMarkAttendance }) {
+  const className = workflow.selectedClass?.name || 'Toán 8';
+  const recordMap = new Map(attendanceRecords
+    .filter((item) => item.attendanceDate === attendanceDate)
+    .map((item) => [item.studentId, item]));
+
+  return (
+    <section className="panel wide">
+      <div className="panel-heading">
+        <h2>Bảng điểm danh</h2>
+        <span>{className}</span>
+      </div>
+      <div className="attendance-toolbar">
+        <input type="date" value={attendanceDate} onChange={(event) => onAttendanceDateChange(event.target.value)} />
+        <Button type="primary" icon={<CheckSquareOutlined />} onClick={() => workflow.classStudents.forEach((student) => onTeacherMarkAttendance(student.id, 'PRESENT'))}>
+          Điểm danh nhanh
+        </Button>
+        <span>{workflow.classStudents.length} học sinh</span>
+      </div>
+      <div className="attendance-grid" style={{ gridTemplateColumns: '220px 150px 1fr' }}>
+        <div className="attendance-head">Học sinh</div>
+        <div className="attendance-head center">Trạng thái</div>
+        <div className="attendance-head">Cập nhật</div>
+        {workflow.classStudents.map((student) => (
+          <Fragment key={student.id}>
+            <div className="attendance-name" key={`${student.id}-name`}>
+              <strong>{student.fullName || student.username}</strong>
+              <span>{student.username}</span>
+            </div>
+            <div className={`attendance-total center ${attendanceMeta[recordMap.get(student.id)?.status]?.className || ''}`}>
+              {attendanceMeta[recordMap.get(student.id)?.status]?.label || 'Chưa điểm danh'}
+            </div>
+            <Select
+              placeholder="Chọn trạng thái"
+              value={recordMap.get(student.id)?.status}
+              onChange={(status) => onTeacherMarkAttendance(student.id, status)}
+              options={Object.entries(attendanceMeta).map(([value, meta]) => ({ value, label: meta.label }))}
+            />
+          </Fragment>
+        ))}
+      </div>
+      <div className="attendance-legend">
+        {Object.values(attendanceMeta).map((item) => (
+          <span key={item.className}><i className={`attendance-dot ${item.className}`} />{item.label}</span>
+        ))}
+      </div>
+    </section>
   );
 }
 

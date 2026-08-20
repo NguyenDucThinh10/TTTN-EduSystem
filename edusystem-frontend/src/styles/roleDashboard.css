@@ -354,6 +354,198 @@ button:disabled {
   gap: 16px;
 }
 
+.schedule-board,
+.attendance-grid {
+  display: grid;
+  gap: 8px;
+  overflow-x: auto;
+}
+
+.schedule-board {
+  grid-template-columns: 150px repeat(7, minmax(150px, 1fr));
+  min-width: 1120px;
+}
+
+.schedule-row {
+  display: contents;
+}
+
+.schedule-head,
+.schedule-class,
+.schedule-cell,
+.attendance-head,
+.attendance-name,
+.attendance-total {
+  min-height: 44px;
+  padding: 10px;
+  border: 1px solid #edf0f5;
+  border-radius: 6px;
+  background: #fbfcfe;
+}
+
+.schedule-head,
+.attendance-head,
+.attendance-total {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.schedule-class,
+.attendance-name {
+  display: grid;
+  align-content: center;
+  gap: 2px;
+  font-weight: 700;
+}
+
+.attendance-name span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.schedule-cell {
+  min-height: 86px;
+  background: #ffffff;
+}
+
+.schedule-slot {
+  display: grid;
+  gap: 3px;
+  padding: 10px;
+  border: 1px solid #ffe7ba;
+  border-radius: 6px;
+  background: #fffdf4;
+  color: #1f2937;
+  font-size: 13px;
+}
+
+.schedule-slot + .schedule-slot {
+  margin-top: 8px;
+}
+
+.schedule-slot span {
+  color: #64748b;
+}
+
+.attendance-toolbar,
+.attendance-legend {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.attendance-grid {
+  min-width: 720px;
+}
+
+.center {
+  text-align: center;
+}
+
+.attendance-mark {
+  min-height: 38px;
+  border: 0;
+  border-radius: 6px;
+  color: #ffffff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.attendance-mark.present,
+.attendance-dot.present,
+.attendance-pill.present {
+  background: #22c55e;
+}
+
+.attendance-mark.absent,
+.attendance-dot.absent,
+.attendance-pill.absent {
+  background: #ef4444;
+}
+
+.attendance-mark.late,
+.attendance-dot.late,
+.attendance-pill.late {
+  background: #f59e0b;
+}
+
+.attendance-mark.excused,
+.attendance-dot.excused,
+.attendance-pill.excused {
+  background: #3b82f6;
+}
+
+.attendance-dot {
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+  margin-right: 6px;
+  border-radius: 999px;
+}
+
+.attendance-legend span {
+  display: inline-flex;
+  align-items: center;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.attendance-pill {
+  width: fit-content;
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: #ffffff !important;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.student-schedule-list {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(170px, 1fr));
+  gap: 12px;
+  overflow-x: auto;
+}
+
+.student-day-card {
+  display: grid;
+  gap: 12px;
+  min-height: 170px;
+  padding: 12px;
+  border: 1px solid #edf0f5;
+  border-radius: 8px;
+  background: #fbfcfe;
+}
+
+.student-day-title {
+  display: grid;
+  gap: 2px;
+}
+
+.student-day-title span {
+  color: #64748b;
+}
+
+.student-day-lessons {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+}
+
+.attendance-history article {
+  position: relative;
+  padding-right: 120px;
+}
+
+.attendance-history .attendance-pill {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+}
+
 @media (max-width: 960px) {
   .role-header {
     padding-right: 12px;
@@ -380,6 +572,7 @@ button:disabled {
   .student-grid,
   .analytics-columns,
   .metrics,
+  .student-schedule-list,
   .overview-stats,
   .form-row {
     grid-template-columns: 1fr;

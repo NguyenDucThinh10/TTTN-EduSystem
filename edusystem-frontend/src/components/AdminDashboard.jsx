@@ -4,6 +4,7 @@ import { Avatar, Badge, Breadcrumb, Button, Dropdown, Layout, Menu, Space, theme
 import {
     BellOutlined,
     BookOutlined,
+    CalendarOutlined,
     DashboardOutlined,
     LogoutOutlined,
     MenuFoldOutlined,
@@ -20,6 +21,7 @@ const breadcrumbMap = {
     '/admin/users': 'Quản lý Tài khoản',
     '/admin/courses': 'Quản lý Học phần',
     '/admin/classes': 'Quản lý Lớp học',
+    '/admin/schedules': 'Quản lý thời khóa biểu',
 };
 
 export default function AdminDashboard({ onLogout }) {
@@ -58,6 +60,7 @@ export default function AdminDashboard({ onLogout }) {
         { key: '/admin/users', icon: <UserOutlined />, label: 'Quản lý Tài khoản', onClick: () => navigate('/admin/users') },
         { key: '/admin/courses', icon: <ReadOutlined />, label: 'Quản lý Học phần', onClick: () => navigate('/admin/courses') },
         { key: '/admin/classes', icon: <BookOutlined />, label: 'Quản lý Lớp học', onClick: () => navigate('/admin/classes') },
+        { key: '/admin/schedules', icon: <CalendarOutlined />, label: 'Quản lý thời khóa biểu', onClick: () => navigate('/admin/schedules') },
     ];
 
     return (
