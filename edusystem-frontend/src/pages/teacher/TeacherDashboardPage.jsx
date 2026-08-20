@@ -11,10 +11,12 @@ import {
   LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
+  ReloadOutlined,
   TeamOutlined,
   UserOutlined,
 } from '@ant-design/icons';
 import ClassSelectorPanel from '../../components/ClassSelectorPanel';
+import { TeacherDashboardOverview } from '../../components/DashboardOverview';
 import axiosClient from '../../api/axiosClient';
 import useDashboardWorkflow from '../../hooks/useDashboardWorkflow';
 import { fileHref, formatDate, score, statusLabel } from '../../utils/dashboardDisplay';
@@ -153,7 +155,7 @@ export default function TeacherDashboardPage({ user, onLogout }) {
           <div className="role-titlebar">
             <h1>{pageTitles[activeView]}</h1>
             <Space>
-              <Button onClick={workflow.onRefresh} loading={workflow.loading}>Làm mới</Button>
+              <Button type="text" shape="circle" icon={<ReloadOutlined />} title="Làm mới" aria-label="Làm mới" onClick={workflow.onRefresh} loading={workflow.loading} />
               <Breadcrumb items={[{ title: 'Teacher' }, { title: pageTitles[activeView] }]} />
             </Space>
           </div>
@@ -195,27 +197,13 @@ export default function TeacherDashboardPage({ user, onLogout }) {
 }
 
 function TeacherOverview({ workflow }) {
-  const pendingCount = workflow.assignmentDetail?.submissions?.filter((row) => row.submission && row.submission.status !== 'GRADED').length ?? 0;
-
-  return (
-    <section className="overview-panel">
-      <p>Chào mừng đến trang giảng viên EduSystem.</p>
-      <div className="overview-stats">
-        <div><strong>{workflow.classes.length}</strong><span>Lớp phụ trách</span></div>
-        <div><strong>{workflow.classStudents.length}</strong><span>Sinh viên lớp đang chọn</span></div>
-        <div><strong>{workflow.assignments.length}</strong><span>Bài tập lớp đang chọn</span></div>
-        <div><strong>{pendingCount}</strong><span>Bài nộp chưa chấm</span></div>
-        <div><strong>{workflow.dashboard?.submissionCount ?? '-'}</strong><span>Tổng bài nộp</span></div>
-        <div><strong>{score(workflow.classAnalytics?.classAverage)}</strong><span>Điểm TB lớp</span></div>
-      </div>
-    </section>
-  );
+  return <TeacherDashboardOverview workflow={workflow} />;
 }
 
 function TeacherClasses({ workflow }) {
   return (
     <div className="workspace-grid teacher-grid">
-      <section className="panel">
+      <section className="panel feature-classes">
         <div className="panel-heading">
           <h2>Danh sách lớp phụ trách</h2>
           <span>{workflow.classes.length} lớp</span>
@@ -233,12 +221,12 @@ function TeacherClasses({ workflow }) {
         </div>
       </section>
 
-      <section className="panel">
+      <section className="panel feature-students">
         <div className="panel-heading">
           <h2>Sinh viên trong lớp</h2>
           <span>{workflow.selectedClass?.name || 'Chọn lớp'}</span>
         </div>
-        <div className="submission-table">
+        <div className="submission-table student-roster-table">
           <div className="table-head"><span>Mã SV</span><span>Họ tên</span><span>Email</span><span>Trạng thái</span><span></span></div>
           {workflow.classStudents.map((student) => (
             <div className="table-row" key={student.id}>
@@ -261,7 +249,7 @@ function TeacherSchedule({ workflow, schedules }) {
   const visibleSchedule = schedules.filter((slot) => classes.includes(slot.className) || workflow.classes.length === 0);
 
   return (
-    <section className="panel wide">
+    <section className="panel wide feature-schedule">
       <div className="panel-heading">
         <h2>Thời khóa biểu tuần</h2>
         <span>{visibleSchedule.length} buổi dạy</span>
@@ -300,7 +288,7 @@ function TeacherAttendance({ workflow, attendanceDate, attendanceRecords, onAtte
     .map((item) => [item.studentId, item]));
 
   return (
-    <section className="panel wide">
+    <section className="panel wide feature-attendance">
       <div className="panel-heading">
         <h2>Bảng điểm danh</h2>
         <span>{className}</span>
@@ -362,7 +350,7 @@ function TeacherAssignments({ workflow }) {
 
   return (
     <div className="workspace-grid teacher-grid">
-      <section className="panel">
+      <section className="panel feature-assignment-create">
         <div className="panel-heading">
           <h2>{editingId ? 'Sửa bài tập' : 'Tạo bài tập'}</h2>
           {editingId && <button type="button" className="ghost-button" onClick={onCancelEdit}>Hủy sửa</button>}
@@ -381,7 +369,7 @@ function TeacherAssignments({ workflow }) {
         </form>
       </section>
 
-      <section className="panel">
+      <section className="panel feature-assignments">
         <div className="panel-heading"><h2>Danh sách bài tập</h2><span>{assignments.length} bài</span></div>
         <AssignmentList
           assignments={assignments}
@@ -399,7 +387,7 @@ function TeacherAssignments({ workflow }) {
 function TeacherSubmissions({ workflow }) {
   return (
     <div className="workspace-grid teacher-grid submissions-view">
-      <section className="panel">
+      <section className="panel feature-assignments">
         <div className="panel-heading"><h2>Bài tập</h2><span>{workflow.assignments.length} bài</span></div>
         <AssignmentList
           assignments={workflow.assignments}
@@ -407,7 +395,7 @@ function TeacherSubmissions({ workflow }) {
           onSelectAssignment={workflow.onSelectAssignment}
         />
       </section>
-      <section className="panel">
+      <section className="panel feature-submissions">
         <div className="panel-heading">
           <h2>Danh sách bài nộp</h2>
           <span>{workflow.assignmentDetail?.assignment?.title || 'Chọn bài tập'}</span>
@@ -421,7 +409,7 @@ function TeacherSubmissions({ workflow }) {
 function TeacherGrading({ workflow }) {
   return (
     <div className="workspace-grid teacher-grid submissions-view">
-      <section className="panel">
+      <section className="panel feature-assignments">
         <div className="panel-heading"><h2>Bài tập</h2><span>{workflow.assignments.length} bài</span></div>
         <AssignmentList
           assignments={workflow.assignments}
@@ -429,7 +417,7 @@ function TeacherGrading({ workflow }) {
           onSelectAssignment={workflow.onSelectAssignment}
         />
       </section>
-      <section className="panel">
+      <section className="panel feature-grading">
         <div className="panel-heading">
           <h2>Chấm điểm</h2>
           <span>{workflow.assignmentDetail?.assignment?.title || 'Chọn bài tập'}</span>
@@ -521,7 +509,7 @@ function SubmissionGradingTable({ workflow }) {
 
 function AnalyticsPanel({ classAnalytics, dashboard }) {
   return (
-    <section className="panel wide">
+    <section className="panel wide feature-analytics">
       <div className="panel-heading">
         <h2>Thống kê</h2>
         <span>{classAnalytics?.className || 'Lớp học'}</span>
@@ -535,7 +523,7 @@ function AnalyticsPanel({ classAnalytics, dashboard }) {
       <div className="analytics-columns">
         <div>
           <h3>Tiến độ sinh viên</h3>
-          <div className="compact-list">
+          <div className="compact-list analytics-student-list">
             {classAnalytics?.studentProgress?.map((item) => (
               <article key={item.studentId}>
                 <strong>{item.studentName}</strong>
@@ -546,7 +534,7 @@ function AnalyticsPanel({ classAnalytics, dashboard }) {
         </div>
         <div>
           <h3>Thống kê bài tập</h3>
-          <div className="compact-list">
+          <div className="compact-list analytics-assignment-list">
             {classAnalytics?.assignmentStatistics?.map((item) => (
               <article key={item.assignmentId}>
                 <strong>{item.assignmentTitle}</strong>

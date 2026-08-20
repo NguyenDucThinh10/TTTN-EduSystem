@@ -1,26 +1,43 @@
+import { useMemo, useState } from 'react';
 import HomeLayout from './HomeLayout';
 import { featuredCourses } from './homeContent';
 
+const allFilter = 'Tất cả';
+const courseFilters = [allFilter, 'AI', 'Web', 'App', 'Dữ liệu', 'Bảo mật'];
+
 export default function CoursesPage({ user, onLogout }) {
+  const [activeFilter, setActiveFilter] = useState(allFilter);
+  const visibleCourses = useMemo(() => {
+    if (activeFilter === allFilter) return featuredCourses;
+    return featuredCourses.filter((course) => course.category === activeFilter);
+  }, [activeFilter]);
+
   return (
     <HomeLayout user={user} onLogout={onLogout}>
       <main>
         <section className="home-page-hero courses">
           <p className="home-eyebrow">Danh mục đào tạo</p>
-          <h1>Khóa học Công nghệ thông tin</h1>
-          <p>Các học phần mẫu được tổ chức theo hướng thực hành, có thông tin thời lượng, cấp độ và nội dung trọng tâm.</p>
+          <h1>Ngành Công nghệ thông tin</h1>
+          <p>Các học phần mẫu được tổ chức theo chuyên ngành AI, Web, App, Dữ liệu và Bảo mật, có thông tin thời lượng, cấp độ và nội dung trọng tâm.</p>
         </section>
 
         <section className="home-section">
-          <div className="home-toolbar">
-            <button type="button">Tất cả</button>
-            <button type="button">Lập trình</button>
-            <button type="button">Dữ liệu</button>
-            <button type="button">Bảo mật</button>
+          <div className="home-toolbar" role="tablist" aria-label="Lọc học phần theo chuyên ngành">
+            {courseFilters.map((filter) => (
+              <button
+                type="button"
+                key={filter}
+                className={activeFilter === filter ? 'active' : ''}
+                onClick={() => setActiveFilter(filter)}
+                aria-pressed={activeFilter === filter}
+              >
+                {filter}
+              </button>
+            ))}
           </div>
 
           <div className="home-card-grid courses">
-            {featuredCourses.map((course) => (
+            {visibleCourses.map((course) => (
               <article className="home-course-card" key={course.title}>
                 <img alt={course.title} src={course.image} />
                 <div>

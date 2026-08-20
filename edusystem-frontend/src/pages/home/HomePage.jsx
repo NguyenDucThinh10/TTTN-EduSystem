@@ -1,10 +1,9 @@
 import { Link } from 'react-router-dom';
-import heroImage from '../../assets/hero.png';
 import HomeLayout from './HomeLayout';
 import { featuredCourses, latestNews } from './homeContent';
 
 const stats = [
-  { value: '5+', label: 'học phần nổi bật' },
+  { value: '12+', label: 'học phần nổi bật' },
   { value: '24/7', label: 'truy cập học liệu' },
   { value: '100%', label: 'theo dõi tiến độ' },
 ];
@@ -26,7 +25,7 @@ export default function HomePage({ user, onLogout }) {
   return (
     <HomeLayout user={user} onLogout={onLogout}>
       <main>
-        <section className="home-hero" style={{ backgroundImage: `linear-gradient(90deg, rgba(9, 30, 66, 0.86), rgba(9, 30, 66, 0.42)), url(${heroImage})` }}>
+        <section className="home-hero">
           <div className="home-hero-content">
             <p className="home-eyebrow">EduLMS Portal</p>
             <h1>Hệ thống quản lý học tập hiện đại cho nhà trường</h1>
@@ -38,7 +37,7 @@ export default function HomePage({ user, onLogout }) {
                 Bắt đầu sử dụng
               </Link>
               <Link className="home-secondary-action large" to="/khoa-hoc">
-                Xem khóa học
+                Xem học phần
               </Link>
             </div>
           </div>
@@ -75,7 +74,7 @@ export default function HomePage({ user, onLogout }) {
           <div className="home-section-heading">
             <div>
               <p className="home-eyebrow">Học phần nổi bật</p>
-              <h2>Khóa học đang mở</h2>
+              <h2>Học phần đang mở</h2>
             </div>
             <Link to="/khoa-hoc">Xem tất cả</Link>
           </div>

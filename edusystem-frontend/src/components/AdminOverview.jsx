@@ -1,27 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Alert, Card, Col, Row, Statistic } from 'antd';
-import {
-    AuditOutlined,
-    BookOutlined,
-    CheckCircleOutlined,
-    FileDoneOutlined,
-    ReadOutlined,
-    SolutionOutlined,
-    TeamOutlined,
-    UserOutlined,
-} from '@ant-design/icons';
+import { Alert, Spin } from 'antd';
 import axiosClient from '../api/axiosClient';
-
-const stats = [
-    { key: 'totalUsers', title: 'Tổng tài khoản', icon: <UserOutlined /> },
-    { key: 'totalStudents', title: 'Sinh viên', icon: <TeamOutlined /> },
-    { key: 'totalTeachers', title: 'Giảng viên', icon: <SolutionOutlined /> },
-    { key: 'totalCourses', title: 'Học phần', icon: <ReadOutlined /> },
-    { key: 'totalClasses', title: 'Lớp học', icon: <BookOutlined /> },
-    { key: 'totalAssignments', title: 'Bài tập', icon: <AuditOutlined /> },
-    { key: 'totalSubmissions', title: 'Bài nộp', icon: <FileDoneOutlined /> },
-    { key: 'totalGradedSubmissions', title: 'Đã chấm', icon: <CheckCircleOutlined /> },
-];
+import { AdminDashboardOverview } from './DashboardOverview';
+import '../styles/roleDashboard.css';
 
 export default function AdminOverview() {
     const [dashboard, setDashboard] = useState({});
@@ -46,23 +27,6 @@ export default function AdminOverview() {
         loadDashboard();
     }, []);
 
-    return (
-        <div>
-            {error && <Alert type="error" message={error} showIcon style={{ marginBottom: 16 }} />}
-            <Row gutter={[16, 16]}>
-                {stats.map((item) => (
-                    <Col xs={24} sm={12} lg={6} key={item.key}>
-                        <Card loading={loading} bordered>
-                            <Statistic
-                                title={item.title}
-                                value={dashboard[item.key] ?? 0}
-                                prefix={item.icon}
-                                valueStyle={{ color: '#1677ff', fontWeight: 700 }}
-                            />
-                        </Card>
-                    </Col>
-                ))}
-            </Row>
-        </div>
-    );
+    if (loading && !Object.keys(dashboard).length) return <div className="dashboard-loading"><Spin size="large" /></div>;
+    return <div>{error && <Alert type="error" message={error} showIcon style={{ marginBottom: 16 }} />}<AdminDashboardOverview dashboard={dashboard} /></div>;
 }

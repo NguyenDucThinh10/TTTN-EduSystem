@@ -11,10 +11,12 @@ import {
   LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
+  ReloadOutlined,
   ReadOutlined,
   UserOutlined,
 } from '@ant-design/icons';
 import ClassSelectorPanel from '../../components/ClassSelectorPanel';
+import { StudentDashboardOverview } from '../../components/DashboardOverview';
 import axiosClient from '../../api/axiosClient';
 import useDashboardWorkflow from '../../hooks/useDashboardWorkflow';
 import { fileHref, formatDate, score, statusLabel } from '../../utils/dashboardDisplay';
@@ -151,7 +153,7 @@ export default function StudentDashboardPage({ user, onLogout }) {
           <div className="role-titlebar">
             <h1>{pageTitles[activeView]}</h1>
             <Space>
-              <Button onClick={workflow.onRefresh} loading={workflow.loading}>Làm mới</Button>
+              <Button type="text" shape="circle" icon={<ReloadOutlined />} title="Làm mới" aria-label="Làm mới" onClick={workflow.onRefresh} loading={workflow.loading} />
               <Breadcrumb items={[{ title: 'Student' }, { title: pageTitles[activeView] }]} />
             </Space>
           </div>
@@ -193,26 +195,12 @@ export default function StudentDashboardPage({ user, onLogout }) {
 }
 
 function StudentOverview({ workflow }) {
-  const submittedIds = new Set(workflow.mySubmissions.map((item) => item.assignmentId));
-  const missingCount = workflow.assignments.filter((item) => !submittedIds.has(item.id)).length;
-
-  return (
-    <section className="overview-panel">
-      <p>Chào mừng đến trang sinh viên EduSystem.</p>
-      <div className="overview-stats">
-        <div><strong>{workflow.classes.length}</strong><span>Lớp đã đăng ký</span></div>
-        <div><strong>{workflow.assignments.length}</strong><span>Bài tập lớp đang chọn</span></div>
-        <div><strong>{workflow.mySubmissions.length}</strong><span>Bài đã nộp</span></div>
-        <div><strong>{missingCount}</strong><span>Bài chưa nộp</span></div>
-        <div><strong>{score(workflow.studentGrades?.averageScore)}</strong><span>Điểm trung bình</span></div>
-      </div>
-    </section>
-  );
+  return <StudentDashboardOverview workflow={workflow} />;
 }
 
 function CourseRegistration({ workflow }) {
   return (
-    <section className="panel wide">
+    <section className="panel wide feature-registration">
       <div className="panel-heading">
         <h2>Học phần đang mở</h2>
         <span>{workflow.openClasses.length} lớp</span>
@@ -227,9 +215,11 @@ function CourseRegistration({ workflow }) {
             </div>
             <div className="submit-box">
               <span className={`badge ${classItem.enrolled ? 'GRADED' : ''}`}>{classItem.enrolled ? 'Đã đăng ký' : statusLabel(classItem.status)}</span>
-              <button type="button" onClick={() => workflow.onRegisterClass(classItem.id)} disabled={classItem.enrolled}>
-                {classItem.enrolled ? 'Đã đăng ký' : 'Đăng ký'}
-              </button>
+              {classItem.enrolled ? (
+                <button type="button" className="danger" onClick={() => workflow.onCancelRegistration(classItem.id)}>Hủy đăng ký</button>
+              ) : (
+                <button type="button" onClick={() => workflow.onRegisterClass(classItem.id)}>Đăng ký</button>
+              )}
             </div>
           </article>
         ))}
@@ -241,7 +231,7 @@ function CourseRegistration({ workflow }) {
 
 function MyClasses({ workflow }) {
   return (
-    <section className="panel wide">
+    <section className="panel wide feature-classes">
       <div className="panel-heading">
         <h2>Lớp của tôi</h2>
         <span>{workflow.classes.length} lớp</span>
@@ -256,8 +246,6 @@ function MyClasses({ workflow }) {
             </div>
             <div className="submit-box">
               <span className="badge GRADED">Đã đăng ký</span>
-              <button type="button" onClick={() => workflow.setSelectedClassId(classItem.id)}>Chọn lớp</button>
-              <button type="button" className="danger" onClick={() => workflow.onCancelRegistration(classItem.id)}>Hủy đăng ký</button>
             </div>
           </article>
         ))}
@@ -266,12 +254,11 @@ function MyClasses({ workflow }) {
     </section>
   );
 }
-
 function StudentSchedule({ schedules }) {
   const days = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ nhật'];
 
   return (
-    <section className="panel wide">
+    <section className="panel wide feature-schedule">
       <div className="panel-heading">
         <h2>Lịch học tuần này</h2>
         <span>{schedules.length} buổi học</span>
@@ -308,7 +295,7 @@ function StudentAttendance({ workflow, attendanceDate, attendanceRecords, onAtte
   const rate = attendanceRecords.length ? Math.round((attendedCount / attendanceRecords.length) * 100) : 0;
 
   return (
-    <section className="panel wide">
+    <section className="panel wide feature-attendance">
       <div className="panel-heading">
         <h2>Chuyên cần của tôi</h2>
         <span>{rate}% tham gia</span>
@@ -316,7 +303,7 @@ function StudentAttendance({ workflow, attendanceDate, attendanceRecords, onAtte
       <div className="attendance-toolbar">
         <input type="date" value={attendanceDate} onChange={(event) => onAttendanceDateChange(event.target.value)} />
         <Button type="primary" icon={<CheckSquareOutlined />} onClick={onSelfSubmitAttendance} disabled={!workflow.selectedClassId}>
-          Tự nộp điểm danh
+          Điểm danh
         </Button>
       </div>
       <div className="metrics attendance-summary">
@@ -358,7 +345,7 @@ function StudentAssignments({ workflow }) {
   const classClosed = selectedClass?.status === 'COMPLETED';
 
   return (
-    <section className="panel wide">
+    <section className="panel wide feature-assignments">
       <div className="panel-heading"><h2>Bài tập của lớp</h2><span>{selectedClass?.name || ''}</span></div>
       <div className="student-assignment-list">
         {assignments.map((assignment) => {
@@ -404,7 +391,7 @@ function StudentAssignments({ workflow }) {
 
 function StudentSubmissions({ workflow }) {
   return (
-    <section className="panel wide">
+    <section className="panel wide feature-submissions">
       <div className="panel-heading"><h2>Bài đã nộp</h2><span>{workflow.mySubmissions.length} bài</span></div>
       <div className="compact-list">
         {workflow.mySubmissions.map((submission) => (
@@ -423,7 +410,7 @@ function StudentSubmissions({ workflow }) {
 
 function StudentGrades({ workflow }) {
   return (
-    <section className="panel wide">
+    <section className="panel wide feature-grades">
       <div className="panel-heading"><h2>Điểm của tôi</h2><span>TB {score(workflow.studentGrades?.averageScore)}</span></div>
       <div className="compact-list">
         {workflow.studentGrades?.grades?.map((grade) => (

@@ -11,13 +11,46 @@
   gap: 10px;
   max-height: 460px;
   overflow: auto;
+  padding-right: 4px;
 }
 
 .assignment-item,
 .compact-list article {
-  border: 1px solid #edf0f5;
+  border: 1px solid #e7edf6;
   border-radius: 8px;
-  background: #fbfcfe;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfcfe 100%);
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
+  position: relative;
+  overflow: hidden;
+  transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.assignment-item::before,
+.compact-list article::before {
+  content: '';
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  border-radius: 8px;
+  background-color: #fef3c7;
+  color: #d97706;
+}
+
+.assignment-item::after,
+.compact-list article::after {
+  content: '';
+  width: 14px;
+  height: 18px;
+  position: absolute;
+  top: 20px;
+  right: 22px;
+  border: 2px solid currentColor;
+  border-radius: 2px;
+  box-shadow: inset 4px 0 0 rgba(217, 119, 6, 0.14);
 }
 
 .assignment-item {
@@ -25,12 +58,28 @@
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: 12px;
-  padding: 12px;
+  padding: 12px 58px 12px 12px;
+}
+
+.assignment-item:hover,
+.compact-list article:hover {
+  border-color: #bfdbfe;
+  box-shadow: 0 14px 30px rgba(37, 99, 235, 0.08);
+  transform: translateY(-1px);
 }
 
 .assignment-item.selected {
   border-color: #1677ff;
-  background: #f0f7ff;
+  background: linear-gradient(180deg, #eff6ff 0%, #ffffff 100%);
+}
+
+.assignment-item.selected::before {
+  background-color: #dbeafe;
+  color: #2563eb;
+}
+
+.assignment-item.selected::after {
+  box-shadow: inset 4px 0 0 rgba(37, 99, 235, 0.14);
 }
 
 .assignment-main {
@@ -48,6 +97,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  color: #172033;
 }
 
 .assignment-actions,
@@ -64,6 +114,10 @@
   overflow-x: auto;
 }
 
+.student-roster-table {
+  overflow-x: visible;
+}
+
 .table-head,
 .table-row {
   display: grid;
@@ -73,6 +127,24 @@
   min-width: 820px;
 }
 
+.student-roster-table .table-head,
+.student-roster-table .table-row {
+  grid-template-columns: minmax(110px, 0.8fr) minmax(150px, 1fr) minmax(220px, 1.4fr) minmax(110px, 0.7fr) 0;
+  min-width: 0;
+}
+
+.student-roster-table .table-head span,
+.student-roster-table .table-row span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.student-roster-table .badge {
+  max-width: fit-content;
+}
+
 .table-head {
   color: #64748b;
   font-size: 13px;
@@ -80,14 +152,66 @@
 }
 
 .table-row {
-  padding: 10px 0;
-  border-top: 1px solid #edf0f5;
+  padding: 12px;
+  border: 1px solid #edf0f5;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.035);
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.table-row:hover {
+  border-color: #ddd6fe;
+  box-shadow: 0 10px 24px rgba(124, 58, 237, 0.08);
 }
 
 .compact-list article {
   display: grid;
   gap: 4px;
-  padding: 12px;
+  padding: 12px 58px 12px 12px;
+}
+
+.compact-list article:nth-child(3n + 1)::before {
+  background-color: #dbeafe;
+  color: #2563eb;
+}
+
+.compact-list article:nth-child(3n + 1)::after {
+  width: 17px;
+  height: 12px;
+  top: 22px;
+  right: 20px;
+  border-radius: 9px 9px 3px 3px;
+  box-shadow: 7px -7px 0 -5px currentColor, -7px -7px 0 -5px currentColor;
+}
+
+.compact-list article:nth-child(3n + 2)::before {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.compact-list article:nth-child(3n + 2)::after {
+  width: 17px;
+  height: 12px;
+  top: 22px;
+  right: 20px;
+  border-radius: 9px 9px 3px 3px;
+  box-shadow: 7px -7px 0 -5px currentColor, -7px -7px 0 -5px currentColor;
+}
+
+.compact-list article:nth-child(3n)::before {
+  background-color: #ede9fe;
+  color: #7c3aed;
+}
+
+.compact-list article:nth-child(3n)::after {
+  width: 18px;
+  height: 16px;
+  top: 20px;
+  right: 20px;
+  border-width: 0 0 2px 2px;
+  border-radius: 0;
+  box-shadow: 5px -4px 0 -3px currentColor, 10px -8px 0 -3px currentColor, 15px -12px 0 -3px currentColor;
 }
 
 .compact-list article button {
@@ -101,10 +225,94 @@
   color: #1677ff;
   font-weight: 700;
   cursor: pointer;
+  transition: background 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.analytics-columns h3 {
+  margin: 0 0 10px;
+  color: #172033;
+  font-size: 15px;
+}
+
+.teacher-grid .panel:first-child {
+  position: sticky;
+  top: 16px;
 }
 
 @media (max-width: 960px) {
   .assignment-item {
     grid-template-columns: 1fr;
   }
+
+  .teacher-grid .panel:first-child {
+    position: static;
+  }
+}
+
+.assignment-item::before,
+.compact-list article::before {
+  width: 42px;
+  height: 42px;
+  background-color: transparent;
+  background-image: var(--edu-card-icon, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none'%3E%3Cpath d='M13 47c7-6 15-6 23 0V17c-8-5-16-5-23 0v30Z' stroke='%233f5fad' stroke-width='4' stroke-linejoin='round'/%3E%3Cpath d='M36 47c6-6 11-6 16-2V15c-5-4-10-3-16 2v30Z' stroke='%233f5fad' stroke-width='4' stroke-linejoin='round'/%3E%3Cpath d='M31 39l8-18 5 2-8 18-6 4 1-6Z' fill='%23f15f3f'/%3E%3C/svg%3E"));
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 42px 42px;
+}
+
+.assignment-item::after,
+.compact-list article::after {
+  display: none;
+}
+
+.assignment-item.selected {
+  --edu-card-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none'%3E%3Crect x='15' y='15' width='34' height='34' rx='6' stroke='%232563eb' stroke-width='4'/%3E%3Cpath d='M23 33l7 7 14-18' stroke='%232563eb' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.compact-list article:nth-child(3n + 1),
+.compact-list article:nth-child(3n + 2) {
+  --edu-card-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none'%3E%3Ccircle cx='32' cy='19' r='8' stroke='%23d79b61' stroke-width='4'/%3E%3Cpath d='M20 46c2-10 7-16 12-16s10 6 12 16' stroke='%23d79b61' stroke-width='4' stroke-linecap='round'/%3E%3Ccircle cx='17' cy='29' r='6' stroke='%23d79b61' stroke-width='3'/%3E%3Ccircle cx='47' cy='29' r='6' stroke='%23d79b61' stroke-width='3'/%3E%3C/svg%3E");
+}
+
+.compact-list article:nth-child(3n) {
+  --edu-card-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64' fill='none'%3E%3Cpath d='M12 51h41' stroke='%230f4c81' stroke-width='4' stroke-linecap='round'/%3E%3Crect x='17' y='30' width='8' height='18' rx='3' fill='%2357c7a5'/%3E%3Crect x='29' y='21' width='8' height='27' rx='3' fill='%23f5c35d'/%3E%3Crect x='41' y='13' width='8' height='35' rx='3' fill='%23c24daf'/%3E%3C/svg%3E");
+}
+
+.assignment-item::before,
+.compact-list article::before {
+  background-size: 42px 42px;
+  background-image: var(--edu-card-icon, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%2356b083'/%3E%3Cpath d='M18 20h14c4 0 7 3 7 7v22H25c-4 0-7-3-7-7V20Z' fill='%23f6f1dd'/%3E%3Cpath d='M39 27c0-4 3-7 7-7h3v29H39V27Z' fill='%23f6f1dd'/%3E%3Cpath d='M33 45l10-20 6 3-10 20-7 4 1-7Z' fill='%23ef6351'/%3E%3C/svg%3E"));
+}
+
+.assignment-item.selected {
+  --edu-card-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%23f2c14e'/%3E%3Crect x='17' y='17' width='30' height='30' rx='5' fill='%23f6f1dd'/%3E%3Cpath d='M23 33l7 7 14-18' fill='none' stroke='%2356b083' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.compact-list article:nth-child(3n + 1),
+.compact-list article:nth-child(3n + 2) {
+  --edu-card-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%23f6b735'/%3E%3Cpath d='M20 50c2-10 7-16 12-16s10 6 12 16H20Z' fill='%23ef6351'/%3E%3Ccircle cx='32' cy='27' r='10' fill='%23f6f1dd'/%3E%3Cpath d='M23 24c1-8 17-8 18 0v9c-4 4-14 4-18 0v-9Z' fill='%236a5148'/%3E%3Cpath d='M13 18l19-9 19 9-19 9-19-9Z' fill='%230f4c81'/%3E%3Cpath d='M23 23v7c5 4 13 4 18 0v-7l-9 4-9-4Z' fill='%231b365d'/%3E%3C/svg%3E");
+}
+
+.compact-list article:nth-child(3n) {
+  --edu-card-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%230a8f8f'/%3E%3Crect x='16' y='37' width='7' height='13' rx='2' fill='%2356b083'/%3E%3Crect x='28' y='27' width='7' height='23' rx='2' fill='%23f2c14e'/%3E%3Crect x='40' y='18' width='7' height='32' rx='2' fill='%23c24daf'/%3E%3C/svg%3E");
+}
+
+.assignment-list .assignment-item::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%2356b083'/%3E%3Crect x='18' y='16' width='12' height='35' rx='3' fill='%230f4c81'/%3E%3Crect x='32' y='16' width='12' height='35' rx='3' fill='%23f6f1dd'/%3E%3Crect x='45' y='20' width='6' height='29' rx='2' fill='%23f2c14e'/%3E%3C/svg%3E");
+}
+
+.assignment-list .assignment-item.selected::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%23f2c14e'/%3E%3Crect x='17' y='17' width='30' height='30' rx='5' fill='%23f6f1dd'/%3E%3Cpath d='M23 33l7 7 14-18' fill='none' stroke='%2356b083' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.teacher-grid:not(.submissions-view) .compact-list article::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%23f6b735'/%3E%3Crect x='13' y='17' width='38' height='29' rx='4' fill='%230b8f8f'/%3E%3Crect x='13' y='17' width='38' height='29' rx='4' fill='none' stroke='%23e7b72f' stroke-width='4'/%3E%3Cpath d='M18 48h28' stroke='%23e7b72f' stroke-width='5' stroke-linecap='round'/%3E%3Ctext x='20' y='36' fill='%23f6f1dd' font-size='16' font-family='Arial,sans-serif' font-weight='700'%3Ea+b%3C/text%3E%3Crect x='41' y='39' width='7' height='3' rx='1' fill='%23f6f1dd'/%3E%3C/svg%3E");
+}
+
+.analytics-student-list article::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%23f6b735'/%3E%3Cpath d='M20 50c2-10 7-16 12-16s10 6 12 16H20Z' fill='%23ef6351'/%3E%3Ccircle cx='32' cy='27' r='10' fill='%23f6f1dd'/%3E%3Cpath d='M13 18l19-9 19 9-19 9-19-9Z' fill='%230f4c81'/%3E%3C/svg%3E") !important;
+}
+
+.analytics-assignment-list article::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%2356b083'/%3E%3Crect x='18' y='16' width='12' height='35' rx='3' fill='%230f4c81'/%3E%3Crect x='32' y='16' width='12' height='35' rx='3' fill='%23f6f1dd'/%3E%3Crect x='45' y='20' width='6' height='29' rx='2' fill='%23f2c14e'/%3E%3C/svg%3E") !important;
 }

@@ -106,6 +106,7 @@
 
 .home-hero {
   align-items: center;
+  background-image: linear-gradient(90deg, rgba(9, 30, 66, 0.86), rgba(9, 30, 66, 0.42)), url('https://umn.ac.id/wp-content/uploads/2020/09/3G2A4004.jpg');
   background-position: center;
   background-size: cover;
   display: flex;
@@ -341,7 +342,8 @@
 }
 
 .home-page-hero.courses {
-  background-image: linear-gradient(90deg, rgba(9, 30, 66, 0.86), rgba(9, 30, 66, 0.36)), url('https://lh3.googleusercontent.com/aida/AP1WRLv8fn8hW3Mkr8BwKH5e-rwLJPWEFzxvNziDuJY7oB-6RNc-uu139Nr9j2eVtmoPCoK8d3ioUjxX_i9BLszK9HwzM978KMBY_hUuzakKhogrhktyCxhtM79xIhBGZxRaONLdu_OabbBPWr1Yo9H_fXLaulnAQArS-rmc5FVALDbzF2yPW6qFw8Z5rdc5-825jjfnQvbVkAZ1c4907vwf9dRZpuK3Zr_F2HNq0fabD583KeN-s02isnUtuQ');
+  background-image: linear-gradient(90deg, rgba(9, 30, 66, 0.82), rgba(9, 30, 66, 0.22)), url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1800&q=85');
+  background-position: center 44%;
 }
 
 .home-page-hero.news {
@@ -349,7 +351,7 @@
 }
 
 .home-page-hero.contact {
-  background-image: linear-gradient(90deg, rgba(9, 30, 66, 0.86), rgba(9, 30, 66, 0.36)), url('https://lh3.googleusercontent.com/aida-public/AB6AXuDbpvIBqQzhwk4c3flGDtUS6h187vBB-FlEmBuFktfjwGn5dpB1tg4W8KbA8qeYPWMNNz__y17HH4hyIlrgmFkJQcWy7EDyjA-jcVfe_ZoMPBP_E0gfLq-jg3GLGPPCWRRhJqlYS-Yod5edaBMiefXxyHIc0jdm1Jgl5U03otdGzFZ-rLScIn3A8EYGloj_kMukTycTqXGwRr8pPqGnwhJYFfovuUF1EAVbxWjmPNvIB1M5FPRmyE6A');
+  background-image: linear-gradient(90deg, rgba(9, 30, 66, 0.86), rgba(9, 30, 66, 0.36)), url('https://media.www.kent.ac.uk/se/47763/Kent-22ndjune2023-8794_1920w.jpg');
 }
 
 .home-page-hero h1,
@@ -406,7 +408,8 @@
   padding: 11px 16px;
 }
 
-.home-toolbar button:first-child {
+.home-toolbar button.active,
+.home-toolbar button[aria-pressed='true'] {
   background: #0f6eb8;
   border-color: #0f6eb8;
   color: #fff;
@@ -540,6 +543,16 @@
 .home-map-panel div {
   margin: 0 auto;
   max-width: 1180px;
+}
+
+.home-campus-map {
+  display: block;
+  width: 100%;
+  margin-top: 28px;
+  border: 1px solid #d0ddea;
+  border-radius: 8px;
+  box-shadow: 0 18px 36px rgba(9, 30, 66, 0.12);
+  object-fit: cover;
 }
 
 .home-footer {
