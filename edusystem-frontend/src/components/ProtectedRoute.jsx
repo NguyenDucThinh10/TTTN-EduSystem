@@ -1,9 +1,11 @@
-import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom'; // BỔ SUNG: Import thêm Outlet
 
+const normalizeRole = (role) => String(role || '').replace(/^ROLE_/, '').toUpperCase();
+
 const ProtectedRoute = ({ children, allowedRoles }) => {
-    const token = localStorage.getItem('token');
-    const userRole = localStorage.getItem('role');
+    const token = sessionStorage.getItem('token');
+    const userRole = normalizeRole(sessionStorage.getItem('role'));
+    const normalizedAllowedRoles = allowedRoles?.map(normalizeRole);
 
     // 1. Nếu chưa đăng nhập -> Chuyển hướng về trang Auth/Login
     if (!token) {
@@ -11,7 +13,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     }
 
     // 2. Nếu đã đăng nhập nhưng vai trò không nằm trong danh sách được phép
-    if (allowedRoles && !allowedRoles.includes(userRole)) {
+    if (normalizedAllowedRoles && !normalizedAllowedRoles.includes(userRole)) {
         // Đẩy về đúng trang theo Role hiện tại để tránh truy cập trái phép
         if (userRole === 'ADMIN') return <Navigate to="/admin" replace />;
         if (userRole === 'TEACHER') return <Navigate to="/teacher" replace />;

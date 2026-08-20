@@ -33,9 +33,9 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
 
     public AuthController(AuthenticationManager authenticationManager, 
-                          JwtTokenProvider jwtTokenProvider, 
-                          UserRepository userRepository,
-                          PasswordEncoder passwordEncoder) {
+                            JwtTokenProvider jwtTokenProvider, 
+                            UserRepository userRepository,
+                            PasswordEncoder passwordEncoder) {
         this.authenticationManager = authenticationManager;
         this.jwtTokenProvider = jwtTokenProvider;
         this.userRepository = userRepository;
@@ -59,7 +59,13 @@ public class AuthController {
             User user = userRepository.findByUsername(loginRequest.getUsername()).get();
             String token = jwtTokenProvider.generateToken(user.getUsername(), user.getRole().name());
 
-            return ResponseEntity.ok(new JwtAuthResponse(token, "Bearer", user.getUsername(), user.getRole().name()));
+            return ResponseEntity.ok(new JwtAuthResponse(
+                    token,
+                    "Bearer",
+                    user.getId(),
+                    user.getUsername(),
+                    user.getFullName(),
+                    user.getRole().name()));
             
         } catch (AuthenticationException ex) {
             // BẮT LỖI: Trả về mã 401 Unauthorized thay vì 403 Forbidden nếu sai mật khẩu
@@ -79,7 +85,12 @@ public class AuthController {
         newUser.setFullName(request.getFullName());
         newUser.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         
-        newUser.setRole(Role.STUDENT); 
+        Role requestedRole = request.getRole() == null ? Role.STUDENT : request.getRole();
+        if (requestedRole == Role.ADMIN) {
+            return ResponseEntity.badRequest().body("Khong the dang ky tai khoan quan tri vien!");
+        }
+
+        newUser.setRole(requestedRole); 
         newUser.setStatus(UserStatus.ACTIVE); 
 
         userRepository.save(newUser);

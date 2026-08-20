@@ -1,25 +1,49 @@
-import React, { useState } from 'react';
-import { useNavigate, Outlet, useLocation } from 'react-router-dom';
-import { Layout, Menu, Button, theme, Dropdown, Avatar, Space, Badge, Breadcrumb, Typography } from 'antd';
+﻿import { useState } from 'react';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Avatar, Badge, Breadcrumb, Button, Dropdown, Layout, Menu, Space, theme } from 'antd';
 import {
-    MenuFoldOutlined, MenuUnfoldOutlined, UserOutlined, BookOutlined,
-    LogoutOutlined, DashboardOutlined, BellOutlined, SettingOutlined
+    BellOutlined,
+    BookOutlined,
+    CalendarOutlined,
+    DashboardOutlined,
+    LogoutOutlined,
+    MenuFoldOutlined,
+    MenuUnfoldOutlined,
+    ReadOutlined,
+    SettingOutlined,
+    UserOutlined,
 } from '@ant-design/icons';
 
 const { Header, Sider, Content, Footer } = Layout;
-const { Text } = Typography;
 
-export default function AdminDashboard() {
+const breadcrumbMap = {
+    '/admin': 'Tổng quan',
+    '/admin/users': 'Quản lý Tài khoản',
+    '/admin/courses': 'Quản lý Học phần',
+    '/admin/classes': 'Quản lý Lớp học',
+    '/admin/schedules': 'Quản lý thời khóa biểu',
+};
+
+export default function AdminDashboard({ onLogout }) {
     const [collapsed, setCollapsed] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
-
     const { token: { colorBgContainer, borderRadiusLG } } = theme.useToken();
     const username = localStorage.getItem('username') || 'Admin';
+    const currentTitle = breadcrumbMap[location.pathname] || 'Tổng quan';
 
     const handleLogout = () => {
-        localStorage.clear();
-        navigate('/auth', { replace: true });
+        if (onLogout) {
+            onLogout();
+            return;
+        }
+
+        localStorage.removeItem('token');
+        localStorage.removeItem('role');
+        localStorage.removeItem('username');
+        localStorage.removeItem('fullName');
+        localStorage.removeItem('user');
+        navigate('/');
     };
 
     const userMenu = {
@@ -31,64 +55,90 @@ export default function AdminDashboard() {
         ],
     };
 
-    const breadcrumbMap = {
-        '/admin': 'Tổng quan',
-        '/admin/users': 'Quản lý Tài khoản',
-        '/admin/classes': 'Quản lý Lớp học',
-    };
-    
-    // [ĐÃ FIX LỖI MENU] - Sắp xếp đường dẫn từ dài đến ngắn để kiểm tra chính xác tuyệt đối
-    const sortedPaths = Object.keys(breadcrumbMap).sort((a, b) => b.length - a.length);
-    const currentPath = sortedPaths.find(path => location.pathname.startsWith(path)) || '/admin';
-    const currentTitle = breadcrumbMap[currentPath] || 'Tổng quan';
+    const menuItems = [
+        { key: '/admin', icon: <DashboardOutlined />, label: 'Tổng quan', onClick: () => navigate('/admin') },
+        { key: '/admin/users', icon: <UserOutlined />, label: 'Quản lý Tài khoản', onClick: () => navigate('/admin/users') },
+        { key: '/admin/courses', icon: <ReadOutlined />, label: 'Quản lý Học phần', onClick: () => navigate('/admin/courses') },
+        { key: '/admin/classes', icon: <BookOutlined />, label: 'Quản lý Lớp học', onClick: () => navigate('/admin/classes') },
+        { key: '/admin/schedules', icon: <CalendarOutlined />, label: 'Quản lý thời khóa biểu', onClick: () => navigate('/admin/schedules') },
+    ];
 
     return (
         <Layout style={{ minHeight: '100vh', backgroundColor: '#f0f2f5' }}>
-            <Sider trigger={null} collapsible collapsed={collapsed} theme="dark" width={260} 
-                style={{ boxShadow: '2px 0 8px 0 rgba(29,35,41,.05)', zIndex: 10, overflow: 'auto', height: '100vh', position: 'sticky', top: 0, left: 0 }}>
-                <div style={{ 
-                    height: 48, margin: '16px', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'white', fontSize: collapsed ? 16 : 22, fontWeight: '800', letterSpacing: '1.5px', transition: 'all 0.3s ease', overflow: 'hidden', whiteSpace: 'nowrap', cursor: 'pointer'
-                }} onClick={() => navigate('/admin')}>
+            <Sider trigger={null} collapsible collapsed={collapsed} theme="dark" width={250} style={{ boxShadow: '2px 0 8px 0 rgba(29,35,41,.05)', zIndex: 10 }}>
+                <div style={{
+                    height: 48,
+                    margin: '16px',
+                    background: 'rgba(255, 255, 255, 0.08)',
+                    borderRadius: '8px',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    color: 'white',
+                    fontSize: collapsed ? 16 : 20,
+                    fontWeight: '800',
+                    letterSpacing: '1px',
+                    transition: 'all 0.3s',
+                    overflow: 'hidden',
+                    whiteSpace: 'nowrap',
+                }}>
                     {collapsed ? 'LMS' : 'EDUSYSTEM'}
                 </div>
-                <Menu theme="dark" mode="inline" selectedKeys={[currentPath]} style={{ borderRight: 0, padding: '0 8px' }}
-                    items={[
-                        { key: '/admin', icon: <DashboardOutlined />, label: 'Tổng quan', onClick: () => navigate('/admin') },
-                        { key: '/admin/users', icon: <UserOutlined />, label: 'Quản lý Tài khoản', onClick: () => navigate('/admin/users') },
-                        { key: '/admin/classes', icon: <BookOutlined />, label: 'Quản lý Lớp học', onClick: () => navigate('/admin/classes') },
-                    ]}
-                />
+                <Menu theme="dark" mode="inline" selectedKeys={[location.pathname]} items={menuItems} />
             </Sider>
 
             <Layout>
-                <Header style={{ padding: 0, background: colorBgContainer, display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight: '24px', boxShadow: '0 1px 4px rgba(0,21,41,.08)', position: 'sticky', top: 0, zIndex: 9, height: 64, lineHeight: '64px' }}>
-                    <Button type="text" icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />} onClick={() => setCollapsed(!collapsed)} style={{ fontSize: '18px', width: 64, height: 64, transition: 'color 0.3s' }} />
-                    <Space size="large" align="center">
-                        <Badge count={5} size="small" offset={[-2, 6]}>
-                            <Button type="text" shape="circle" icon={<BellOutlined style={{ fontSize: '20px', color: '#555' }}/>} />
+                <Header style={{
+                    padding: 0,
+                    background: colorBgContainer,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    paddingRight: '24px',
+                    boxShadow: '0 1px 4px rgba(0,21,41,.08)',
+                    zIndex: 1,
+                }}>
+                    <Button
+                        type="text"
+                        icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+                        onClick={() => setCollapsed(!collapsed)}
+                        style={{ fontSize: '18px', width: 64, height: 64 }}
+                    />
+
+                    <Space size="large">
+                        <Badge count={0} size="small">
+                            <Button type="text" shape="circle" icon={<BellOutlined style={{ fontSize: '18px', color: '#555' }} />} />
                         </Badge>
-                        <Dropdown menu={userMenu} placement="bottomRight" arrow trigger={['click']}>
-                            <Space style={{ cursor: 'pointer', padding: '0 12px', height: '100%', display: 'flex', alignItems: 'center' }}>
-                                <Avatar style={{ backgroundColor: '#1890ff', verticalAlign: 'middle' }} icon={<UserOutlined />} />
-                                <Text strong style={{ fontSize: '14px', color: '#333' }}>{username}</Text>
+                        <Dropdown menu={userMenu} placement="bottomRight" arrow>
+                            <Space style={{ cursor: 'pointer', padding: '0 8px' }}>
+                                <Avatar style={{ backgroundColor: '#1677ff' }} icon={<UserOutlined />} />
+                                <span style={{ fontWeight: 500, fontSize: '14px', color: '#333' }}>{username}</span>
                             </Space>
                         </Dropdown>
                     </Space>
                 </Header>
 
-                <Content style={{ margin: '24px', display: 'flex', flexDirection: 'column' }}>
-                    <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                        
+                <Content style={{ margin: '24px 24px 0', display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 600, color: '#1f1f1f' }}>
+                            {currentTitle}
+                        </h2>
                         <Breadcrumb items={[{ title: 'Admin' }, { title: currentTitle }]} />
                     </div>
-                    {/* KHU VỰC OUTLET */}
-                    <div style={{ padding: 0, background: 'transparent', borderRadius: borderRadiusLG, flex: 1, display: 'flex', flexDirection: 'column' }}>
-                        <Outlet /> 
+
+                    <div style={{
+                        padding: 24,
+                        background: colorBgContainer,
+                        borderRadius: borderRadiusLG,
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                        flex: 1,
+                    }}>
+                        <Outlet />
                     </div>
                 </Content>
-                
-                <Footer style={{ textAlign: 'center', color: '#8c8c8c', padding: '16px 50px', fontSize: '13px' }}>
-                    EduSystem (XDPM-OOP) ©{new Date().getFullYear()} Created with Ant Design
+
+                <Footer style={{ textAlign: 'center', color: '#888', padding: '16px 50px' }}>
+                    EduSystem ©{new Date().getFullYear()} Created with Ant Design
                 </Footer>
             </Layout>
         </Layout>

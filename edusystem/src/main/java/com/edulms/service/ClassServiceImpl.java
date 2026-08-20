@@ -17,12 +17,15 @@ import com.edulms.dto.ClassRequest;
 import com.edulms.dto.ClassResponse;
 import com.edulms.dto.UserResponse;
 import com.edulms.entity.ClassEntity;
+import com.edulms.entity.ClassStatus;
 import com.edulms.entity.Course;
 import com.edulms.entity.Enrollment;
+import com.edulms.entity.Role;
 import com.edulms.entity.User;
 import com.edulms.repository.ClassRepository;
 import com.edulms.repository.CourseRepository;
 import com.edulms.repository.EnrollmentRepository;
+import com.edulms.repository.SubmissionRepository;
 import com.edulms.repository.UserRepository;
 
 @Service
@@ -31,40 +34,40 @@ public class ClassServiceImpl implements ClassService {
     private final ClassRepository classRepository;
     private final CourseRepository courseRepository;
     private final UserRepository userRepository;
-    
-    
     private final EnrollmentRepository enrollmentRepository;
+    private final SubmissionRepository submissionRepository;
+    private final CurrentUserService currentUserService;
 
-    
-    public ClassServiceImpl(ClassRepository classRepository, 
-                            CourseRepository courseRepository, 
-                            UserRepository userRepository,
-                            EnrollmentRepository enrollmentRepository) {
+    public ClassServiceImpl(
+            ClassRepository classRepository,
+            CourseRepository courseRepository,
+            UserRepository userRepository,
+            EnrollmentRepository enrollmentRepository,
+            SubmissionRepository submissionRepository,
+            CurrentUserService currentUserService) {
         this.classRepository = classRepository;
         this.courseRepository = courseRepository;
         this.userRepository = userRepository;
         this.enrollmentRepository = enrollmentRepository;
+        this.submissionRepository = submissionRepository;
+        this.currentUserService = currentUserService;
     }
 
     @Override
     public ClassResponse createClass(ClassRequest request) {
-        // 1. Tìm Course và Teacher từ DB
         Course course = courseRepository.findById(request.getCourseId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy môn học"));
+                .orElseThrow(() -> new RuntimeException("Khong tim thay mon hoc"));
         User teacher = userRepository.findById(request.getTeacherId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy giảng viên"));
+                .orElseThrow(() -> new RuntimeException("Khong tim thay giang vien"));
 
-        // 2. Tạo ClassEntity
         ClassEntity newClass = new ClassEntity();
         newClass.setCourse(course);
         newClass.setTeacher(teacher);
         newClass.setName(request.getName());
         newClass.setSemester(request.getSemester());
-        newClass.setStatus(request.getStatus());
+        newClass.setStatus(request.getStatus() != null ? request.getStatus() : ClassStatus.ONGOING);
 
-        // 3. Lưu vào database
-        ClassEntity savedClass = classRepository.save(newClass);
-        return mapToResponse(savedClass);
+        return mapToResponse(classRepository.save(newClass));
     }
 
     @Override
@@ -74,34 +77,90 @@ public class ClassServiceImpl implements ClassService {
                 .collect(Collectors.toList());
     }
 
-    // Hàm phụ trợ map dữ liệu
-    private ClassResponse mapToResponse(ClassEntity entity) {
-        ClassResponse response = new ClassResponse();
-        response.setId(entity.getId());
-        response.setName(entity.getName());
-        response.setSemester(entity.getSemester());
-        response.setStatus(entity.getStatus());
-        response.setCourseTitle(entity.getCourse().getTitle()); // Lấy tên môn học
-        
-        // Ưu tiên hiển thị FullName, nếu null thì lấy Username
-        String tName = entity.getTeacher().getFullName();
-        response.setTeacherName(tName != null ? tName : entity.getTeacher().getUsername());
-        
-        return response;
+    @Override
+    public List<ClassResponse> getMyClasses() {
+        User user = currentUserService.getCurrentUser();
+        if (user.getRole() == Role.ADMIN) {
+            return getAllClasses();
+        }
+        if (user.getRole() == Role.TEACHER) {
+            return classRepository.findByTeacherId(user.getId()).stream()
+                    .map(this::mapToResponse)
+                    .collect(Collectors.toList());
+        }
+        return enrollmentRepository.findByStudentId(user.getId()).stream()
+                .map(enrollment -> mapToResponse(enrollment.getClassEntity()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ClassResponse> getOpenClassesForRegistration() {
+        User user = currentUserService.getCurrentUser();
+        if (user.getRole() != Role.STUDENT) {
+            throw new UnauthorizedClassAccessException("Chi sinh vien duoc dang ky hoc phan");
+        }
+        return classRepository.findByStatus(ClassStatus.ONGOING).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public ClassResponse getClassById(Long id) {
+        ClassEntity classEntity = classRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Khong tim thay lop hoc"));
+        requireClassAccess(classEntity);
+        return mapToResponse(classEntity);
+    }
+
+    @Override
+    public ClassResponse updateClass(Long id, ClassRequest request) {
+        ClassEntity classEntity = classRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Khong tim thay lop hoc"));
+
+        Course course = courseRepository.findById(request.getCourseId())
+                .orElseThrow(() -> new ResourceNotFoundException("Khong tim thay hoc phan"));
+        User teacher = userRepository.findById(request.getTeacherId())
+                .orElseThrow(() -> new ResourceNotFoundException("Khong tim thay giang vien"));
+        if (teacher.getRole() != Role.TEACHER) {
+            throw new RuntimeException("Nguoi duoc phan cong khong phai giang vien");
+        }
+
+        classEntity.setCourse(course);
+        classEntity.setTeacher(teacher);
+        classEntity.setName(request.getName());
+        classEntity.setSemester(request.getSemester());
+        classEntity.setStatus(request.getStatus() != null ? request.getStatus() : ClassStatus.ONGOING);
+        return mapToResponse(classRepository.save(classEntity));
+    }
+
+    @Override
+    public List<UserResponse> getClassStudents(Long classId) {
+        ClassEntity classEntity = classRepository.findById(classId)
+                .orElseThrow(() -> new ResourceNotFoundException("Khong tim thay lop hoc"));
+        requireClassAccess(classEntity);
+        return enrollmentRepository.findByClassEntityId(classEntity.getId()).stream()
+                .map(enrollment -> mapUserToResponse(enrollment.getStudent()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<UserResponse> getStudentsByClass(Long classId) {
+        return getClassStudents(classId);
     }
 
     @Override
     public void enrollStudentsToClass(Long classId, List<Long> studentIds) {
-        // 1. Tìm lớp học
         ClassEntity classEntity = classRepository.findById(classId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy lớp học!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Khong tim thay lop hoc"));
 
-        // 2. Duyệt danh sách sinh viên được truyền lên
         for (Long studentId : studentIds) {
             User student = userRepository.findById(studentId)
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy sinh viên ID: " + studentId));
+                    .orElseThrow(() -> new ResourceNotFoundException("Khong tim thay sinh vien ID: " + studentId));
 
-            // 3. Nếu sinh viên chưa có trong lớp thì mới thêm vào (chống duplicate)
+            if (student.getRole() != Role.STUDENT) {
+                throw new RuntimeException("Nguoi dung ID " + studentId + " khong phai sinh vien");
+            }
+
             if (!enrollmentRepository.existsByStudentIdAndClassEntityId(studentId, classId)) {
                 Enrollment enrollment = new Enrollment();
                 enrollment.setClassEntity(classEntity);
@@ -112,86 +171,145 @@ public class ClassServiceImpl implements ClassService {
     }
 
     @Override
-        public String enrollStudentsFromExcel(Long classId, MultipartFile file) {
-            // 1. Tìm lớp học
-            ClassEntity classEntity = classRepository.findById(classId)
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy lớp học!"));
+    public String enrollStudentsFromExcel(Long classId, MultipartFile file) {
+        ClassEntity classEntity = classRepository.findById(classId)
+                .orElseThrow(() -> new ResourceNotFoundException("Khong tim thay lop hoc"));
 
-            int successCount = 0;
-            int duplicateCount = 0;
-            int notFoundCount = 0;
+        int successCount = 0;
+        int duplicateCount = 0;
+        int notFoundCount = 0;
 
-            // 2. Mở và đọc file Excel
-            try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
-                Sheet sheet = workbook.getSheetAt(0);
-                DataFormatter formatter = new DataFormatter();
-                List<Enrollment> enrollmentsToSave = new ArrayList<>();
+        try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
+            Sheet sheet = workbook.getSheetAt(0);
+            DataFormatter formatter = new DataFormatter();
+            List<Enrollment> enrollmentsToSave = new ArrayList<>();
 
-                for (Row row : sheet) {
-                    if (row.getRowNum() == 0) continue; // Bỏ qua dòng tiêu đề (Header)
-
-                    // Lấy giá trị cột đầu tiên (Cột 0) là Username / Mã sinh viên
-                    String username = formatter.formatCellValue(row.getCell(0)).trim();
-                    if (username.isEmpty()) continue;
-
-                    // 3. Tìm sinh viên trong DB theo Username
-                    Optional<User> studentOpt = userRepository.findByUsername(username);
-                    
-                    if (studentOpt.isPresent()) {
-                        User student = studentOpt.get();
-                        
-                        // Kiểm tra đúng là role STUDENT hay không
-                        if (student.getRole() == com.edulms.entity.Role.STUDENT) {
-                            // Kiểm tra xem đã có trong lớp chưa để tránh trùng lặp
-                            boolean exists = enrollmentRepository.existsByStudentIdAndClassEntityId(student.getId(), classId);
-                            
-                            if (!exists) {
-                                Enrollment enrollment = new Enrollment();
-                                enrollment.setClassEntity(classEntity);
-                                enrollment.setStudent(student);
-                                enrollmentsToSave.add(enrollment);
-                                successCount++;
-                            } else {
-                                duplicateCount++;
-                            }
-                        } else {
-                            notFoundCount++;
-                        }
-                    } else {
-                        notFoundCount++;
-                    }
+            for (Row row : sheet) {
+                if (row.getRowNum() == 0) {
+                    continue;
                 }
 
-                // 4. Lưu danh sách vào Database
-                if (!enrollmentsToSave.isEmpty()) {
-                    enrollmentRepository.saveAll(enrollmentsToSave);
+                String username = formatter.formatCellValue(row.getCell(0)).trim();
+                if (username.isEmpty()) {
+                    continue;
                 }
 
-                // Trả về thông báo chi tiết kết quả để Frontend hiển thị cho người dùng biết
-                return String.format("Thành công! Đã thêm mới %d sinh viên vào lớp. (Bỏ qua %d sinh viên đã có sẵn, %d không tìm thấy/không hợp lệ).", 
-                        successCount, duplicateCount, notFoundCount);
+                Optional<User> studentOpt = userRepository.findByUsername(username);
+                if (studentOpt.isEmpty() || studentOpt.get().getRole() != Role.STUDENT) {
+                    notFoundCount++;
+                    continue;
+                }
 
-            } catch (Exception e) {
-                throw new RuntimeException("Lỗi đọc file Excel: " + e.getMessage());
+                User student = studentOpt.get();
+                if (enrollmentRepository.existsByStudentIdAndClassEntityId(student.getId(), classId)) {
+                    duplicateCount++;
+                    continue;
+                }
+
+                Enrollment enrollment = new Enrollment();
+                enrollment.setClassEntity(classEntity);
+                enrollment.setStudent(student);
+                enrollmentsToSave.add(enrollment);
+                successCount++;
             }
+
+            if (!enrollmentsToSave.isEmpty()) {
+                enrollmentRepository.saveAll(enrollmentsToSave);
+            }
+
+            return String.format(
+                    "Thanh cong! Da them moi %d sinh vien vao lop. Bo qua %d sinh vien da co san, %d khong tim thay/khong hop le.",
+                    successCount,
+                    duplicateCount,
+                    notFoundCount);
+        } catch (Exception e) {
+            throw new RuntimeException("Loi doc file Excel: " + e.getMessage());
+        }
     }
 
     @Override
-    public List<UserResponse> getStudentsByClass(Long classId) {
-        classRepository.findById(classId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy lớp học!"));
+    public void removeStudentFromClass(Long classId, Long studentId) {
+        Enrollment enrollment = enrollmentRepository.findByClassEntityIdAndStudentId(classId, studentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Sinh vien chua duoc ghi danh vao lop nay"));
+        enrollmentRepository.delete(enrollment);
+    }
 
-        List<Enrollment> enrollments = enrollmentRepository.findByClassEntityId(classId);
-        
-        return enrollments.stream().map(enrollment -> {
-            User student = enrollment.getStudent();
-            UserResponse res = new UserResponse();
-            res.setId(student.getId());
-            res.setUsername(student.getUsername());
-            res.setFullName(student.getFullName());
-            res.setEmail(student.getEmail());
-            res.setRole(student.getRole());
-            return res;
-        }).collect(Collectors.toList());
+    @Override
+    public ClassResponse selfEnroll(Long classId) {
+        User student = currentUserService.getCurrentUser();
+        if (student.getRole() != Role.STUDENT) {
+            throw new UnauthorizedClassAccessException("Chi sinh vien duoc dang ky hoc phan");
+        }
+        ClassEntity classEntity = classRepository.findById(classId)
+                .orElseThrow(() -> new ResourceNotFoundException("Khong tim thay lop hoc"));
+        if (classEntity.getStatus() != ClassStatus.ONGOING) {
+            throw new RuntimeException("Lop hoc da ket thuc, khong the dang ky");
+        }
+        if (!enrollmentRepository.existsByStudentIdAndClassEntityId(student.getId(), classId)) {
+            Enrollment enrollment = new Enrollment();
+            enrollment.setClassEntity(classEntity);
+            enrollment.setStudent(student);
+            enrollmentRepository.save(enrollment);
+        }
+        return mapToResponse(classEntity);
+    }
+
+    @Override
+    public void cancelSelfEnrollment(Long classId) {
+        User student = currentUserService.getCurrentUser();
+        if (student.getRole() != Role.STUDENT) {
+            throw new UnauthorizedClassAccessException("Chi sinh vien duoc huy dang ky hoc phan");
+        }
+        if (submissionRepository.existsByStudentIdAndAssignmentClassEntityId(student.getId(), classId)) {
+            throw new RuntimeException("Khong the huy dang ky vi da co bai nop trong lop");
+        }
+        Enrollment enrollment = enrollmentRepository.findByClassEntityIdAndStudentId(classId, student.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Ban chua dang ky lop nay"));
+        enrollmentRepository.delete(enrollment);
+    }
+
+    private void requireClassAccess(ClassEntity classEntity) {
+        User user = currentUserService.getCurrentUser();
+        if (user.getRole() == Role.ADMIN || classEntity.getTeacher().getId().equals(user.getId())) {
+            return;
+        }
+        enrollmentRepository.findByClassEntityIdAndStudentId(classEntity.getId(), user.getId())
+                .orElseThrow(() -> new UnauthorizedClassAccessException("Ban khong thuoc lop hoc nay"));
+    }
+
+    private ClassResponse mapToResponse(ClassEntity entity) {
+        ClassResponse response = new ClassResponse();
+        response.setId(entity.getId());
+        response.setName(entity.getName());
+        response.setSemester(entity.getSemester());
+        response.setStatus(entity.getStatus());
+        response.setCourseId(entity.getCourse().getId());
+        response.setCourseCode(entity.getCourse().getCode());
+        response.setCourseTitle(entity.getCourse().getTitle());
+        response.setCourseCredits(entity.getCourse().getCredits());
+        response.setTeacherId(entity.getTeacher().getId());
+
+        String teacherName = entity.getTeacher().getFullName();
+        response.setTeacherName(teacherName != null ? teacherName : entity.getTeacher().getUsername());
+        response.setStudentCount(enrollmentRepository.countByClassEntityId(entity.getId()));
+        User currentUser = currentUserService.getCurrentUser();
+        if (currentUser.getRole() == Role.STUDENT) {
+            response.setEnrolled(enrollmentRepository.existsByStudentIdAndClassEntityId(currentUser.getId(), entity.getId()));
+        } else {
+            response.setEnrolled(false);
+        }
+
+        return response;
+    }
+
+    private UserResponse mapUserToResponse(User user) {
+        UserResponse response = new UserResponse();
+        response.setId(user.getId());
+        response.setUsername(user.getUsername());
+        response.setFullName(user.getFullName());
+        response.setEmail(user.getEmail());
+        response.setRole(user.getRole());
+        response.setStatus(user.getStatus());
+        return response;
     }
 }

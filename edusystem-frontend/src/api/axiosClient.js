@@ -1,20 +1,16 @@
 import axios from 'axios';
 
-// Khởi tạo một bản sao của Axios với cấu hình mặc định
 const axiosClient = axios.create({
-  baseURL: 'http://localhost:8080', // Trỏ thẳng vào cổng Backend Spring Boot
+  baseURL: 'http://localhost:8080',
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Interceptor: Trước khi gửi bất kỳ request nào đi, hãy chạy vào đây
 axiosClient.interceptors.request.use(
   (config) => {
-    // Lấy token từ LocalStorage
-    const token = localStorage.getItem('token');
-    
-    // Nếu có token thì tự động nhét vào Header Authorization
+    const token = sessionStorage.getItem('token');
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -27,25 +23,23 @@ axiosClient.interceptors.request.use(
 
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error),
 );
 
-// Interceptor: Khi nhận response từ Server về, nếu lỗi 401 (hết hạn token) thì xử lý
 axiosClient.interceptors.response.use(
-  (response) => {
-    return response.data; // Chỉ lấy phần data, bỏ qua các config thừa của Axios
-  },
+  (response) => response.data,
   (error) => {
+
     // Xử lý lỗi 401 (Chưa đăng nhập hoặc Token giả/hết hạn)
     if (error.response && error.response.status === 401) {
       console.error("Token hết hạn hoặc không hợp lệ!");
       
       // [BỔ SUNG] Dọn sạch két sắt khi bị đá ra ngoài
-      localStorage.removeItem('token');
-      localStorage.removeItem('role'); 
-      localStorage.removeItem('username'); 
+      sessionStorage.removeItem('token');
+      sessionStorage.removeItem('role');
+      sessionStorage.removeItem('user'); 
+      sessionStorage.removeItem('username'); 
+      sessionStorage.removeItem('fullName');
       
       // [BẬT LÊN & SỬA ĐƯỜNG DẪN] Đá về đúng trang AuthPage của bạn
       window.location.href = '/auth'; 
@@ -59,7 +53,7 @@ axiosClient.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export default axiosClient;

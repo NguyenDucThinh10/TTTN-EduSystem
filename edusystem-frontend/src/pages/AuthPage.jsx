@@ -1,9 +1,19 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // BỔ SUNG: Import hook điều hướng
 import './AuthPage.css';
 import axiosClient from '../api/axiosClient'; // Import file cấu hình API của chúng ta
 
-export default function AuthPage() {
+const normalizeRole = (role) => String(role || '').replace(/^ROLE_/, '').toUpperCase();
+
+const roleHomePath = (role) => {
+    const normalizedRole = normalizeRole(role);
+    if (normalizedRole === 'ADMIN') return '/admin';
+    if (normalizedRole === 'TEACHER') return '/teacher';
+    if (normalizedRole === 'STUDENT') return '/student';
+    return '/';
+};
+
+export default function AuthPage({ onAuthenticated }) {
     // BỔ SUNG: Khởi tạo hook điều hướng
     const navigate = useNavigate();
 
@@ -15,7 +25,8 @@ export default function AuthPage() {
         username: '',
         email: '',
         password: '',
-        fullName: ''
+        fullName: '',
+        role: 'STUDENT'
     });
 
     // 2. Hàm bắt sự kiện khi người dùng gõ phím
@@ -37,7 +48,7 @@ export default function AuthPage() {
                 // Chuyển form về lại mặt Login
                 setIsActive(false); 
                 // Xóa trắng form đăng ký (Đã bổ sung xóa luôn fullName)
-                setRegisterData({ username: '', email: '', password: '', fullName: '' });
+                setRegisterData({ username: '', email: '', password: '', fullName: '', role: 'STUDENT' });
             }
         } catch (error) {
             console.error("Lỗi đăng ký:", error);
@@ -64,21 +75,28 @@ export default function AuthPage() {
             console.log("Dữ liệu trả về từ API Login:", response);
 
             const token = response.token || response.accessToken;
-            const role = response.role;
+            const role = normalizeRole(response.role);
             const username = response.username;
+            const fullName = response.fullName;
+            const user = {
+                id: response.id,
+                username,
+                fullName,
+                role,
+            };
 
-            // Lưu thông tin vào localStorage
-            localStorage.setItem('token', token);
-            localStorage.setItem('role', role);
-            localStorage.setItem('username', username);
+            // Lưu thông tin vào sessionStorage để mỗi tab có auth riêng biệt
+            sessionStorage.setItem('token', token);
+            sessionStorage.setItem('role', role);
+            sessionStorage.setItem('username', username);
+            if (fullName) sessionStorage.setItem('fullName', fullName);
+            sessionStorage.setItem('user', JSON.stringify(user));
 
             // Điều hướng dựa trên quyền
-            if (role === 'ADMIN') {
-                navigate('/admin');
-            } else if (role === 'TEACHER') {
-                navigate('/teacher');
+            if (onAuthenticated) {
+                onAuthenticated(user);
             } else {
-                navigate('/student');
+                navigate(roleHomePath(role));
             }
         } catch (error) {
             console.error("Lỗi đăng nhập:", error);
@@ -146,6 +164,14 @@ export default function AuthPage() {
                             <input type="password" name="password" value={registerData.password} onChange={handleRegisterChange} required />
                             <label>Password</label>
                             <i className='bx bxs-lock-alt'></i>
+                        </div>
+                        <div className="input-box role-box animation" style={{ '--i': 20.5, '--j': 3.5 }}>
+                            <select name="role" value={registerData.role} onChange={handleRegisterChange} required>
+                                <option value="STUDENT">Sinh viên</option>
+                                <option value="TEACHER">Giảng viên</option>
+                            </select>
+                            <label>Vai trò</label>
+                            <i className='bx bxs-user-badge'></i>
                         </div>
                         <button type="submit" className="btn animation" style={{ '--i': 21, '--j': 4 }}>Sign Up</button>
                         <div className="linkTxt animation" style={{ '--i': 22, '--j': 5 }}>

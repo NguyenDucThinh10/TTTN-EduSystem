@@ -65,3 +65,129 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JT
 ### 2. Xem danh sách Lớp học
 GET http://localhost:8080/api/admin/classes
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc4NTI5MTcyNCwiZXhwIjoxNzg1Mzc4MTI0fQ.aQ9yDCPGyosCz80slhnBj1HixbhmEg4J54iH30-wUas
+
+### =========================
+### BACKEND B - TEST GUIDE
+### =========================
+### Cach dung:
+### 1. Chay app: mvn spring-boot:run
+### 2. Bam "Send Request" o request Login teacher
+### 3. Copy accessToken tra ve va dan vao @teacherToken ben duoi
+### 4. Bam "Send Request" o request Login student
+### 5. Copy accessToken tra ve va dan vao @studentToken ben duoi
+### 6. Test tu tren xuong duoi.
+###
+### Du lieu mau dang co:
+### teacher / teacher123
+### student / student123
+### classId = 1
+### student da duoc enroll vao classId = 1
+
+@baseUrl = http://localhost:8080
+@teacherToken = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZWFjaGVyIiwicm9sZSI6IlRFQUNIRVIiLCJpYXQiOjE3ODUzOTQ0NDksImV4cCI6MTc4NTQ4MDg0OX0.qCef_DCaLtXeBlmsUrBPR7JkG6HdByxir1glm6Th1BM
+@studentToken = paste_student_token_here
+@classId = 1
+@assignmentId = 4
+@submissionId = 4
+@studentId = 3
+
+### B1. Login teacher
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "teacher",
+  "password": "teacher123"
+}
+
+### B2. Login student
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "student",
+  "password": "student123"
+}
+
+### B3. Teacher tao bai tap
+### Sau khi tao thanh cong, copy id tra ve va gan vao @assignmentId phia tren.
+POST {{baseUrl}}/api/assignments
+Content-Type: application/json
+Authorization: Bearer {{teacherToken}}
+
+{
+  "classId": {{classId}},
+  "title": "Test backend B",
+  "description": "Bai tap test API phan B",
+  "dueDate": "2026-08-02T23:59:00",
+  "maxScore": 10,
+  "weight": 1
+}
+
+### B4. Xem danh sach bai tap cua lop
+GET {{baseUrl}}/api/assignments/class/{{classId}}
+Authorization: Bearer {{teacherToken}}
+
+### B5. Xem chi tiet bai tap va danh sach nop bai
+GET {{baseUrl}}/api/assignments/{{assignmentId}}
+Authorization: Bearer {{teacherToken}}
+
+### B6. Student xem bai tap cua lop
+GET {{baseUrl}}/api/assignments/class/{{classId}}
+Authorization: Bearer {{studentToken}}
+
+### B7. Student nop bai bang file
+### Luu y: sua duong dan file neu may ban khong co file nay.
+### Sau khi nop thanh cong, copy id tra ve va gan vao @submissionId phia tren.
+POST {{baseUrl}}/api/submissions/assignments/{{assignmentId}}
+Authorization: Bearer {{studentToken}}
+Content-Type: multipart/form-data; boundary=----EduSystemBoundary
+
+------EduSystemBoundary
+Content-Disposition: form-data; name="file"; filename="test-submission.txt"
+Content-Type: text/plain
+
+Noi dung bai nop test phan B
+------EduSystemBoundary--
+
+### B8. Student xem cac bai da nop cua minh
+GET {{baseUrl}}/api/submissions/me
+Authorization: Bearer {{studentToken}}
+
+### B9. Teacher xem danh sach bai nop theo bai tap
+GET {{baseUrl}}/api/submissions/assignments/{{assignmentId}}
+Authorization: Bearer {{teacherToken}}
+
+### B10. Teacher xem sinh vien nao da/chua nop
+GET {{baseUrl}}/api/submissions/assignments/{{assignmentId}}/students
+Authorization: Bearer {{teacherToken}}
+
+### B11. Teacher cham diem bai nop
+PUT {{baseUrl}}/api/grades/submissions/{{submissionId}}
+Content-Type: application/json
+Authorization: Bearer {{teacherToken}}
+
+{
+  "score": 8.5,
+  "feedback": "Lam bai tot"
+}
+
+### B12. Xem diem cua bai nop
+GET {{baseUrl}}/api/grades/submissions/{{submissionId}}
+Authorization: Bearer {{teacherToken}}
+
+### B13. Student xem diem cua minh trong lop
+GET {{baseUrl}}/api/grades/students/{{studentId}}/classes/{{classId}}
+Authorization: Bearer {{studentToken}}
+
+### B14. Teacher xem thong ke lop
+GET {{baseUrl}}/api/analytics/classes/{{classId}}
+Authorization: Bearer {{teacherToken}}
+
+### B15. Teacher xem thong ke sinh vien
+GET {{baseUrl}}/api/analytics/students/{{studentId}}/classes/{{classId}}
+Authorization: Bearer {{teacherToken}}
+
+### B16. Dashboard tong quan
+GET {{baseUrl}}/api/analytics/dashboard
+Authorization: Bearer {{teacherToken}}

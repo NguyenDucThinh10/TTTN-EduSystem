@@ -1,0 +1,642 @@
+.home-shell {
+  min-height: 100vh;
+  background: #f7f9fc;
+  color: #102033;
+}
+
+.home-header {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.94);
+  border-bottom: 1px solid #dbe3ee;
+  display: flex;
+  gap: 24px;
+  justify-content: space-between;
+  min-height: 72px;
+  padding: 0 6vw;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.home-brand,
+.home-nav-link,
+.home-footer a,
+.home-section-heading a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.home-brand {
+  align-items: center;
+  color: #103d6f;
+  display: inline-flex;
+  font-size: 1.35rem;
+  font-weight: 900;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+.home-brand-mark {
+  align-items: center;
+  background: #0f6eb8;
+  border-radius: 8px;
+  color: #fff;
+  display: inline-flex;
+  height: 36px;
+  justify-content: center;
+  width: 36px;
+}
+
+.home-nav {
+  display: flex;
+  flex: 1;
+  gap: 8px;
+  justify-content: center;
+}
+
+.home-nav-link {
+  border-radius: 8px;
+  color: #526476;
+  font-size: 0.82rem;
+  font-weight: 800;
+  padding: 10px 12px;
+}
+
+.home-nav-link:hover,
+.home-nav-link.active {
+  background: #e8f1fb;
+  color: #0f5f9f;
+}
+
+.home-actions,
+.home-hero-actions {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.home-primary-action,
+.home-secondary-action {
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  font-weight: 800;
+  justify-content: center;
+  line-height: 1;
+  padding: 12px 16px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.home-primary-action {
+  background: #0f6eb8;
+  color: #fff;
+}
+
+.home-secondary-action {
+  background: #e8f1fb;
+  color: #0f5f9f;
+}
+
+.home-primary-action.large,
+.home-secondary-action.large {
+  padding: 15px 20px;
+}
+
+.home-hero {
+  align-items: center;
+  background-image: linear-gradient(90deg, rgba(9, 30, 66, 0.86), rgba(9, 30, 66, 0.42)), url('https://umn.ac.id/wp-content/uploads/2020/09/3G2A4004.jpg');
+  background-position: center;
+  background-size: cover;
+  display: flex;
+  min-height: 640px;
+  padding: 80px 6vw 110px;
+}
+
+.home-hero-content {
+  color: #fff;
+  max-width: 760px;
+}
+
+.home-hero h1,
+.home-page-hero h1 {
+  font-size: clamp(2.5rem, 6vw, 4.8rem);
+  line-height: 1.03;
+  margin: 0 0 22px;
+}
+
+.home-hero p,
+.home-page-hero p,
+.home-section p {
+  line-height: 1.7;
+}
+
+.home-hero-content > p:not(.home-eyebrow) {
+  color: #e7eef7;
+  font-size: 1.1rem;
+  max-width: 660px;
+}
+
+.home-eyebrow {
+  color: #0f6eb8;
+  font-size: 0.8rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  margin: 0 0 12px;
+  text-transform: uppercase;
+}
+
+.home-hero .home-eyebrow {
+  color: #9fd4ff;
+}
+
+.home-section {
+  margin: 0 auto;
+  max-width: 1180px;
+  padding: 72px 24px;
+}
+
+.home-stat-band {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: -52px;
+  position: relative;
+}
+
+.home-stat {
+  background: #fff;
+  border: 1px solid #dfe7f0;
+  border-radius: 8px;
+  box-shadow: 0 16px 32px rgba(15, 47, 80, 0.1);
+  padding: 28px;
+}
+
+.home-stat strong {
+  color: #0f5f9f;
+  display: block;
+  font-size: 2.2rem;
+}
+
+.home-stat span {
+  color: #657789;
+  font-weight: 700;
+}
+
+.home-split {
+  align-items: start;
+  display: grid;
+  gap: 42px;
+  grid-template-columns: 0.9fr 1.1fr;
+}
+
+.home-section h2 {
+  color: #123b63;
+  font-size: clamp(2rem, 4vw, 3.1rem);
+  line-height: 1.08;
+  margin: 0 0 18px;
+}
+
+.home-feature-list,
+.home-value-grid,
+.home-contact-cards {
+  display: grid;
+  gap: 14px;
+}
+
+.home-feature-item {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #dfe7f0;
+  border-radius: 8px;
+  display: flex;
+  gap: 14px;
+  padding: 18px;
+}
+
+.home-feature-item span {
+  color: #0f6eb8;
+  font-weight: 900;
+}
+
+.home-section-heading {
+  align-items: end;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.home-section-heading a {
+  color: #0f6eb8;
+  font-weight: 900;
+}
+
+.home-card-grid {
+  display: grid;
+  gap: 22px;
+}
+
+.home-card-grid.three {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.home-card,
+.home-course-card,
+.home-featured-news,
+.home-contact-card,
+.home-guide-panel,
+.home-contact-form {
+  background: #fff;
+  border: 1px solid #dfe7f0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.home-card img {
+  aspect-ratio: 16 / 10;
+  display: block;
+  object-fit: cover;
+  width: 100%;
+}
+
+.home-card div,
+.home-course-card div,
+.home-featured-news div {
+  padding: 22px;
+}
+
+.home-tag {
+  background: #e8f1fb;
+  border-radius: 999px;
+  color: #0f5f9f;
+  display: inline-flex;
+  font-size: 0.76rem;
+  font-weight: 900;
+  margin-bottom: 12px;
+  padding: 7px 10px;
+}
+
+.home-card h3,
+.home-news-row h3,
+.home-course-card h2,
+.home-featured-news h2,
+.home-contact-card h2 {
+  color: #123b63;
+  line-height: 1.25;
+  margin: 0 0 10px;
+}
+
+.home-card p,
+.home-news-row p,
+.home-course-card p,
+.home-featured-news p,
+.home-contact-card p {
+  color: #66798b;
+  margin: 0;
+}
+
+.home-news-list {
+  display: grid;
+  gap: 16px;
+}
+
+.home-news-row {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #dfe7f0;
+  border-radius: 8px;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: 180px 1fr;
+  overflow: hidden;
+  padding: 12px;
+}
+
+.home-news-row img {
+  aspect-ratio: 4 / 3;
+  border-radius: 6px;
+  object-fit: cover;
+  width: 100%;
+}
+
+.home-news-row span,
+.home-featured-news small {
+  color: #0f6eb8;
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.home-page-hero {
+  background-position: center;
+  background-size: cover;
+  color: #fff;
+  min-height: 410px;
+  padding: 110px 6vw 86px;
+}
+
+.home-page-hero.about {
+  background-image: linear-gradient(90deg, rgba(9, 30, 66, 0.84), rgba(9, 30, 66, 0.38)), url('https://lh3.googleusercontent.com/aida-public/AB6AXuBmMAyXVl7VnsaG8u2Z9GosBBSF9E5x2febGTAls_G94zU2HWe5a8D5UGkDxWaWb4GcAQv63DhJRzRlwktNkTeiqzq-y01bQ4ScXd1CeXlztw57Z16L0uxfIlJXvpcJSymigr3xQEmJ0jCCE7DhA9Hc7nOkzDzev4fsx9F09NCt7HYX3p9EUBBsRm2LaerAeCXel8Plqr-xUxmv0008IQP-kN0S3LpsVxhsEsh4D_vlFpOATjnvV3u8');
+}
+
+.home-page-hero.courses {
+  background-image: linear-gradient(90deg, rgba(9, 30, 66, 0.82), rgba(9, 30, 66, 0.22)), url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1800&q=85');
+  background-position: center 44%;
+}
+
+.home-page-hero.news {
+  background-image: linear-gradient(90deg, rgba(9, 30, 66, 0.86), rgba(9, 30, 66, 0.36)), url('https://lh3.googleusercontent.com/aida-public/AB6AXuCd3ZberxXrR0engDYmi2iXXgRwYA6Vr543Y1xzx4lc9xlW9cq7wP2DuQ92-Q-0EXqwP9ZEdqn5qEmUATpunwkZWv78xIYlKcae5qGzDNWXyNInu1xtbchHNbVGS1y9AST0p1WrdnEQG6OHe1T3Rza1MiWz1nMNPE_vrD09yNrOut_j8pAEzrjn7ucRdcveVcToxosST_DePd8ayIrjTMiVUTl-0na2_jlhk4MZZUnSLyFy3in_hXoH');
+}
+
+.home-page-hero.contact {
+  background-image: linear-gradient(90deg, rgba(9, 30, 66, 0.86), rgba(9, 30, 66, 0.36)), url('https://media.www.kent.ac.uk/se/47763/Kent-22ndjune2023-8794_1920w.jpg');
+}
+
+.home-page-hero h1,
+.home-page-hero p {
+  max-width: 780px;
+}
+
+.home-page-hero > p:not(.home-eyebrow) {
+  color: #e7eef7;
+  font-size: 1.1rem;
+}
+
+.home-value {
+  background: #fff;
+  border: 1px solid #dfe7f0;
+  border-radius: 8px;
+  color: #123b63;
+  font-weight: 800;
+  padding: 20px;
+}
+
+.home-process {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.home-process div {
+  background: #123b63;
+  border-radius: 8px;
+  color: #fff;
+  padding: 28px;
+}
+
+.home-process span {
+  color: #9fd4ff;
+  font-weight: 900;
+}
+
+.home-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.home-toolbar button {
+  background: #fff;
+  border: 1px solid #cdd8e5;
+  border-radius: 8px;
+  color: #526476;
+  cursor: pointer;
+  font-weight: 800;
+  padding: 11px 16px;
+}
+
+.home-toolbar button.active,
+.home-toolbar button[aria-pressed='true'] {
+  background: #0f6eb8;
+  border-color: #0f6eb8;
+  color: #fff;
+}
+
+.home-card-grid.courses {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.home-course-card img {
+  aspect-ratio: 16 / 9;
+  display: block;
+  object-fit: cover;
+  width: 100%;
+}
+
+.home-course-card dl {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, 1fr);
+  margin: 22px 0 0;
+}
+
+.home-course-card dt {
+  color: #758596;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.home-course-card dd {
+  color: #123b63;
+  font-weight: 900;
+  margin: 4px 0 0;
+}
+
+.home-featured-news {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  margin-bottom: 28px;
+}
+
+.home-featured-news img {
+  height: 100%;
+  min-height: 340px;
+  object-fit: cover;
+  width: 100%;
+}
+
+.home-news-layout {
+  align-items: start;
+  display: grid;
+  gap: 22px;
+  grid-template-columns: 1fr 340px;
+}
+
+.home-guide-panel {
+  padding: 24px;
+}
+
+.home-guide-panel h2 {
+  font-size: 1.35rem;
+}
+
+.home-guide-panel p {
+  border-top: 1px solid #dfe7f0;
+  color: #526476;
+  margin: 0;
+  padding: 16px 0;
+}
+
+.home-contact-layout {
+  align-items: start;
+  display: grid;
+  gap: 28px;
+  grid-template-columns: 0.9fr 1.1fr;
+}
+
+.home-contact-card {
+  padding: 24px;
+}
+
+.home-contact-card span {
+  color: #0f6eb8;
+  font-weight: 900;
+}
+
+.home-contact-form {
+  display: grid;
+  gap: 16px;
+  padding: 28px;
+}
+
+.home-contact-form h2 {
+  font-size: 1.8rem;
+  margin-bottom: 4px;
+}
+
+.home-contact-form label {
+  color: #43566a;
+  display: grid;
+  font-weight: 800;
+  gap: 8px;
+}
+
+.home-contact-form input,
+.home-contact-form textarea {
+  border: 1px solid #cdd8e5;
+  border-radius: 8px;
+  padding: 13px 14px;
+  resize: vertical;
+}
+
+.home-contact-form button {
+  background: #0f6eb8;
+  border: 0;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 900;
+  padding: 14px 18px;
+}
+
+.home-map-panel {
+  background: #e8f1fb;
+  border-top: 1px solid #d0ddea;
+  max-width: none;
+  padding-left: max(24px, 6vw);
+  padding-right: max(24px, 6vw);
+}
+
+.home-map-panel div {
+  margin: 0 auto;
+  max-width: 1180px;
+}
+
+.home-campus-map {
+  display: block;
+  width: 100%;
+  margin-top: 28px;
+  border: 1px solid #d0ddea;
+  border-radius: 8px;
+  box-shadow: 0 18px 36px rgba(9, 30, 66, 0.12);
+  object-fit: cover;
+}
+
+.home-footer {
+  background: #0d2d4a;
+  color: #e8f1fb;
+  display: grid;
+  gap: 24px;
+  grid-template-columns: 1fr auto;
+  padding: 42px 6vw;
+}
+
+.home-footer h2 {
+  margin: 0 0 10px;
+}
+
+.home-footer p {
+  color: #b9cbdb;
+  margin: 0;
+  max-width: 560px;
+}
+
+.home-footer-links {
+  align-content: start;
+  display: grid;
+  gap: 10px;
+}
+
+.home-footer a {
+  color: #dcecff;
+  font-weight: 800;
+}
+
+@media (max-width: 920px) {
+  .home-header {
+    align-items: flex-start;
+    flex-direction: column;
+    padding-bottom: 16px;
+    padding-top: 16px;
+  }
+
+  .home-nav {
+    justify-content: flex-start;
+    overflow-x: auto;
+    width: 100%;
+  }
+
+  .home-stat-band,
+  .home-split,
+  .home-card-grid.three,
+  .home-card-grid.courses,
+  .home-process,
+  .home-featured-news,
+  .home-news-layout,
+  .home-contact-layout,
+  .home-footer {
+    grid-template-columns: 1fr;
+  }
+
+  .home-news-row {
+    grid-template-columns: 130px 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .home-hero,
+  .home-page-hero {
+    min-height: 520px;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .home-hero-actions,
+  .home-actions,
+  .home-section-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .home-section {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .home-news-row {
+    grid-template-columns: 1fr;
+  }
+}
