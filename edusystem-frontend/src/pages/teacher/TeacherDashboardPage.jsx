@@ -14,12 +14,15 @@ import {
   ReloadOutlined,
   TeamOutlined,
   UserOutlined,
+  RobotOutlined // --- BỔ SUNG: Icon cho nút AI ---
 } from '@ant-design/icons';
 import ClassSelectorPanel from '../../components/ClassSelectorPanel';
 import { TeacherDashboardOverview } from '../../components/DashboardOverview';
 import axiosClient from '../../api/axiosClient';
 import useDashboardWorkflow from '../../hooks/useDashboardWorkflow';
 import { fileHref, formatDate, score, statusLabel } from '../../utils/dashboardDisplay';
+// --- BỔ SUNG: Import Component AI ---
+import AIQuizGenerator from '../../components/AIQuizGenerator'; 
 import '../../styles/roleDashboard.css';
 import './TeacherDashboard.css';
 
@@ -332,6 +335,9 @@ function TeacherAttendance({ workflow, attendanceDate, attendanceRecords, onAtte
 }
 
 function TeacherAssignments({ workflow }) {
+  // --- BỔ SUNG: State bật tắt Modal AI ---
+  const [isAIModalVisible, setIsAIModalVisible] = useState(false);
+
   const {
     assignments,
     editingId,
@@ -353,8 +359,25 @@ function TeacherAssignments({ workflow }) {
       <section className="panel feature-assignment-create">
         <div className="panel-heading">
           <h2>{editingId ? 'Sửa bài tập' : 'Tạo bài tập'}</h2>
-          {editingId && <button type="button" className="ghost-button" onClick={onCancelEdit}>Hủy sửa</button>}
+          
+          {/* --- BỔ SUNG: Nhóm Nút hành động --- */}
+          <div style={{ display: 'flex', gap: '8px' }}>
+            {editingId && <button type="button" className="ghost-button" onClick={onCancelEdit}>Hủy sửa</button>}
+            
+            {/* Nút gọi AI Generator (Chỉ hiện khi lớp chưa kết thúc) */}
+            {!classCompleted && (
+              <Button 
+                type="default" 
+                style={{ backgroundColor: '#ffffff', color: '#1677ff', borderColor: '#1677ff' }} 
+                icon={<RobotOutlined />} 
+                onClick={() => setIsAIModalVisible(true)}
+              >
+                Tạo bằng AI
+              </Button>
+            )}
+          </div>
         </div>
+        
         {classCompleted && <p className="notice">Lớp đã kết thúc, không thể tạo hoặc chỉnh sửa bài tập.</p>}
         <form className="assignment-form" onSubmit={onSubmitAssignmentForm}>
           <label>Tiêu đề<input name="title" value={form.title} onChange={handleAssignmentChange} required disabled={classCompleted} /></label>
@@ -380,6 +403,13 @@ function TeacherAssignments({ workflow }) {
           showActions
         />
       </section>
+
+      {/* --- BỔ SUNG: Render Modal AI --- */}
+      <AIQuizGenerator 
+        visible={isAIModalVisible} 
+        onClose={() => setIsAIModalVisible(false)} 
+      />
+
     </div>
   );
 }
