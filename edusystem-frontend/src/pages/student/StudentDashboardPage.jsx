@@ -14,12 +14,15 @@ import {
   ReloadOutlined,
   ReadOutlined,
   UserOutlined,
+  RobotOutlined // --- BỔ SUNG: Icon cho AI ---
 } from '@ant-design/icons';
 import ClassSelectorPanel from '../../components/ClassSelectorPanel';
 import { StudentDashboardOverview } from '../../components/DashboardOverview';
 import axiosClient from '../../api/axiosClient';
 import useDashboardWorkflow from '../../hooks/useDashboardWorkflow';
 import { fileHref, formatDate, score, statusLabel } from '../../utils/dashboardDisplay';
+// --- BỔ SUNG: Import Component Trợ giảng AI ---
+import AITutorDrawer from '../../components/AITutorDrawer'; 
 import '../../styles/roleDashboard.css';
 import './StudentDashboard.css';
 
@@ -331,6 +334,9 @@ function StudentAttendance({ workflow, attendanceDate, attendanceRecords, onAtte
 }
 
 function StudentAssignments({ workflow }) {
+  // --- BỔ SUNG: State mở/tắt Drawer Trợ giảng AI ---
+  const [isTutorOpen, setIsTutorOpen] = useState(false);
+
   const {
     assignments,
     onCancelSubmission,
@@ -346,7 +352,27 @@ function StudentAssignments({ workflow }) {
 
   return (
     <section className="panel wide feature-assignments">
-      <div className="panel-heading"><h2>Bài tập của lớp</h2><span>{selectedClass?.name || ''}</span></div>
+      <div className="panel-heading" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h2>Bài tập của lớp</h2>
+          <span>{selectedClass?.name || ''}</span>
+        </div>
+        
+        {/* --- BỔ SUNG: Nút gọi Trợ giảng AI phong cách trắng viền tím --- */}
+        <Button 
+          type="primary" 
+          icon={<RobotOutlined />} 
+          onClick={() => setIsTutorOpen(true)}
+          style={{ 
+              backgroundColor: '#c3d0ee', 
+              borderColor: '#722ed1', 
+              color: '#ffffff' /* Ép cứng chữ màu trắng */ 
+          }}
+        >
+          Hỏi Trợ giảng AI
+        </Button>
+      </div>
+
       <div className="student-assignment-list">
         {assignments.map((assignment) => {
           const submission = submittedByAssignment[assignment.id];
@@ -385,6 +411,9 @@ function StudentAssignments({ workflow }) {
         })}
         {assignments.length === 0 && <p className="empty">Lớp này chưa có bài tập.</p>}
       </div>
+
+      {/* --- BỔ SUNG: Render Drawer Trợ giảng AI --- */}
+      <AITutorDrawer visible={isTutorOpen} onClose={() => setIsTutorOpen(false)} />
     </section>
   );
 }

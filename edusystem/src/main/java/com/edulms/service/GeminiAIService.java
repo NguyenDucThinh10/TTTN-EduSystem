@@ -72,4 +72,44 @@ public class GeminiAIService {
         // Trả về mảng JSON rỗng nếu có lỗi để Frontend không bị sập
         return "[]"; 
     }
+
+    public String askTutorWithContext(String documentText, String userQuestion) {
+        RestTemplate restTemplate = new RestTemplate();
+
+        String prompt = "Bạn là một trợ giảng ảo thông minh, thân thiện và am hiểu học thuật. Dựa vào nội dung tài liệu học tập được cung cấp dưới đây, hãy giải đáp thắc mắc cho sinh viên một cách chính xác, súc tích và bám sát tài liệu.\n" +
+                        "YÊU CẦU: Trình bày câu trả lời rõ ràng bằng định dạng Markdown.\n\n" +
+                        "Nội dung tài liệu:\n" + documentText + "\n\n" +
+                        "Câu hỏi từ sinh viên: " + userQuestion;
+
+        Map<String, Object> textPart = new HashMap<>();
+        textPart.put("text", prompt);
+
+        Map<String, Object> parts = new HashMap<>();
+        parts.put("parts", Collections.singletonList(textPart));
+
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("contents", Collections.singletonList(parts));
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestBody, headers);
+
+        try {
+            String fullUrl = apiUrl + "?key=" + apiKey;
+            ResponseEntity<Map> response = restTemplate.postForEntity(fullUrl, requestEntity, Map.class);
+
+            Map<String, Object> responseBody = response.getBody();
+            if (responseBody != null && responseBody.containsKey("candidates")) {
+                List<Map<String, Object>> candidates = (List<Map<String, Object>>) responseBody.get("candidates");
+                Map<String, Object> content = (Map<String, Object>) candidates.get(0).get("content");
+                List<Map<String, Object>> resParts = (List<Map<String, Object>>) content.get("parts");
+                
+                return (String) resParts.get(0).get("text");
+            }
+        } catch (Exception e) {
+            System.err.println("Lỗi AI Tutor: " + e.getMessage());
+        }
+        return "Xin lỗi, trợ giảng AI đang gặp sự cố kết nối và chưa thể trả lời lúc này.";
+    }
 }

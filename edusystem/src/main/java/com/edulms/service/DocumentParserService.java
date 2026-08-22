@@ -17,6 +17,10 @@ public class DocumentParserService {
              
             PDFTextStripper pdfStripper = new PDFTextStripper();
             
+            // --- [BẢN NÂNG CẤP ĐẶC BIỆT] ---
+            // Ép PDFBox sắp xếp lại các ký tự theo tọa độ trên trang để tránh lỗi mất chữ
+            pdfStripper.setSortByPosition(true);
+            
             // Giới hạn chỉ đọc 5 trang đầu để tiết kiệm token API 
             pdfStripper.setStartPage(1);
             pdfStripper.setEndPage(5); 
