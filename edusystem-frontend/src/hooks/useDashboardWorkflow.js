@@ -4,11 +4,27 @@ import axiosClient from '../api/axiosClient';
 import { isPastDate, toApiDate } from '../utils/dateUtils';
 
 const emptyAssignment = {
+  assignmentKind: 'REGULAR',
   title: '',
   description: '',
   dueDate: '',
   maxScore: 10,
   fileUrl: '',
+};
+
+const assignmentKindLabels = {
+  REGULAR: '',
+  MIDTERM: 'Giữa kỳ',
+  FINAL: 'Cuối kỳ',
+};
+
+const stripAssignmentKind = (title = '') => title.replace(/^\[(Giữa kỳ|Cuối kỳ)\]\s*/i, '');
+
+const inferAssignmentKind = (assignment = {}) => {
+  const title = assignment.title || '';
+  if (/^\[?Cuối kỳ\]?/i.test(title) || /\bcuối kỳ\b/i.test(title)) return 'FINAL';
+  if (/^\[?Giữa kỳ\]?/i.test(title) || /\bgiữa kỳ\b/i.test(title)) return 'MIDTERM';
+  return 'REGULAR';
 };
 
 export default function useDashboardWorkflow(user) {
@@ -209,7 +225,7 @@ export default function useDashboardWorkflow(user) {
 
     const payload = {
       classId: Number(selectedClassId),
-      title: form.title,
+      title: form.assignmentKind === 'REGULAR' ? form.title : `[${assignmentKindLabels[form.assignmentKind]}] ${form.title}`,
       description: form.description,
       fileUrl: uploadedFileUrl,
       dueDate: toApiDate(form.dueDate),
@@ -249,7 +265,8 @@ export default function useDashboardWorkflow(user) {
   const startEdit = (assignment) => {
     setEditingId(assignment.id);
     setForm({
-      title: assignment.title || '',
+      assignmentKind: inferAssignmentKind(assignment),
+      title: stripAssignmentKind(assignment.title || ''),
       description: assignment.description || '',
       dueDate: assignment.dueDate ? assignment.dueDate.slice(0, 16) : '',
       maxScore: assignment.maxScore || 10,

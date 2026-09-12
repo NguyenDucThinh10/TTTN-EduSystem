@@ -36,8 +36,21 @@ const pageTitles = {
   assignments: 'Bài tập',
   submissions: 'Bài nộp',
   grading: 'Chấm điểm',
-  analytics: 'Thống kê',
+  analytics: 'Tổng kết',
 };
+
+const assignmentKindMeta = (assignment = {}) => {
+  const title = assignment.title || '';
+  if (/^\[?Cuối kỳ\]?/i.test(title) || /\bcuối kỳ\b/i.test(title)) {
+    return { label: 'Cuối kỳ', className: 'final', key: 'final' };
+  }
+  if (/^\[?Giữa kỳ\]?/i.test(title) || /\bgiữa kỳ\b/i.test(title)) {
+    return { label: 'Giữa kỳ', className: 'midterm', key: 'midterm' };
+  }
+  return { label: 'Bài tập', className: 'regular', key: 'regular' };
+};
+
+const cleanAssignmentTitle = (title = '') => title.replace(/^\[(Giữa kỳ|Cuối kỳ)\]\s*/i, '');
 
 const weekDays = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7', 'Chủ nhật'];
 
@@ -78,7 +91,7 @@ export default function TeacherDashboardPage({ user, onLogout }) {
     { key: 'assignments', icon: <BookOutlined />, label: 'Bài tập' },
     { key: 'submissions', icon: <FileDoneOutlined />, label: 'Bài nộp' },
     { key: 'grading', icon: <FileDoneOutlined />, label: 'Chấm điểm' },
-    { key: 'analytics', icon: <BarChartOutlined />, label: 'Thống kê' },
+    { key: 'analytics', icon: <BarChartOutlined />, label: 'Tổng kết' },
   ], []);
 
   const userName = user.username || 'teacher';
@@ -189,7 +202,7 @@ export default function TeacherDashboardPage({ user, onLogout }) {
             {activeView === 'assignments' && <TeacherAssignments workflow={workflow} />}
             {activeView === 'submissions' && <TeacherSubmissions workflow={workflow} />}
             {activeView === 'grading' && <TeacherGrading workflow={workflow} />}
-            {activeView === 'analytics' && <AnalyticsPanel classAnalytics={workflow.classAnalytics} dashboard={workflow.dashboard} />}
+            {activeView === 'analytics' && <SummaryPanel workflow={workflow} />}
           </div>
         </Content>
 
@@ -380,6 +393,13 @@ function TeacherAssignments({ workflow }) {
         
         {classCompleted && <p className="notice">Lớp đã kết thúc, không thể tạo hoặc chỉnh sửa bài tập.</p>}
         <form className="assignment-form" onSubmit={onSubmitAssignmentForm}>
+          <label>Loại bài
+            <select name="assignmentKind" value={form.assignmentKind || 'REGULAR'} onChange={handleAssignmentChange} disabled={classCompleted}>
+              <option value="REGULAR">Bài tập</option>
+              <option value="MIDTERM">Giữa kỳ</option>
+              <option value="FINAL">Cuối kỳ</option>
+            </select>
+          </label>
           <label>Tiêu đề<input name="title" value={form.title} onChange={handleAssignmentChange} required disabled={classCompleted} /></label>
           <label>Mô tả<textarea name="description" value={form.description} onChange={handleAssignmentChange} rows="4" disabled={classCompleted} /></label>
           <div className="form-row">
@@ -461,28 +481,31 @@ function TeacherGrading({ workflow }) {
 function AssignmentList({ assignments, selectedAssignmentId, onDeleteAssignment, onSelectAssignment, onStartEdit, showActions = false }) {
   return (
     <div className="assignment-list">
-      {assignments.map((assignment) => (
-        <article className={`assignment-item ${String(selectedAssignmentId) === String(assignment.id) ? 'selected' : ''}`} key={assignment.id}>
-          <button type="button" className="assignment-main" onClick={() => onSelectAssignment(assignment.id)}>
-            <strong>{assignment.title}</strong>
-            <span>{formatDate(assignment.dueDate)} | {assignment.submissionCount || 0} bài nộp | Điểm {score(assignment.maxScore)}</span>
-          </button>
-          <div className="assignment-actions">
-            {assignment.fileUrl && <a href={fileHref(assignment.fileUrl)} target="_blank" rel="noreferrer">Tải đề</a>}
-            {showActions && onStartEdit && <button type="button" onClick={() => onStartEdit(assignment)}>Sửa</button>}
-            {showActions && onDeleteAssignment && (
-              <button
-                type="button"
-                className="danger"
-                title="Xóa bài tập"
-                onClick={() => onDeleteAssignment(assignment.id)}
-              >
-                Xóa
-              </button>
-            )}
-          </div>
-        </article>
-      ))}
+      {assignments.map((assignment) => {
+        const kind = assignmentKindMeta(assignment);
+        return (
+          <article className={`assignment-item ${String(selectedAssignmentId) === String(assignment.id) ? 'selected' : ''}`} key={assignment.id}>
+            <button type="button" className="assignment-main" onClick={() => onSelectAssignment(assignment.id)}>
+              <strong><span className={`assignment-kind ${kind.className}`}>{kind.label}</span>{cleanAssignmentTitle(assignment.title)}</strong>
+              <span>{formatDate(assignment.dueDate)} | {assignment.submissionCount || 0} bài nộp | Điểm {score(assignment.maxScore)}</span>
+            </button>
+            <div className="assignment-actions">
+              {assignment.fileUrl && <a href={fileHref(assignment.fileUrl)} target="_blank" rel="noreferrer">Tải đề</a>}
+              {showActions && onStartEdit && <button type="button" onClick={() => onStartEdit(assignment)}>Sửa</button>}
+              {showActions && onDeleteAssignment && (
+                <button
+                  type="button"
+                  className="danger"
+                  title="Xóa bài tập"
+                  onClick={() => onDeleteAssignment(assignment.id)}
+                >
+                  Xóa
+                </button>
+              )}
+            </div>
+          </article>
+        );
+      })}
       {assignments.length === 0 && <p className="empty">Lớp này chưa có bài tập.</p>}
     </div>
   );
@@ -537,42 +560,115 @@ function SubmissionGradingTable({ workflow }) {
   );
 }
 
-function AnalyticsPanel({ classAnalytics, dashboard }) {
+const averageCategoryScore = (scores) => {
+  if (!scores.length) return null;
+  return scores.reduce((total, item) => total + item, 0) / scores.length;
+};
+
+const weightedSummaryScore = ({ regular, midterm, final }) => (
+  (regular ?? 0) * 0.2 + (midterm ?? 0) * 0.3 + (final ?? 0) * 0.5
+);
+
+const summaryRank = (total) => {
+  if (total >= 8.5) return 'Giỏi';
+  if (total >= 7) return 'Khá';
+  if (total >= 5) return 'Đạt';
+  return 'Chưa đạt';
+};
+
+function SummaryPanel({ workflow }) {
+  const { assignments, classAnalytics, classStudents, dashboard, selectedClass } = workflow;
+  const [assignmentDetails, setAssignmentDetails] = useState([]);
+
+  useEffect(() => {
+    let active = true;
+    const loadDetails = async () => {
+      if (!assignments.length) {
+        setAssignmentDetails([]);
+        return;
+      }
+      try {
+        const details = await Promise.all(assignments.map((assignment) => axiosClient.get(`/api/assignments/${assignment.id}`)));
+        if (active) setAssignmentDetails(details.filter(Boolean));
+      } catch (error) {
+        console.error(error);
+        if (active) setAssignmentDetails([]);
+      }
+    };
+    loadDetails();
+    return () => {
+      active = false;
+    };
+  }, [assignments]);
+
+  const summaryRows = useMemo(() => {
+    const students = classStudents.length ? classStudents : classAnalytics?.studentProgress || [];
+    return students.map((student) => {
+      const byKind = { regular: [], midterm: [], final: [] };
+
+      assignmentDetails.forEach((detail) => {
+        const kind = assignmentKindMeta(detail.assignment || detail).key;
+        const maxScore = Number(detail.assignment?.maxScore || detail.maxScore || 10);
+        const row = detail.submissions?.find((item) => String(item.studentId) === String(student.id || student.studentId));
+        const rawScore = Number(row?.submission?.score ?? 0);
+        const normalizedScore = maxScore > 0 ? (rawScore / maxScore) * 10 : rawScore;
+        byKind[kind].push(normalizedScore);
+      });
+
+      const regular = averageCategoryScore(byKind.regular);
+      const midterm = averageCategoryScore(byKind.midterm);
+      const final = averageCategoryScore(byKind.final);
+      const total = weightedSummaryScore({ regular, midterm, final });
+
+      return {
+        studentId: student.id || student.studentId,
+        studentName: student.fullName || student.studentName || student.username,
+        regular,
+        midterm,
+        final,
+        total,
+        rank: summaryRank(total),
+      };
+    });
+  }, [assignmentDetails, classAnalytics, classStudents]);
+
   return (
     <section className="panel wide feature-analytics">
       <div className="panel-heading">
-        <h2>Thống kê</h2>
-        <span>{classAnalytics?.className || 'Lớp học'}</span>
+        <h2>Tổng kết</h2>
+        <span>{selectedClass?.name || classAnalytics?.className || 'Lớp học'}</span>
       </div>
       <div className="metrics">
         <div><strong>{dashboard?.classCount ?? '-'}</strong><span>Lớp</span></div>
-        <div><strong>{dashboard?.assignmentCount ?? '-'}</strong><span>Bài tập</span></div>
-        <div><strong>{dashboard?.submissionCount ?? '-'}</strong><span>Bài nộp</span></div>
+        <div><strong>{assignments.length}</strong><span>Bài kiểm tra</span></div>
+        <div><strong>{classStudents.length || classAnalytics?.studentProgress?.length || 0}</strong><span>Sinh viên</span></div>
         <div><strong>{score(classAnalytics?.classAverage)}</strong><span>Điểm TB lớp</span></div>
       </div>
-      <div className="analytics-columns">
-        <div>
-          <h3>Tiến độ sinh viên</h3>
-          <div className="compact-list analytics-student-list">
-            {classAnalytics?.studentProgress?.map((item) => (
-              <article key={item.studentId}>
-                <strong>{item.studentName}</strong>
-                <span>{item.submittedAssignments}/{item.totalAssignments} bài | TB {score(item.averageScore)}</span>
-              </article>
-            ))}
-          </div>
+      <div className="summary-weight-note">
+        <span>Bài tập 20%</span>
+        <span>Giữa kỳ 30%</span>
+        <span>Cuối kỳ 50%</span>
+      </div>
+      <div className="submission-table summary-table">
+        <div className="table-head">
+          <span>Sinh viên</span>
+          <span>Bài tập 20%</span>
+          <span>Giữa kỳ 30%</span>
+          <span>Cuối kỳ 50%</span>
+          <span>Tổng kết</span>
+          <span>Xếp loại</span>
         </div>
-        <div>
-          <h3>Thống kê bài tập</h3>
-          <div className="compact-list analytics-assignment-list">
-            {classAnalytics?.assignmentStatistics?.map((item) => (
-              <article key={item.assignmentId}>
-                <strong>{item.assignmentTitle}</strong>
-                <span>{item.submissionCount} nộp | {item.gradedCount} chấm | TB {score(item.averageScore)}</span>
-              </article>
-            ))}
+        {summaryRows.map((row) => (
+          <div className="table-row" key={row.studentId}>
+            <span>{row.studentName}</span>
+            <span>{row.regular == null ? '-' : score(row.regular)}</span>
+            <span>{row.midterm == null ? '-' : score(row.midterm)}</span>
+            <span>{row.final == null ? '-' : score(row.final)}</span>
+            <span><strong>{score(row.total)}</strong></span>
+            <span className={`badge ${row.total >= 5 ? 'SUBMITTED' : 'missing'}`}>{row.rank}</span>
           </div>
-        </div>
+        ))}
+        {summaryRows.length === 0 && <p className="empty">Chưa có dữ liệu sinh viên để tổng kết.</p>}
       </div>
     </section>
   );

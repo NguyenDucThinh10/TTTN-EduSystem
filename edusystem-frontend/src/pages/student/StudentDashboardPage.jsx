@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Avatar, Badge, Breadcrumb, Button, Dropdown, Form, Input, InputNumber, Layout, Menu, Space, Table, Tag, theme, message } from 'antd';
+import { Avatar, Badge, Breadcrumb, Button, Dropdown, Layout, Menu, Space, Table, Tag, theme, message } from 'antd';
 import {
   BarChartOutlined,
   BellOutlined,
@@ -38,7 +38,7 @@ const pageTitles = {
   attendance: 'Điểm danh',
   assignments: 'Bài tập',
   submissions: 'Bài đã nộp',
-  grades: 'Điểm của tôi',
+  grades: 'Kết quả học tập',
   tuitionPayment: 'Nộp học phí',
   tuitionDebt: 'Tra cứu công nợ',
 };
@@ -82,7 +82,7 @@ export default function StudentDashboardPage({ user, onLogout }) {
     { key: 'attendance', icon: <CheckSquareOutlined />, label: 'Điểm danh' },
     { key: 'assignments', icon: <ReadOutlined />, label: 'Bài tập' },
     { key: 'submissions', icon: <FileDoneOutlined />, label: 'Bài đã nộp' },
-    { key: 'grades', icon: <BarChartOutlined />, label: 'Điểm của tôi' },
+    { key: 'grades', icon: <BarChartOutlined />, label: 'Kết quả học tập' },
     { key: 'tuitionPayment', icon: <DollarOutlined />, label: 'Nộp học phí' },
     { key: 'tuitionDebt', icon: <DollarOutlined />, label: 'Tra cứu công nợ' },
   ], []);
@@ -194,8 +194,8 @@ export default function StudentDashboardPage({ user, onLogout }) {
             {activeView === 'assignments' && <StudentAssignments workflow={workflow} />}
             {activeView === 'submissions' && <StudentSubmissions workflow={workflow} />}
             {activeView === 'grades' && <StudentGrades workflow={workflow} />}
-            {activeView === 'tuitionPayment' && <StudentTuition mode="payment" />}
-            {activeView === 'tuitionDebt' && <StudentTuition mode="debt" />}
+            {activeView === 'tuitionPayment' && <StudentTuition mode="payment" user={user} />}
+            {activeView === 'tuitionDebt' && <StudentTuition mode="debt" user={user} />}
           </div>
         </Content>
 
@@ -386,10 +386,11 @@ function StudentAssignments({ workflow }) {
           const submission = submittedByAssignment[assignment.id];
           const overdue = isPastDue(assignment.dueDate);
           const locked = classClosed || overdue;
+          const kind = assignmentKindMeta(assignment);
           return (
             <article className="student-assignment" key={assignment.id}>
               <div>
-                <h3>{assignment.title}</h3>
+                <h3><span className={`assignment-kind ${kind.className}`}>{kind.label}</span>{cleanAssignmentTitle(assignment.title)}</h3>
                 <p>{assignment.description || 'Không có mô tả.'}</p>
                 <span>Hạn nộp: {formatDate(assignment.dueDate)} | Điểm: {score(assignment.maxScore)}</span>
                 <span className={`badge ${submission?.status || (overdue ? 'LATE' : 'missing')}`}>
@@ -446,18 +447,98 @@ function StudentSubmissions({ workflow }) {
 }
 
 function StudentGrades({ workflow }) {
+  const grades = workflow.studentGrades?.grades || [];
+  const selectedClass = workflow.selectedClass || {};
+  const byKind = grades.reduce((groups, grade) => {
+    const kind = assignmentKindMeta({ title: grade.assignmentTitle }).className;
+    const maxScore = Number(grade.maxScore || 10);
+    const normalizedScore = maxScore > 0 ? (Number(grade.score || 0) / maxScore) * 10 : Number(grade.score || 0);
+    groups[kind].push(normalizedScore);
+    return groups;
+  }, { regular: [], midterm: [], final: [] });
+  const regularScore = averageLearningScore(byKind.regular);
+  const midtermScore = averageLearningScore(byKind.midterm);
+  const finalScore = averageLearningScore(byKind.final);
+  const processScore = regularScore == null && midtermScore == null
+    ? null
+    : (((regularScore ?? 0) * 0.2) + ((midtermScore ?? 0) * 0.3)) / 0.5;
+  const finalSummaryScore = ((regularScore ?? 0) * 0.2) + ((midtermScore ?? 0) * 0.3) + ((finalScore ?? 0) * 0.5);
+  const gradeMeta = learningGradeMeta(finalSummaryScore);
+  const row = {
+    code: selectedClass.courseCode || workflow.studentGrades?.className || selectedClass.name || '-',
+    title: selectedClass.courseTitle || selectedClass.name || workflow.studentGrades?.className || '-',
+    credits: selectedClass.courseCredits ?? '-',
+    processScore,
+    finalScore,
+    finalSummaryScore,
+    gradeMeta,
+    passed: finalSummaryScore >= 5,
+  };
+
   return (
-    <section className="panel wide feature-grades">
-      <div className="panel-heading"><h2>Điểm của tôi</h2><span>TB {score(workflow.studentGrades?.averageScore)}</span></div>
-      <div className="compact-list">
-        {workflow.studentGrades?.grades?.map((grade) => (
-          <article key={grade.id}>
-            <strong>{grade.assignmentTitle}</strong>
-            <span>{score(grade.score)} / {score(grade.maxScore)}</span>
-            <span>{grade.feedback || 'Chưa có nhận xét'}</span>
-          </article>
-        ))}
-        {(!workflow.studentGrades?.grades || workflow.studentGrades.grades.length === 0) && <p className="empty">Chưa có điểm.</p>}
+    <section className="panel wide feature-grades learning-result-panel">
+      <div className="panel-heading"><h2>Kết quả học tập</h2><span>{selectedClass.semester || 'Học kỳ hiện tại'}</span></div>
+      <div className="learning-tabs">
+        <button type="button" className="active">Bảng điểm học tập</button>
+      </div>
+      <div className="learning-board">
+        <div className="learning-table-wrap">
+          <table className="learning-table">
+            <thead>
+              <tr>
+                <th>TT</th>
+                <th>Mã lớp học phần</th>
+                <th>Tên môn học/học phần</th>
+                <th>Số tín chỉ</th>
+                <th>Điểm quá trình</th>
+                <th>Điểm cuối kỳ</th>
+                <th>Điểm tổng kết</th>
+                <th>Điểm hệ 4</th>
+                <th>Điểm chữ</th>
+                <th>Xếp loại</th>
+                <th>Đạt</th>
+                <th>Ghi chú</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="semester-row">
+                <td colSpan="12">{selectedClass.semester || 'Học kỳ hiện tại'}</td>
+              </tr>
+              {grades.length > 0 ? (
+                <tr>
+                  <td>1</td>
+                  <td>{row.code}</td>
+                  <td>{row.title}</td>
+                  <td>{row.credits}</td>
+                  <td>{row.processScore == null ? '-' : score(row.processScore)}</td>
+                  <td>{row.finalScore == null ? '-' : score(row.finalScore)}</td>
+                  <td>{score(row.finalSummaryScore)}</td>
+                  <td>{row.gradeMeta.point4.toFixed(2)}</td>
+                  <td>{row.gradeMeta.letter}</td>
+                  <td>{row.gradeMeta.rank}</td>
+                  <td>{row.passed ? '✓' : '-'}</td>
+                  <td>{row.passed ? '' : 'Chưa đạt'}</td>
+                </tr>
+              ) : (
+                <tr>
+                  <td colSpan="12" className="learning-empty">Chưa có điểm.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+        <div className="learning-summary">
+          <p>Điểm trung bình học kỳ (hệ 10): <strong>{grades.length ? score(row.finalSummaryScore) : '-'}</strong></p>
+          <p>Điểm trung bình tích lũy (hệ 10): <strong>{grades.length ? score(row.finalSummaryScore) : '-'}</strong></p>
+          <p>Điểm trung bình học kỳ (hệ 4): <strong>{grades.length ? row.gradeMeta.point4.toFixed(2) : '-'}</strong></p>
+          <p>Điểm trung bình tích lũy (hệ 4): <strong>{grades.length ? row.gradeMeta.point4.toFixed(2) : '-'}</strong></p>
+          <p>Xếp loại học lực học kỳ: <strong>{grades.length ? row.gradeMeta.rank : '-'}</strong></p>
+          <p>Xếp loại học lực tích lũy: <strong>{grades.length ? row.gradeMeta.rank : '-'}</strong></p>
+          <p>Tổng số tín chỉ học kỳ đạt: <strong>{row.passed ? row.credits : 0}</strong></p>
+          <p>Tổng số tín chỉ đã đăng ký: <strong>{row.credits}</strong></p>
+          <p>Điểm rèn luyện học kỳ: <strong>83.00</strong></p>
+          <p>Tổng số tín chỉ nợ tính đến hiện tại: <strong>{row.passed ? 0 : row.credits}</strong></p>
+        </div>
       </div>
     </section>
   );
@@ -471,22 +552,56 @@ const tuitionStatusMeta = {
   UNPAID: { color: 'red', label: 'Chưa đóng' },
 };
 
+const assignmentKindMeta = (assignment = {}) => {
+  const title = assignment.title || '';
+  if (/^\[?Cuối kỳ\]?/i.test(title) || /\bcuối kỳ\b/i.test(title)) {
+    return { label: 'Cuối kỳ', className: 'final' };
+  }
+  if (/^\[?Giữa kỳ\]?/i.test(title) || /\bgiữa kỳ\b/i.test(title)) {
+    return { label: 'Giữa kỳ', className: 'midterm' };
+  }
+  return { label: 'Bài tập', className: 'regular' };
+};
+
+const cleanAssignmentTitle = (title = '') => title.replace(/^\[(Giữa kỳ|Cuối kỳ)\]\s*/i, '');
+
+const averageLearningScore = (scores) => {
+  if (!scores.length) return null;
+  return scores.reduce((total, item) => total + item, 0) / scores.length;
+};
+
+const learningGradeMeta = (value = 0) => {
+  if (value >= 8.5) return { point4: 4, letter: 'A', rank: 'Giỏi' };
+  if (value >= 8) return { point4: 3.5, letter: 'B+', rank: 'Khá' };
+  if (value >= 7) return { point4: 3, letter: 'B', rank: 'Khá' };
+  if (value >= 6.5) return { point4: 2.5, letter: 'C+', rank: 'Trung bình' };
+  if (value >= 5.5) return { point4: 2, letter: 'C', rank: 'Trung bình' };
+  if (value >= 5) return { point4: 1.5, letter: 'D+', rank: 'Đạt' };
+  if (value >= 4) return { point4: 1, letter: 'D', rank: 'Yếu' };
+  return { point4: 0, letter: 'F', rank: 'Kém' };
+};
+
 const tuitionPaymentStatusMeta = {
   PENDING: { color: 'blue', label: 'Chờ xác nhận' },
   CONFIRMED: { color: 'green', label: 'Đã xác nhận' },
   REJECTED: { color: 'red', label: 'Từ chối' },
 };
 
-function StudentTuition({ mode }) {
+function StudentTuition({ mode, user }) {
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [form] = Form.useForm();
+  const [selectedLineKeys, setSelectedLineKeys] = useState([]);
+  const [paymentMethod, setPaymentMethod] = useState('VNPAY');
+  const [paymentProfile, setPaymentProfile] = useState({});
+  const [lineAmounts, setLineAmounts] = useState({});
 
   const fetchSummary = async () => {
     setLoading(true);
     try {
       const data = await getMyTuitionSummary();
       setSummary(data);
+      setSelectedLineKeys((data?.lines || []).map((line) => `${line.classId}-${line.courseId}`));
+      setLineAmounts(Object.fromEntries((data?.lines || []).map((line) => [`${line.classId}-${line.courseId}`, Number(line.amount || 0)])));
     } catch (error) {
       console.error(error);
       message.error('Không thể tải dữ liệu học phí');
@@ -499,18 +614,59 @@ function StudentTuition({ mode }) {
     fetchSummary();
   }, []);
 
-  const submitPayment = async (values) => {
+  const lines = summary?.lines || [];
+  const lineKey = (line) => `${line.classId}-${line.courseId}`;
+  const selectedLines = lines.filter((line) => selectedLineKeys.includes(lineKey(line)));
+  const selectedAmount = selectedLines.reduce((total, line) => total + Number(lineAmounts[lineKey(line)] ?? line.amount ?? 0), 0);
+  const paidAmount = Number(summary?.paidAmount || 0);
+  const pendingAmount = Number(summary?.pendingAmount || 0);
+  const debtAmount = Number(summary?.debtAmount || 0);
+  const deductionAmount = Math.min(paidAmount, selectedAmount);
+  const payableAmount = Math.max(selectedAmount - deductionAmount, 0);
+  const studentName = user?.fullName || sessionStorage.getItem('fullName') || summary?.studentName || 'Trương Công Lý';
+  const profile = {
+    studentCode: '',
+    studentName,
+    birthDate: '',
+    major: 'Công nghệ thông tin',
+    program: 'Chuẩn (đại trà)',
+    ...paymentProfile,
+  };
+
+  const updateProfile = (field, value) => {
+    setPaymentProfile((current) => ({ ...current, [field]: value }));
+  };
+
+  const updateLineAmount = (key, value) => {
+    const normalizedValue = Number(String(value).replace(/\D/g, '')) || 0;
+    setLineAmounts((current) => ({ ...current, [key]: normalizedValue }));
+  };
+
+  const toggleLine = (key) => {
+    setSelectedLineKeys((current) => (
+      current.includes(key) ? current.filter((item) => item !== key) : [...current, key]
+    ));
+  };
+
+  const submitPayment = async () => {
+    const amount = Math.max(payableAmount || selectedAmount, 0);
+    if (!amount) {
+      message.warning('Vui lòng chọn khoản học phí cần thanh toán');
+      return;
+    }
+
     try {
-      await createTuitionPaymentRequest(values);
-      message.success('Đã gửi yêu cầu nộp học phí, vui lòng chờ admin xác nhận');
-      form.resetFields();
+      await createTuitionPaymentRequest({
+        amount,
+        note: `Thanh toán học phí qua ${paymentMethod}`,
+      });
+      message.success(`Thanh toán ${paymentMethod} thành công. Đã gửi thông báo cho admin xác nhận.`);
       fetchSummary();
     } catch (error) {
       console.error(error);
       message.error(error.response?.data?.message || 'Gửi yêu cầu nộp học phí thất bại');
     }
   };
-
   return (
     <section className="panel wide feature-tuition">
       <div className="panel-heading">
@@ -518,67 +674,126 @@ function StudentTuition({ mode }) {
         <span>1 tín chỉ = {formatTuitionMoney(400000)}</span>
       </div>
 
-      <div className="metrics">
-        <div><strong>{summary?.totalCredits || 0}</strong><span>Tín chỉ</span></div>
-        <div><strong>{formatTuitionMoney(summary?.totalAmount)}</strong><span>Tổng học phí</span></div>
-        <div><strong>{formatTuitionMoney(summary?.paidAmount)}</strong><span>Đã nộp</span></div>
-        <div><strong>{formatTuitionMoney(summary?.debtAmount)}</strong><span>Còn nợ</span></div>
-      </div>
+      {mode === 'payment' && (
+        <div className="online-payment">
+          <h1>THANH TOÁN TRỰC TUYẾN</h1>
 
-      {summary?.status && (
-        <div style={{ marginBottom: 16 }}>
-          <Tag color={tuitionStatusMeta[summary.status]?.color}>{tuitionStatusMeta[summary.status]?.label || summary.status}</Tag>
-          <Tag color="blue">Chờ xác nhận: {formatTuitionMoney(summary.pendingAmount)}</Tag>
+          <div className="online-student-info">
+            <label><strong>Mã số SV:</strong><input value={profile.studentCode} onChange={(event) => updateProfile('studentCode', event.target.value)} /></label>
+            <label><strong>Họ và tên:</strong><input value={profile.studentName} onChange={(event) => updateProfile('studentName', event.target.value)} /></label>
+            <label><strong>Ngày sinh:</strong><input value={profile.birthDate} onChange={(event) => updateProfile('birthDate', event.target.value)} /></label>
+            <label><strong>Ngành:</strong><input value={profile.major} onChange={(event) => updateProfile('major', event.target.value)} /></label>
+            <label><strong>Chương trình đào tạo:</strong><input value={profile.program} onChange={(event) => updateProfile('program', event.target.value)} /></label>
+          </div>
+
+          <div className="online-payment-box">
+            <div className="online-payment-header">Các khoản đóng phí</div>
+            <div className="online-payment-body">
+              <h2>Nội dung thu</h2>
+              <div className="online-fee-list">
+                {lines.map((line) => {
+                  const key = lineKey(line);
+                  return (
+                    <label className="online-fee-item" key={key}>
+                      <input
+                        type="checkbox"
+                        checked={selectedLineKeys.includes(key)}
+                        onChange={() => toggleLine(key)}
+                      />
+                      <span>{line.courseTitle || line.className}</span>
+                      <input
+                        className="online-money-input"
+                        value={lineAmounts[key] ?? line.amount ?? 0}
+                        onChange={(event) => updateLineAmount(key, event.target.value)}
+                      />
+                    </label>
+                  );
+                })}
+                {lines.length === 0 && <p className="empty">Chưa có khoản học phí cần thanh toán.</p>}
+              </div>
+
+              <div className="online-payment-totals">
+                <label><strong>Tổng học phí:</strong><input readOnly value={formatTuitionMoney(selectedAmount)} /></label>
+                <label><strong>Dư nợ:</strong><input readOnly value={formatTuitionMoney(debtAmount)} /></label>
+                <label><strong>Khấu trừ:</strong><input readOnly value={formatTuitionMoney(deductionAmount)} /></label>
+                <label><strong>Chờ admin xác nhận:</strong><input readOnly value={formatTuitionMoney(pendingAmount)} /></label>
+                <label><strong>Số tiền phải đóng:</strong><input readOnly value={formatTuitionMoney(payableAmount)} /></label>
+                <label><strong>Số tiền thanh toán:</strong><input readOnly value={formatTuitionMoney(payableAmount)} /></label>
+              </div>
+
+              <h3>Phương thức thanh toán:</h3>
+              <div className="payment-methods">
+                <button
+                  type="button"
+                  className={`payment-method ${paymentMethod === 'VNPAY' ? 'selected' : ''}`}
+                  onClick={() => setPaymentMethod('VNPAY')}
+                >
+                  <span className="method-mark vnpay-mark">V</span>
+                  <span>VNPAY</span>
+                </button>
+                <button
+                  type="button"
+                  className={`payment-method ${paymentMethod === 'MoMo' ? 'selected' : ''}`}
+                  onClick={() => setPaymentMethod('MoMo')}
+                >
+                  <span className="method-mark momo-mark">mo<br />mo</span>
+                  <span>MoMo</span>
+                </button>
+              </div>
+
+              <Button
+                type="primary"
+                size="large"
+                icon={<DollarOutlined />}
+                loading={loading}
+                disabled={!selectedAmount}
+                onClick={submitPayment}
+                className="online-pay-button"
+              >
+                Thanh toán qua {paymentMethod}
+              </Button>
+            </div>
+          </div>
         </div>
       )}
+      {mode === 'debt' && (
+        <>
+          <Table
+            title={() => 'Chi tiết học phí theo học phần'}
+            size="small"
+            rowKey={(line) => `${line.classId}-${line.courseId}`}
+            dataSource={summary?.lines || []}
+            loading={loading}
+            pagination={false}
+            columns={[
+              { title: 'Học phần', render: (_, line) => `${line.courseCode} - ${line.courseTitle}` },
+              { title: 'Lớp', dataIndex: 'className' },
+              { title: 'Học kỳ', dataIndex: 'semester' },
+              { title: 'Tín chỉ', dataIndex: 'credits', width: 90 },
+              { title: 'Học phí', dataIndex: 'amount', render: formatTuitionMoney },
+            ]}
+            style={{ marginBottom: 24 }}
+          />
 
-      {mode === 'payment' && (
-        <Form form={form} layout="vertical" onFinish={submitPayment} style={{ maxWidth: 520, marginBottom: 24 }}>
-          <Form.Item name="amount" label="Số tiền muốn nộp" rules={[{ required: true, message: 'Vui lòng nhập số tiền' }]}>
-            <InputNumber min={1000} step={100000} style={{ width: '100%' }} formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')} />
-          </Form.Item>
-          <Form.Item name="note" label="Ghi chú">
-            <Input.TextArea rows={3} placeholder="VD: Nộp học phí học kỳ này" />
-          </Form.Item>
-          <Button type="primary" htmlType="submit" icon={<DollarOutlined />} loading={loading}>Gửi yêu cầu nộp</Button>
-        </Form>
-      )}
-
-      <Table
-        title={() => 'Chi tiết học phí theo học phần'}
-        size="small"
-        rowKey={(line) => `${line.classId}-${line.courseId}`}
-        dataSource={summary?.lines || []}
-        loading={loading}
-        pagination={false}
-        columns={[
-          { title: 'Học phần', render: (_, line) => `${line.courseCode} - ${line.courseTitle}` },
-          { title: 'Lớp', dataIndex: 'className' },
-          { title: 'Học kỳ', dataIndex: 'semester' },
-          { title: 'Tín chỉ', dataIndex: 'credits', width: 90 },
-          { title: 'Học phí', dataIndex: 'amount', render: formatTuitionMoney },
-        ]}
-        style={{ marginBottom: 24 }}
-      />
-
-      <Table
-        title={() => 'Lịch sử nộp học phí'}
-        size="small"
-        rowKey="id"
-        dataSource={summary?.payments || []}
-        loading={loading}
-        pagination={{ pageSize: 5 }}
-        columns={[
-          { title: 'Ngày tạo', dataIndex: 'createdAt', render: (value) => value ? new Date(value).toLocaleString('vi-VN') : '' },
-          { title: 'Số tiền', dataIndex: 'amount', render: formatTuitionMoney },
-          { title: 'Ghi chú', dataIndex: 'note' },
-          {
-            title: 'Trạng thái',
-            dataIndex: 'status',
-            render: (status) => <Tag color={tuitionPaymentStatusMeta[status]?.color}>{tuitionPaymentStatusMeta[status]?.label || status}</Tag>,
-          },
-        ]}
-      />
-    </section>
+          <Table
+            title={() => 'Lịch sử nộp học phí'}
+            size="small"
+            rowKey="id"
+            dataSource={summary?.payments || []}
+            loading={loading}
+            pagination={{ pageSize: 5 }}
+            columns={[
+              { title: 'Ngày tạo', dataIndex: 'createdAt', render: (value) => value ? new Date(value).toLocaleString('vi-VN') : '' },
+              { title: 'Số tiền', dataIndex: 'amount', render: formatTuitionMoney },
+              { title: 'Ghi chú', dataIndex: 'note' },
+              {
+                title: 'Trạng thái',
+                dataIndex: 'status',
+                render: (status) => <Tag color={tuitionPaymentStatusMeta[status]?.color}>{tuitionPaymentStatusMeta[status]?.label || status}</Tag>,
+              },
+            ]}
+          />
+        </>
+      )}    </section>
   );
 }
