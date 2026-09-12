@@ -4,6 +4,8 @@ import { Button, Form, Input, InputNumber, message, Modal, Popconfirm, Space, Ta
 import { DeleteOutlined, EditOutlined, PlusOutlined, ReadOutlined } from '@ant-design/icons';
 import axiosClient from '../api/axiosClient';
 
+const formatMoney = (value) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value || 0);
+
 export default function CourseManagement() {
     const [courses, setCourses] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -72,6 +74,7 @@ export default function CourseManagement() {
         { title: 'Mã học phần', dataIndex: 'code', render: (code) => <Tag color="blue">{code}</Tag> },
         { title: 'Tên học phần', dataIndex: 'title', render: (title) => <strong>{title}</strong> },
         { title: 'Số tín chỉ', dataIndex: 'credits', width: 120 },
+        { title: 'Học phí', dataIndex: 'tuitionFee', width: 160, render: formatMoney },
         {
             title: 'Hành động',
             width: 220,

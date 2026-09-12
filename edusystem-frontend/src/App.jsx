@@ -7,6 +7,7 @@ import ClassManagement from './components/ClassManagement';
 import CourseManagement from './components/CourseManagement';
 import ProtectedRoute from './components/ProtectedRoute';
 import ScheduleManagement from './components/ScheduleManagement';
+import TuitionManagement from './components/TuitionManagement';
 import UserManagement from './components/UserManagement';
 import AuthPage from './pages/AuthPage';
 import AboutPage from './pages/home/AboutPage';
@@ -159,6 +160,7 @@ function AppRoutes({ user, setUser }) {
         <Route path="courses" element={<CourseManagement />} />
         <Route path="classes" element={<ClassManagement />} />
         <Route path="schedules" element={<ScheduleManagement />} />
+        <Route path="tuitions" element={<TuitionManagement />} />
       </Route>
       <Route
         path="/teacher/*"

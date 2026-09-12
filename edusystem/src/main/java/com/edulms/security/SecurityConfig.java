@@ -48,6 +48,7 @@ public class SecurityConfig {
                 .requestMatchers("/error").permitAll()
                 .requestMatchers("/uploads/**").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/student/**").hasRole("STUDENT")
                 .requestMatchers("/api/files/download/**").permitAll()
                 .anyRequest().authenticated()
             )

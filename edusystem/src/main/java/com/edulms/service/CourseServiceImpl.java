@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
 @Service
 public class CourseServiceImpl implements CourseService {
 
+    private static final long TUITION_PER_CREDIT = 400000L;
+
     private final CourseRepository courseRepository;
 
     public CourseServiceImpl(CourseRepository courseRepository) {
@@ -63,6 +65,7 @@ public class CourseServiceImpl implements CourseService {
         response.setCode(course.getCode());
         response.setTitle(course.getTitle());
         response.setCredits(course.getCredits());
+        response.setTuitionFee((course.getCredits() == null ? 0 : course.getCredits()) * TUITION_PER_CREDIT);
         return response;
     }
 }

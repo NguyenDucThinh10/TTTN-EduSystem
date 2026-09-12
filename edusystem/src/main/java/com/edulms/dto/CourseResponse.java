@@ -8,4 +8,5 @@ public class CourseResponse {
     private String code;
     private String title;
     private Integer credits;
+    private Long tuitionFee;
 }

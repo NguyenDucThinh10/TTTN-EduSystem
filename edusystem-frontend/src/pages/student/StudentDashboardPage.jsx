@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Avatar, Badge, Breadcrumb, Button, Dropdown, Layout, Menu, Space, theme, message } from 'antd';
+import { Avatar, Badge, Breadcrumb, Button, Dropdown, Form, Input, InputNumber, Layout, Menu, Space, Table, Tag, theme, message } from 'antd';
 import {
   BarChartOutlined,
   BellOutlined,
@@ -7,6 +7,7 @@ import {
   CalendarOutlined,
   CheckSquareOutlined,
   DashboardOutlined,
+  DollarOutlined,
   FileDoneOutlined,
   LogoutOutlined,
   MenuFoldOutlined,
@@ -19,6 +20,7 @@ import {
 import ClassSelectorPanel from '../../components/ClassSelectorPanel';
 import { StudentDashboardOverview } from '../../components/DashboardOverview';
 import axiosClient from '../../api/axiosClient';
+import { createTuitionPaymentRequest, getMyTuitionSummary } from '../../api/tuitionApi';
 import useDashboardWorkflow from '../../hooks/useDashboardWorkflow';
 import { fileHref, formatDate, score, statusLabel } from '../../utils/dashboardDisplay';
 // --- BỔ SUNG: Import Component Trợ giảng AI ---
@@ -37,6 +39,8 @@ const pageTitles = {
   assignments: 'Bài tập',
   submissions: 'Bài đã nộp',
   grades: 'Điểm của tôi',
+  tuitionPayment: 'Nộp học phí',
+  tuitionDebt: 'Tra cứu công nợ',
 };
 
 const isPastDue = (dueDate) => dueDate && new Date(dueDate).getTime() < Date.now();
@@ -79,6 +83,8 @@ export default function StudentDashboardPage({ user, onLogout }) {
     { key: 'assignments', icon: <ReadOutlined />, label: 'Bài tập' },
     { key: 'submissions', icon: <FileDoneOutlined />, label: 'Bài đã nộp' },
     { key: 'grades', icon: <BarChartOutlined />, label: 'Điểm của tôi' },
+    { key: 'tuitionPayment', icon: <DollarOutlined />, label: 'Nộp học phí' },
+    { key: 'tuitionDebt', icon: <DollarOutlined />, label: 'Tra cứu công nợ' },
   ], []);
 
   const userName = user.username || 'student';
@@ -188,6 +194,8 @@ export default function StudentDashboardPage({ user, onLogout }) {
             {activeView === 'assignments' && <StudentAssignments workflow={workflow} />}
             {activeView === 'submissions' && <StudentSubmissions workflow={workflow} />}
             {activeView === 'grades' && <StudentGrades workflow={workflow} />}
+            {activeView === 'tuitionPayment' && <StudentTuition mode="payment" />}
+            {activeView === 'tuitionDebt' && <StudentTuition mode="debt" />}
           </div>
         </Content>
 
@@ -451,6 +459,126 @@ function StudentGrades({ workflow }) {
         ))}
         {(!workflow.studentGrades?.grades || workflow.studentGrades.grades.length === 0) && <p className="empty">Chưa có điểm.</p>}
       </div>
+    </section>
+  );
+}
+
+const formatTuitionMoney = (value) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value || 0);
+
+const tuitionStatusMeta = {
+  PAID: { color: 'green', label: 'Đã đóng đủ' },
+  PARTIAL: { color: 'gold', label: 'Đóng một phần' },
+  UNPAID: { color: 'red', label: 'Chưa đóng' },
+};
+
+const tuitionPaymentStatusMeta = {
+  PENDING: { color: 'blue', label: 'Chờ xác nhận' },
+  CONFIRMED: { color: 'green', label: 'Đã xác nhận' },
+  REJECTED: { color: 'red', label: 'Từ chối' },
+};
+
+function StudentTuition({ mode }) {
+  const [summary, setSummary] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [form] = Form.useForm();
+
+  const fetchSummary = async () => {
+    setLoading(true);
+    try {
+      const data = await getMyTuitionSummary();
+      setSummary(data);
+    } catch (error) {
+      console.error(error);
+      message.error('Không thể tải dữ liệu học phí');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSummary();
+  }, []);
+
+  const submitPayment = async (values) => {
+    try {
+      await createTuitionPaymentRequest(values);
+      message.success('Đã gửi yêu cầu nộp học phí, vui lòng chờ admin xác nhận');
+      form.resetFields();
+      fetchSummary();
+    } catch (error) {
+      console.error(error);
+      message.error(error.response?.data?.message || 'Gửi yêu cầu nộp học phí thất bại');
+    }
+  };
+
+  return (
+    <section className="panel wide feature-tuition">
+      <div className="panel-heading">
+        <h2>{mode === 'payment' ? 'Nộp học phí' : 'Tra cứu công nợ'}</h2>
+        <span>1 tín chỉ = {formatTuitionMoney(400000)}</span>
+      </div>
+
+      <div className="metrics">
+        <div><strong>{summary?.totalCredits || 0}</strong><span>Tín chỉ</span></div>
+        <div><strong>{formatTuitionMoney(summary?.totalAmount)}</strong><span>Tổng học phí</span></div>
+        <div><strong>{formatTuitionMoney(summary?.paidAmount)}</strong><span>Đã nộp</span></div>
+        <div><strong>{formatTuitionMoney(summary?.debtAmount)}</strong><span>Còn nợ</span></div>
+      </div>
+
+      {summary?.status && (
+        <div style={{ marginBottom: 16 }}>
+          <Tag color={tuitionStatusMeta[summary.status]?.color}>{tuitionStatusMeta[summary.status]?.label || summary.status}</Tag>
+          <Tag color="blue">Chờ xác nhận: {formatTuitionMoney(summary.pendingAmount)}</Tag>
+        </div>
+      )}
+
+      {mode === 'payment' && (
+        <Form form={form} layout="vertical" onFinish={submitPayment} style={{ maxWidth: 520, marginBottom: 24 }}>
+          <Form.Item name="amount" label="Số tiền muốn nộp" rules={[{ required: true, message: 'Vui lòng nhập số tiền' }]}>
+            <InputNumber min={1000} step={100000} style={{ width: '100%' }} formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')} />
+          </Form.Item>
+          <Form.Item name="note" label="Ghi chú">
+            <Input.TextArea rows={3} placeholder="VD: Nộp học phí học kỳ này" />
+          </Form.Item>
+          <Button type="primary" htmlType="submit" icon={<DollarOutlined />} loading={loading}>Gửi yêu cầu nộp</Button>
+        </Form>
+      )}
+
+      <Table
+        title={() => 'Chi tiết học phí theo học phần'}
+        size="small"
+        rowKey={(line) => `${line.classId}-${line.courseId}`}
+        dataSource={summary?.lines || []}
+        loading={loading}
+        pagination={false}
+        columns={[
+          { title: 'Học phần', render: (_, line) => `${line.courseCode} - ${line.courseTitle}` },
+          { title: 'Lớp', dataIndex: 'className' },
+          { title: 'Học kỳ', dataIndex: 'semester' },
+          { title: 'Tín chỉ', dataIndex: 'credits', width: 90 },
+          { title: 'Học phí', dataIndex: 'amount', render: formatTuitionMoney },
+        ]}
+        style={{ marginBottom: 24 }}
+      />
+
+      <Table
+        title={() => 'Lịch sử nộp học phí'}
+        size="small"
+        rowKey="id"
+        dataSource={summary?.payments || []}
+        loading={loading}
+        pagination={{ pageSize: 5 }}
+        columns={[
+          { title: 'Ngày tạo', dataIndex: 'createdAt', render: (value) => value ? new Date(value).toLocaleString('vi-VN') : '' },
+          { title: 'Số tiền', dataIndex: 'amount', render: formatTuitionMoney },
+          { title: 'Ghi chú', dataIndex: 'note' },
+          {
+            title: 'Trạng thái',
+            dataIndex: 'status',
+            render: (status) => <Tag color={tuitionPaymentStatusMeta[status]?.color}>{tuitionPaymentStatusMeta[status]?.label || status}</Tag>,
+          },
+        ]}
+      />
     </section>
   );
 }
