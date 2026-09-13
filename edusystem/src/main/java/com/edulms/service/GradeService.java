@@ -9,5 +9,6 @@ public interface GradeService {
     GradeResponse gradeSubmission(Long submissionId, GradeSubmissionRequest request);
     GradeResponse updateGrade(Long gradeId, UpdateGradeRequest request);
     GradeResponse getGradeBySubmission(Long submissionId);
+    StudentGradeResponse getMyGrades();
     StudentGradeResponse getStudentGrades(Long studentId, Long classId);
 }

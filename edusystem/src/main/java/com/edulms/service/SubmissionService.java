@@ -12,7 +12,7 @@ public interface SubmissionService {
     SubmissionResponse submitAssignment(Long assignmentId, MultipartFile file);
     SubmissionResponse resubmitAssignment(Long assignmentId, MultipartFile file);
     void cancelSubmission(Long submissionId);
-    List<SubmissionResponse> getMySubmissions();
+    List<SubmissionResponse> getMySubmissions(Long classId);
     List<SubmissionResponse> getSubmissionsByAssignment(Long assignmentId);
     List<SubmissionStudentResponse> getSubmissionStudents(Long assignmentId);
     SubmissionDetailResponse getSubmissionDetail(Long submissionId);

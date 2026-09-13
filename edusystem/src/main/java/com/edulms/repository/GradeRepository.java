@@ -10,5 +10,6 @@ import com.edulms.entity.Grade;
 public interface GradeRepository extends JpaRepository<Grade, Long> {
     Optional<Grade> findBySubmissionId(Long submissionId);
     List<Grade> findBySubmissionAssignmentClassEntityId(Long classId);
+    List<Grade> findBySubmissionStudentId(Long studentId);
     List<Grade> findBySubmissionStudentIdAndSubmissionAssignmentClassEntityId(Long studentId, Long classId);
 }

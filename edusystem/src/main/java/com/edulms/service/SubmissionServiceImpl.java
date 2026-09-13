@@ -130,9 +130,12 @@ public class SubmissionServiceImpl implements SubmissionService {
     }
 
     @Override
-    public List<SubmissionResponse> getMySubmissions() {
+    public List<SubmissionResponse> getMySubmissions(Long classId) {
         User user = currentUserService.getCurrentUser();
-        return submissionRepository.findByStudentId(user.getId()).stream()
+        List<Submission> submissions = classId == null
+                ? submissionRepository.findByStudentId(user.getId())
+                : submissionRepository.findByStudentIdAndAssignmentClassEntityId(user.getId(), classId);
+        return submissions.stream()
                 .map(this::mapToResponse)
                 .toList();
     }

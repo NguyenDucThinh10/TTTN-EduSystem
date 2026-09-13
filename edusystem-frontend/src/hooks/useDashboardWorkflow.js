@@ -131,14 +131,13 @@ export default function useDashboardWorkflow(user) {
 
   const loadStudentData = async (classId = selectedClassId) => {
     if (!isStudent) return;
-    const submissions = await run(() => axiosClient.get('/api/submissions/me'));
+    const submissions = await run(() => axiosClient.get('/api/submissions/me', {
+      params: classId ? { classId } : undefined,
+    }));
     if (submissions) setMySubmissions(submissions);
 
-    const studentId = user.id || submissions?.[0]?.studentId;
-    if (classId && studentId) {
-      const grades = await run(() => axiosClient.get(`/api/grades/students/${studentId}/classes/${classId}`));
-      if (grades) setStudentGrades(grades);
-    }
+    const grades = await run(() => axiosClient.get('/api/grades/me'));
+    if (grades) setStudentGrades(grades);
   };
 
   const loadClassStudents = async (classId = selectedClassId) => {

@@ -87,6 +87,15 @@ public class GradeServiceImpl implements GradeService {
     }
 
     @Override
+    public StudentGradeResponse getMyGrades() {
+        User user = currentUserService.getCurrentUser();
+        if (user.getRole() != Role.STUDENT) {
+            throw new UnauthorizedClassAccessException("Chi sinh vien duoc xem bang diem cua minh");
+        }
+        return buildStudentGradeResponse(user, null, gradeRepository.findBySubmissionStudentId(user.getId()));
+    }
+
+    @Override
     public StudentGradeResponse getStudentGrades(Long studentId, Long classId) {
         User user = currentUserService.getCurrentUser();
         if (user.getRole() == Role.STUDENT && !user.getId().equals(studentId)) {
@@ -96,6 +105,10 @@ public class GradeServiceImpl implements GradeService {
         User student = userRepository.findById(studentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sinh viên"));
         List<Grade> grades = gradeRepository.findBySubmissionStudentIdAndSubmissionAssignmentClassEntityId(studentId, classId);
+        return buildStudentGradeResponse(student, classId, grades);
+    }
+
+    private StudentGradeResponse buildStudentGradeResponse(User student, Long classId, List<Grade> grades) {
         StudentGradeResponse response = new StudentGradeResponse();
         response.setStudentId(student.getId());
         response.setStudentName(displayName(student));
@@ -139,11 +152,20 @@ public class GradeServiceImpl implements GradeService {
     private GradeResponse mapToResponse(Grade grade) {
         Submission submission = grade.getSubmission();
         Assignment assignment = submission.getAssignment();
+        var classEntity = assignment.getClassEntity();
+        var course = classEntity.getCourse();
         GradeResponse response = new GradeResponse();
         response.setId(grade.getId());
         response.setSubmissionId(submission.getId());
         response.setAssignmentId(assignment.getId());
         response.setAssignmentTitle(assignment.getTitle());
+        response.setClassId(classEntity.getId());
+        response.setClassName(classEntity.getName());
+        response.setSemester(classEntity.getSemester());
+        response.setCourseId(course.getId());
+        response.setCourseCode(course.getCode());
+        response.setCourseTitle(course.getTitle());
+        response.setCourseCredits(course.getCredits());
         response.setStudentId(submission.getStudent().getId());
         response.setStudentName(displayName(submission.getStudent()));
         response.setScore(grade.getScore());

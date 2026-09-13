@@ -1,4 +1,4 @@
--- EduSystem MySQL database schema and demo data
+﻿-- EduSystem MySQL database schema and demo data
 -- Import with:
 -- mysql --default-character-set=utf8mb4 -u root -p < database-edulms-full.sql
 
@@ -221,35 +221,12 @@ INSERT INTO materials (id, class_id, uploader_id, title, description, file_name,
   (2, 4, 2, 'Tài liệu kỹ thuật lập trình C++', 'Tài liệu hướng dẫn cấu trúc điều kiện, vòng lặp và mảng trong C++.', 'ky-thuat-lap-trinh-cpp.pdf', '/uploads/materials/ky-thuat-lap-trinh-cpp.pdf', 'PDF', 1, '2026-09-01 08:30:00'),
   (3, 5, 2, 'Tài liệu HTML, CSS và JavaScript', 'Tài liệu phục vụ học phần lập trình web.', 'html-css-javascript.pdf', '/uploads/materials/html-css-javascript.pdf', 'PDF', 1, '2026-09-01 08:30:00');
 
-INSERT INTO assignments (id, class_id, title, description, file_url, due_date, max_score, weight, status, created_at) VALUES
-  (1, 3, 'Bài tập 1 - Tìm hiểu ngành CNTT', 'Viết báo cáo ngắn về các lĩnh vực trong ngành Công nghệ thông tin.', '/uploads/assignments/bt1-cntt.pdf', '2026-09-15 23:59:00', 10, 1, 'PUBLISHED', '2026-09-01 09:00:00.000000'),
-  (2, 4, 'Bài tập 1 - Cấu trúc điều kiện và vòng lặp', 'Viết chương trình sử dụng câu lệnh điều kiện, vòng lặp for và while.', '/uploads/assignments/bt1-lap-trinh.pdf', '2026-09-18 23:59:00', 10, 1, 'PUBLISHED', '2026-09-01 09:00:00.000000'),
-  (3, 5, 'Bài tập 1 - Thiết kế trang web cá nhân', 'Xây dựng trang web cá nhân bằng HTML, CSS và JavaScript.', '/uploads/assignments/bt1-web.pdf', '2026-09-20 23:59:00', 10, 1, 'PUBLISHED', '2026-09-01 09:00:00.000000'),
-  (4, 1, 'Bài tập 1 - Lập trình hướng đối tượng', 'Xây dựng chương trình quản lý sinh viên sử dụng lớp, đối tượng, kế thừa và đóng gói.', '/uploads/assignments/oop-bt1.pdf', '2026-09-18 23:59:00', 10, 1, 'PUBLISHED', '2026-09-01 09:00:00.000000'),
-  (5, 1, 'Bài tập 2 - Thiết kế sơ đồ lớp', 'Vẽ sơ đồ lớp cho hệ thống quản lý học tập và mô tả các quan hệ giữa các lớp.', '/uploads/assignments/oop-bt2-class-diagram.pdf', '2026-09-25 23:59:00', 10, 1, 'PUBLISHED', '2026-09-01 09:00:00.000000'),
-  (6, 1, 'Bài tập 3 - Xây dựng project Java', 'Hoàn thiện project Java theo mô hình phân lớp và nộp mã nguồn chương trình.', '/uploads/assignments/oop-bt3-java-project.pdf', '2026-10-02 23:59:00', 10, 1, 'PUBLISHED', '2026-09-01 09:00:00.000000'),
-  (7, 2, 'Bài tập 1 - Thiết kế ERD', 'Thiết kế biểu đồ ERD cho hệ thống quản lý đào tạo.', '/uploads/assignments/db-bt1-erd.pdf', '2026-09-22 23:59:00', 10, 1, 'PUBLISHED', '2026-09-01 09:00:00.000000'),
-  (8, 2, 'Bài tập 2 - Truy vấn SQL cơ bản', 'Viết các câu lệnh SELECT, JOIN, GROUP BY để truy vấn dữ liệu.', '/uploads/assignments/db-bt2-sql.pdf', '2026-09-29 23:59:00', 10, 1, 'PUBLISHED', '2026-09-01 09:00:00.000000');
-
-INSERT INTO submissions (id, assignment_id, student_id, file_url, submitted_at, is_late, score, feedback, graded_at, status) VALUES
-  (1, 1, 5, '/uploads/submissions/student-bt1-cntt.pdf', '2026-09-10 09:30:00', 0, 8.5, 'Bài làm đầy đủ nội dung, trình bày rõ ràng.', '2026-09-11 08:00:00', 'GRADED'),
-  (2, 2, 5, '/uploads/submissions/student-bt1-lap-trinh.pdf', '2026-09-16 14:20:00', 0, 9.0, 'Chương trình chạy đúng yêu cầu.', '2026-09-17 09:00:00', 'GRADED'),
-  (3, 3, 5, '/uploads/submissions/student-bt1-web.pdf', '2026-09-18 16:45:00', 0, NULL, NULL, NULL, 'SUBMITTED'),
-  (4, 4, 5, '/uploads/submissions/student-oop-bt1.pdf', '2026-09-15 09:30:00', 0, 8.5, 'Bài làm đúng yêu cầu, cần trình bày code rõ hơn.', '2026-09-16 08:00:00', 'GRADED'),
-  (5, 4, 6, '/uploads/submissions/student2-oop-bt1.pdf', '2026-09-16 10:15:00', 0, NULL, NULL, NULL, 'SUBMITTED'),
-  (6, 5, 7, '/uploads/submissions/student3-oop-bt2.pdf', '2026-09-20 14:20:00', 0, NULL, NULL, NULL, 'SUBMITTED');
-
-INSERT INTO grades (id, feedback, graded_at, graded_by, score, submission_id) VALUES
-  (1, 'Bài làm đầy đủ nội dung, trình bày rõ ràng.', '2026-09-11 08:00:00.000000', 'teacher1', 8.5, 1),
-  (2, 'Chương trình chạy đúng yêu cầu.', '2026-09-17 09:00:00.000000', 'teacher1', 9.0, 2),
-  (3, 'Bài làm đúng yêu cầu, cần trình bày code rõ hơn.', '2026-09-16 08:00:00.000000', 'teacher1', 8.5, 4);
-
 ALTER TABLE users AUTO_INCREMENT = 10;
 ALTER TABLE courses AUTO_INCREMENT = 9;
 ALTER TABLE classes AUTO_INCREMENT = 8;
 ALTER TABLE enrollments AUTO_INCREMENT = 12;
 ALTER TABLE schedules AUTO_INCREMENT = 6;
 ALTER TABLE materials AUTO_INCREMENT = 4;
-ALTER TABLE assignments AUTO_INCREMENT = 9;
-ALTER TABLE submissions AUTO_INCREMENT = 7;
-ALTER TABLE grades AUTO_INCREMENT = 4;
+ALTER TABLE assignments AUTO_INCREMENT = 1;
+ALTER TABLE submissions AUTO_INCREMENT = 1;
+ALTER TABLE grades AUTO_INCREMENT = 1;

@@ -46,6 +46,11 @@ public class GradeController {
         return ResponseEntity.ok(gradeService.getGradeBySubmission(submissionId));
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<StudentGradeResponse> getMyGrades() {
+        return ResponseEntity.ok(gradeService.getMyGrades());
+    }
+
     @GetMapping("/students/{studentId}/classes/{classId}")
     public ResponseEntity<StudentGradeResponse> getStudentGrades(
             @PathVariable Long studentId,

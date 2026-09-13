@@ -50,8 +50,8 @@ public class SubmissionController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<List<SubmissionResponse>> getMySubmissions() {
-        return ResponseEntity.ok(submissionService.getMySubmissions());
+    public ResponseEntity<List<SubmissionResponse>> getMySubmissions(@RequestParam(required = false) Long classId) {
+        return ResponseEntity.ok(submissionService.getMySubmissions(classId));
     }
 
     @GetMapping("/assignments/{assignmentId}")

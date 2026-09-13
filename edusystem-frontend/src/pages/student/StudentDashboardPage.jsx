@@ -96,7 +96,7 @@ export default function StudentDashboardPage({ user, onLogout }) {
     ],
   };
 
-  const showClassSelector = ['attendance', 'assignments', 'submissions', 'grades'].includes(activeView);
+  const showClassSelector = ['attendance', 'assignments', 'submissions'].includes(activeView);
 
   useEffect(() => {
     axiosClient.get('/api/schedules/me')
@@ -448,36 +448,17 @@ function StudentSubmissions({ workflow }) {
 
 function StudentGrades({ workflow }) {
   const grades = workflow.studentGrades?.grades || [];
-  const selectedClass = workflow.selectedClass || {};
-  const byKind = grades.reduce((groups, grade) => {
-    const kind = assignmentKindMeta({ title: grade.assignmentTitle }).className;
-    const maxScore = Number(grade.maxScore || 10);
-    const normalizedScore = maxScore > 0 ? (Number(grade.score || 0) / maxScore) * 10 : Number(grade.score || 0);
-    groups[kind].push(normalizedScore);
-    return groups;
-  }, { regular: [], midterm: [], final: [] });
-  const regularScore = averageLearningScore(byKind.regular);
-  const midtermScore = averageLearningScore(byKind.midterm);
-  const finalScore = averageLearningScore(byKind.final);
-  const processScore = regularScore == null && midtermScore == null
-    ? null
-    : (((regularScore ?? 0) * 0.2) + ((midtermScore ?? 0) * 0.3)) / 0.5;
-  const finalSummaryScore = ((regularScore ?? 0) * 0.2) + ((midtermScore ?? 0) * 0.3) + ((finalScore ?? 0) * 0.5);
-  const gradeMeta = learningGradeMeta(finalSummaryScore);
-  const row = {
-    code: selectedClass.courseCode || workflow.studentGrades?.className || selectedClass.name || '-',
-    title: selectedClass.courseTitle || selectedClass.name || workflow.studentGrades?.className || '-',
-    credits: selectedClass.courseCredits ?? '-',
-    processScore,
-    finalScore,
-    finalSummaryScore,
-    gradeMeta,
-    passed: finalSummaryScore >= 5,
-  };
+  const rows = buildLearningRows(grades);
+  const totalCredits = rows.reduce((total, row) => total + Number(row.credits || 0), 0);
+  const passedCredits = rows.reduce((total, row) => total + (row.passed ? Number(row.credits || 0) : 0), 0);
+  const averageScore10 = weightedAverage(rows, 'finalSummaryScore');
+  const averageScore4 = weightedAverage(rows, 'point4');
+  const averageMeta = learningGradeMeta(averageScore10 || 0);
+  const semesterLabel = rows[0]?.semester || 'Tất cả học kỳ';
 
   return (
     <section className="panel wide feature-grades learning-result-panel">
-      <div className="panel-heading"><h2>Kết quả học tập</h2><span>{selectedClass.semester || 'Học kỳ hiện tại'}</span></div>
+      <div className="panel-heading"><h2>Kết quả học tập</h2><span>{semesterLabel}</span></div>
       <div className="learning-tabs">
         <button type="button" className="active">Bảng điểm học tập</button>
       </div>
@@ -501,49 +482,105 @@ function StudentGrades({ workflow }) {
               </tr>
             </thead>
             <tbody>
-              <tr className="semester-row">
-                <td colSpan="12">{selectedClass.semester || 'Học kỳ hiện tại'}</td>
-              </tr>
-              {grades.length > 0 ? (
-                <tr>
-                  <td>1</td>
+              {rows.length > 0 ? rows.map((row, index) => (
+                <tr key={row.key}>
+                  <td>{index + 1}</td>
                   <td>{row.code}</td>
                   <td>{row.title}</td>
                   <td>{row.credits}</td>
                   <td>{row.processScore == null ? '-' : score(row.processScore)}</td>
                   <td>{row.finalScore == null ? '-' : score(row.finalScore)}</td>
                   <td>{score(row.finalSummaryScore)}</td>
-                  <td>{row.gradeMeta.point4.toFixed(2)}</td>
+                  <td>{row.point4.toFixed(2)}</td>
                   <td>{row.gradeMeta.letter}</td>
                   <td>{row.gradeMeta.rank}</td>
                   <td>{row.passed ? '✓' : '-'}</td>
                   <td>{row.passed ? '' : 'Chưa đạt'}</td>
                 </tr>
-              ) : (
+              )) : (
                 <tr>
-                  <td colSpan="12" className="learning-empty">Chưa có điểm.</td>
+                  <td colSpan="12" className="learning-empty">Chưa có điểm tổng kết.</td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
         <div className="learning-summary">
-          <p>Điểm trung bình học kỳ (hệ 10): <strong>{grades.length ? score(row.finalSummaryScore) : '-'}</strong></p>
-          <p>Điểm trung bình tích lũy (hệ 10): <strong>{grades.length ? score(row.finalSummaryScore) : '-'}</strong></p>
-          <p>Điểm trung bình học kỳ (hệ 4): <strong>{grades.length ? row.gradeMeta.point4.toFixed(2) : '-'}</strong></p>
-          <p>Điểm trung bình tích lũy (hệ 4): <strong>{grades.length ? row.gradeMeta.point4.toFixed(2) : '-'}</strong></p>
-          <p>Xếp loại học lực học kỳ: <strong>{grades.length ? row.gradeMeta.rank : '-'}</strong></p>
-          <p>Xếp loại học lực tích lũy: <strong>{grades.length ? row.gradeMeta.rank : '-'}</strong></p>
-          <p>Tổng số tín chỉ học kỳ đạt: <strong>{row.passed ? row.credits : 0}</strong></p>
-          <p>Tổng số tín chỉ đã đăng ký: <strong>{row.credits}</strong></p>
+          <p>Điểm trung bình học kỳ (hệ 10): <strong>{rows.length ? score(averageScore10) : '-'}</strong></p>
+          <p>Điểm trung bình tích lũy (hệ 10): <strong>{rows.length ? score(averageScore10) : '-'}</strong></p>
+          <p>Điểm trung bình học kỳ (hệ 4): <strong>{rows.length ? averageScore4.toFixed(2) : '-'}</strong></p>
+          <p>Điểm trung bình tích lũy (hệ 4): <strong>{rows.length ? averageScore4.toFixed(2) : '-'}</strong></p>
+          <p>Xếp loại học lực học kỳ: <strong>{rows.length ? averageMeta.rank : '-'}</strong></p>
+          <p>Xếp loại học lực tích lũy: <strong>{rows.length ? averageMeta.rank : '-'}</strong></p>
+          <p>Tổng số tín chỉ học kỳ đạt: <strong>{passedCredits}</strong></p>
+          <p>Tổng số tín chỉ đã đăng ký: <strong>{totalCredits}</strong></p>
           <p>Điểm rèn luyện học kỳ: <strong>83.00</strong></p>
-          <p>Tổng số tín chỉ nợ tính đến hiện tại: <strong>{row.passed ? 0 : row.credits}</strong></p>
+          <p>Tổng số tín chỉ nợ tính đến hiện tại: <strong>{totalCredits - passedCredits}</strong></p>
         </div>
       </div>
     </section>
   );
 }
 
+const buildLearningRows = (grades) => {
+  const groups = new Map();
+  grades.forEach((grade) => {
+    const key = grade.classId || grade.courseId || grade.assignmentId;
+    if (!groups.has(key)) {
+      groups.set(key, {
+        key,
+        classId: grade.classId,
+        code: grade.courseCode || grade.className || '-',
+        title: grade.courseTitle || grade.className || '-',
+        credits: grade.courseCredits ?? '-',
+        semester: grade.semester,
+        grades: [],
+      });
+    }
+    groups.get(key).grades.push(grade);
+  });
+
+  return Array.from(groups.values())
+    .map((group) => {
+      const byKind = group.grades.reduce((items, grade) => {
+        const kind = assignmentKindMeta({ title: grade.assignmentTitle }).className;
+        const maxScore = Number(grade.maxScore || 10);
+        const normalizedScore = maxScore > 0 ? (Number(grade.score || 0) / maxScore) * 10 : Number(grade.score || 0);
+        items[kind].push(normalizedScore);
+        return items;
+      }, { regular: [], midterm: [], final: [] });
+      const regularScore = averageLearningScore(byKind.regular);
+      const midtermScore = averageLearningScore(byKind.midterm);
+      const finalScore = averageLearningScore(byKind.final);
+      if (finalScore == null) return null;
+      const processScore = regularScore == null && midtermScore == null
+        ? null
+        : (((regularScore ?? 0) * 0.2) + ((midtermScore ?? 0) * 0.3)) / 0.5;
+      const finalSummaryScore = ((regularScore ?? 0) * 0.2) + ((midtermScore ?? 0) * 0.3) + (finalScore * 0.5);
+      const gradeMeta = learningGradeMeta(finalSummaryScore);
+      return {
+        ...group,
+        processScore,
+        finalScore,
+        finalSummaryScore,
+        point4: gradeMeta.point4,
+        gradeMeta,
+        passed: finalSummaryScore >= 5,
+      };
+    })
+    .filter(Boolean);
+};
+
+const weightedAverage = (rows, field) => {
+  const totals = rows.reduce((acc, row) => {
+    const credits = Number(row.credits || 0) || 1;
+    return {
+      credits: acc.credits + credits,
+      score: acc.score + (Number(row[field] || 0) * credits),
+    };
+  }, { credits: 0, score: 0 });
+  return totals.credits ? totals.score / totals.credits : 0;
+};
 const formatTuitionMoney = (value) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value || 0);
 
 const tuitionStatusMeta = {

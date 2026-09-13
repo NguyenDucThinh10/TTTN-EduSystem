@@ -18,8 +18,10 @@ export const submissionApi = {
   cancel(submissionId) {
     return axiosClient.delete(`/api/submissions/${submissionId}`);
   },
-  mySubmissions() {
-    return axiosClient.get('/api/submissions/me');
+  mySubmissions(classId) {
+    return axiosClient.get('/api/submissions/me', {
+      params: classId ? { classId } : undefined,
+    });
   },
   listByAssignment(assignmentId) {
     return axiosClient.get(`/api/submissions/assignments/${assignmentId}`);

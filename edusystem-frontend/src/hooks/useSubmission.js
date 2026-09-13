@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { submissionService } from '../services/submissionService';
 
-export function useSubmission({ assignmentId, mine = false } = {}) {
+export function useSubmission({ assignmentId, classId, mine = false } = {}) {
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -12,7 +12,7 @@ export function useSubmission({ assignmentId, mine = false } = {}) {
     setError('');
     try {
       const data = mine
-        ? await submissionService.mySubmissions()
+        ? await submissionService.mySubmissions(classId)
         : assignmentId
           ? await submissionService.listByAssignment(assignmentId)
           : [];
@@ -24,7 +24,7 @@ export function useSubmission({ assignmentId, mine = false } = {}) {
     } finally {
       setLoading(false);
     }
-  }, [assignmentId, mine]);
+  }, [assignmentId, classId, mine]);
 
   useEffect(() => {
     refresh();
