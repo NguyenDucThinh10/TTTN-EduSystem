@@ -185,6 +185,4 @@ POST   /api/ai/ask-tutor
 - Khi triển khai thực tế, nên chuyển thông tin nhạy cảm sang biến môi trường.
 - Chức năng quản lý học phí và nộp học phí đang được định hướng bổ sung trong giai đoạn phát triển tiếp theo.
 
-## Tác giả
 
-Dự án được phát triển phục vụ đề tài thực tập tốt nghiệp: **Xây dựng hệ thống quản lý học tập EduSystem**.
