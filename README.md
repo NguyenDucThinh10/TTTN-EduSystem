@@ -1,4 +1,4 @@
-# TTTN-EduSystem
+# PHÁT TRIỂN HỆ THỐNG HỖ TRỢ QUẢN LÝ HOẠT ĐỘNG HỌC TẬP VÀ ĐÁNH GIÁ KẾT QUẢ CỦA SINH VIÊN TẠI CƠ SƠ ĐÀO TẠO
 
 EduSystem là hệ thống quản lý học tập phục vụ đề tài thực tập tốt nghiệp. Hệ thống được xây dựng theo mô hình Client - Server, hỗ trợ quản lý đào tạo, lớp học, bài tập, bài nộp, điểm số, điểm danh, tài liệu học tập, thống kê và AI hỗ trợ học tập.
 

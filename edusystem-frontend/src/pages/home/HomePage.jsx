@@ -28,7 +28,7 @@ export default function HomePage({ user, onLogout }) {
         <section className="home-hero">
           <div className="home-hero-content">
             <p className="home-eyebrow">EduLMS Portal</p>
-            <h1>Hệ thống quản lý học tập hiện đại cho nhà trường</h1>
+            <h1>Hệ thống hỗ trợ quản lý hoạt động học tập và đánh giá sinh viên </h1>
             <p>
               Kết nối giảng viên và sinh viên qua lớp học số, bài tập, nộp bài, chấm điểm và thông báo học vụ trong một nền tảng thống nhất.
             </p>

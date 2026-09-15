@@ -169,7 +169,7 @@ export const supportChannels = [
   },
   {
     title: 'Hotline học vụ',
-    value: '028 1234 5678',
+    value: '031 245 6789',
     detail: 'Hỗ trợ lịch học, lớp học, bài tập và điểm số.',
   },
   {
