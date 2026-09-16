@@ -29,7 +29,7 @@ import './TeacherDashboard.css';
 const { Header, Sider, Content, Footer } = Layout;
 
 const pageTitles = {
-  overview: 'Tổng quan',
+  overview: 'Tổng quan giảng viên',
   classes: 'Lớp phụ trách',
   schedule: 'Thời khóa biểu',
   attendance: 'Điểm danh',
@@ -76,6 +76,7 @@ export default function TeacherDashboardPage({ user, onLogout }) {
   const workflow = useDashboardWorkflow(user);
   const [collapsed, setCollapsed] = useState(false);
   const [activeView, setActiveView] = useState('overview');
+  const [profile, setProfile] = useState(user);
   const [schedules, setSchedules] = useState([]);
   const [attendanceRecords, setAttendanceRecords] = useState([]);
   const [attendanceDate, setAttendanceDate] = useState(new Date().toISOString().slice(0, 10));
@@ -104,6 +105,12 @@ export default function TeacherDashboardPage({ user, onLogout }) {
   };
 
   const showClassSelector = activeView !== 'overview';
+
+  useEffect(() => {
+    axiosClient.get('/api/me')
+      .then((data) => setProfile(data || user))
+      .catch(() => message.error('Không thể tải thông tin cá nhân'));
+  }, [user]);
 
   useEffect(() => {
     axiosClient.get('/api/schedules/me')
@@ -187,7 +194,7 @@ export default function TeacherDashboardPage({ user, onLogout }) {
             )}
             {workflow.notice && <div className="notice">{workflow.notice}</div>}
             {workflow.loading && <div className="loading-line">Đang tải dữ liệu...</div>}
-            {activeView === 'overview' && <TeacherOverview workflow={workflow} />}
+            {activeView === 'overview' && <TeacherOverview workflow={workflow} profile={profile} />}
             {activeView === 'classes' && <TeacherClasses workflow={workflow} />}
             {activeView === 'schedule' && <TeacherSchedule workflow={workflow} schedules={schedules} />}
             {activeView === 'attendance' && (
@@ -212,8 +219,38 @@ export default function TeacherDashboardPage({ user, onLogout }) {
   );
 }
 
-function TeacherOverview({ workflow }) {
-  return <TeacherDashboardOverview workflow={workflow} />;
+function TeacherOverview({ workflow, profile }) {
+  return (
+    <div className="overview-profile-stack">
+      <ProfileSummary profile={profile} codeLabel="MSGV" title={'Th\u00f4ng tin gi\u1ea3ng vi\u00ean'} />
+      <TeacherDashboardOverview workflow={workflow} hideHeading />
+    </div>
+  );
+}
+
+function ProfileSummary({ profile, codeLabel, title }) {
+  return (
+    <section className="panel profile-summary-panel">
+      <div className="panel-heading">
+        <h2>{title}</h2>
+        <span>{profile?.role || 'TEACHER'}</span>
+      </div>
+      <div className="profile-summary-grid">
+        <div>
+          <span>{'H\u1ecd v\u00e0 t\u00ean'}</span>
+          <strong>{profile?.fullName || '-'}</strong>
+        </div>
+        <div>
+          <span>Email</span>
+          <strong>{profile?.email || '-'}</strong>
+        </div>
+        <div>
+          <span>{codeLabel}</span>
+          <strong>{profile?.username || '-'}</strong>
+        </div>
+      </div>
+    </section>
+  );
 }
 
 function TeacherClasses({ workflow }) {

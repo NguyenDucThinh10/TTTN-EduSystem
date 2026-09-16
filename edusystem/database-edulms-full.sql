@@ -171,7 +171,7 @@ INSERT INTO users (id, username, email, password_hash, full_name, role, status) 
   (2, 'teacher1', 'teacher1@edulms.com', '$2a$10$bMZ5348hyETVxRYnSzo2Ue.PZx4eV1yIvfEYHZ8HxM1Cenk5QwI/O', 'Nguyễn Đức Thịnh', 'TEACHER', 'ACTIVE'),
   (3, 'teacher2', 'teacher2@edulms.com', '$2a$10$bMZ5348hyETVxRYnSzo2Ue.PZx4eV1yIvfEYHZ8HxM1Cenk5QwI/O', 'Nguyễn Văn Minh', 'TEACHER', 'ACTIVE'),
   (4, 'teacher3', 'teacher3@edulms.com', '$2a$10$bMZ5348hyETVxRYnSzo2Ue.PZx4eV1yIvfEYHZ8HxM1Cenk5QwI/O', 'Trần Thị Thu Hà', 'TEACHER', 'ACTIVE'),
-  (5, 'student', 'student@edulms.com', '$2a$10$0pb/g8krAYiINpdSks0jQOY0YuwEqzMxPlXCI.mIUjvi/.j3y7l1O', 'Trương Công Lý', 'STUDENT', 'ACTIVE'),
+  (5, 'student1', 'student1@edulms.com', '$2a$10$0pb/g8krAYiINpdSks0jQOY0YuwEqzMxPlXCI.mIUjvi/.j3y7l1O', 'Trương Công Lý', 'STUDENT', 'ACTIVE'),
   (6, 'student2', 'student2@edulms.com', '$2a$10$0pb/g8krAYiINpdSks0jQOY0YuwEqzMxPlXCI.mIUjvi/.j3y7l1O', 'Nguyễn Hoàng Anh', 'STUDENT', 'ACTIVE'),
   (7, 'student3', 'student3@edulms.com', '$2a$10$0pb/g8krAYiINpdSks0jQOY0YuwEqzMxPlXCI.mIUjvi/.j3y7l1O', 'Lê Đức Anh', 'STUDENT', 'ACTIVE'),
   (8, 'student4', 'student4@edulms.com', '$2a$10$0pb/g8krAYiINpdSks0jQOY0YuwEqzMxPlXCI.mIUjvi/.j3y7l1O', 'Phạm Thảo Vy', 'STUDENT', 'ACTIVE'),
@@ -188,8 +188,8 @@ INSERT INTO courses (id, code, title, credits) VALUES
   (8, 'IT304', 'Phân tích thiết kế hệ thống', 3);
 
 INSERT INTO classes (id, course_id, teacher_id, name, semester, status) VALUES
-  (1, 1, 2, 'XDPM-OOP-K1', 'Học kỳ 1 - 2026', 'ONGOING'),
-  (2, 2, 2, 'DB-Theory-K1', 'Học kỳ 1 - 2026', 'ONGOING'),
+  (1, 1, 2, 'XDPM-OOP-K1', 'HK1 2026-2027', 'ONGOING'),
+  (2, 2, 2, 'DB-Theory-K1', 'HK1 2026-2027', 'ONGOING'),
   (3, 4, 2, 'IT101-01', 'HK1 2026-2027', 'ONGOING'),
   (4, 5, 2, 'IT102-01', 'HK1 2026-2027', 'ONGOING'),
   (5, 6, 2, 'IT202-01', 'HK1 2026-2027', 'ONGOING'),

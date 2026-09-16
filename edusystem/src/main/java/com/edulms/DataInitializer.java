@@ -42,6 +42,8 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) {
         if (userRepository.count() != 0) {
+            migrateLegacyStudentUsername();
+            migrateLegacySemesters();
             return;
         }
 
@@ -49,7 +51,7 @@ public class DataInitializer implements CommandLineRunner {
         User teacher = user("teacher1", "123456", "Nguyễn Đức Thịnh", "teacher1@edulms.com", Role.TEACHER);
         User teacher2 = user("teacher2", "123456", "Nguyễn Văn Minh", "teacher2@edulms.com", Role.TEACHER);
         User teacher3 = user("teacher3", "123456", "Trần Thị Thu Hà", "teacher3@edulms.com", Role.TEACHER);
-        User student = user("student", "123456", "Trương Công Lý", "student@edulms.com", Role.STUDENT);
+        User student = user("student1", "123456", "Trương Công Lý", "student1@edulms.com", Role.STUDENT);
         User student2 = user("student2", "123456", "Nguyễn Hoàng Anh", "student2@edulms.com", Role.STUDENT);
         User student3 = user("student3", "123456", "Lê Đức Anh", "student3@edulms.com", Role.STUDENT);
         User student4 = user("student4", "123456", "Phạm Thảo Vy", "student4@edulms.com", Role.STUDENT);
@@ -68,8 +70,8 @@ public class DataInitializer implements CommandLineRunner {
 
         courseRepository.saveAll(List.of(course1, course2, course3, it101, it102, it202, it303, it304));
 
-        ClassEntity oopClass = new ClassEntity(null, course1, teacher, "XDPM-OOP-K1", "Học kỳ 1 - 2026", ClassStatus.ONGOING);
-        ClassEntity dbClass = new ClassEntity(null, course2, teacher, "DB-Theory-K1", "Học kỳ 1 - 2026", ClassStatus.ONGOING);
+        ClassEntity oopClass = new ClassEntity(null, course1, teacher, "XDPM-OOP-K1", "HK1 2026-2027", ClassStatus.ONGOING);
+        ClassEntity dbClass = new ClassEntity(null, course2, teacher, "DB-Theory-K1", "HK1 2026-2027", ClassStatus.ONGOING);
         ClassEntity it101Class = new ClassEntity(null, it101, teacher, "IT101-01", "HK1 2026-2027", ClassStatus.ONGOING);
         ClassEntity it102Class = new ClassEntity(null, it102, teacher, "IT102-01", "HK1 2026-2027", ClassStatus.ONGOING);
         ClassEntity it202Class = new ClassEntity(null, it202, teacher, "IT202-01", "HK1 2026-2027", ClassStatus.ONGOING);
@@ -112,6 +114,29 @@ public class DataInitializer implements CommandLineRunner {
         ));
 
         System.out.println("====== MOCK DATA INITIALIZED SUCCESSFULLY ======");
+    }
+
+    private void migrateLegacyStudentUsername() {
+        if (userRepository.findByUsername("student1").isPresent()) {
+            return;
+        }
+
+        userRepository.findByUsername("student").ifPresent(student -> {
+            student.setUsername("student1");
+            student.setEmail("student1@edulms.com");
+            userRepository.save(student);
+        });
+    }
+
+    private void migrateLegacySemesters() {
+        List<ClassEntity> classesToUpdate = classRepository.findAll().stream()
+                .filter(classEntity -> "Học kỳ 1 - 2026".equals(classEntity.getSemester()))
+                .toList();
+
+        classesToUpdate.forEach(classEntity -> classEntity.setSemester("HK1 2026-2027"));
+        if (!classesToUpdate.isEmpty()) {
+            classRepository.saveAll(classesToUpdate);
+        }
     }
 
     private User user(String username, String password, String fullName, String email, Role role) {

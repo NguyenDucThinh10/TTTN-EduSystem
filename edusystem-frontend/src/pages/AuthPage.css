@@ -78,3 +78,50 @@ form .linkTxt{ font-size: 14px; color: var(--black); text-align: center; margin:
 /* --- Đã tăng width (900px) và height (800px) --- */
 .wrapper .rotate-bg2{ position: absolute; top: 100%; left: 150px; width: 900px; height: 800px; background: var(--white); transform: rotate(0) skewY(0); transform-origin: bottom left; transition: 1.5s ease; transition-delay: 0.5s; }
 .wrapper.active .rotate-bg2{ transform: rotate(-11deg) skewY(-40deg); transition-delay: 1.2s; }
+
+.auth-error-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: grid;
+    place-items: start center;
+    padding-top: 40px;
+    background: rgba(15, 23, 42, 0.12);
+}
+
+.auth-error-modal {
+    width: min(520px, calc(100vw - 32px));
+    padding: 24px;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.22);
+}
+
+.auth-error-modal h3 {
+    margin: 0 0 14px;
+    color: #111827;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.auth-error-modal p {
+    margin: 0 0 24px;
+    color: #111827;
+    font-size: 15px;
+}
+
+.auth-error-modal button {
+    display: block;
+    width: auto;
+    min-width: 58px;
+    height: 42px;
+    margin-left: auto;
+    padding: 0 18px;
+    border: 0;
+    border-radius: 10px;
+    background: #1f1f1f;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+}

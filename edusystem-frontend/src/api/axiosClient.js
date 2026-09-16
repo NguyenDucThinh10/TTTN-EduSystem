@@ -31,7 +31,9 @@ axiosClient.interceptors.response.use(
   (error) => {
 
     // Xử lý lỗi 401 (Chưa đăng nhập hoặc Token giả/hết hạn)
-    if (error.response && error.response.status === 401) {
+    const isAuthRequest = error.config?.url?.includes('/api/auth/');
+
+    if (error.response && error.response.status === 401 && !isAuthRequest) {
       console.error("Token hết hạn hoặc không hợp lệ!");
       
       // [BỔ SUNG] Dọn sạch két sắt khi bị đá ra ngoài

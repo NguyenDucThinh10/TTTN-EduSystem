@@ -31,7 +31,7 @@ import './StudentDashboard.css';
 const { Header, Sider, Content, Footer } = Layout;
 
 const pageTitles = {
-  overview: 'Tổng quan',
+  overview: 'Tổng quan sinh viên',
   registration: 'Đăng ký học phần',
   classes: 'Lớp của tôi',
   schedule: 'Thời khóa biểu',
@@ -67,6 +67,7 @@ export default function StudentDashboardPage({ user, onLogout }) {
   const workflow = useDashboardWorkflow(user);
   const [collapsed, setCollapsed] = useState(false);
   const [activeView, setActiveView] = useState('overview');
+  const [profile, setProfile] = useState(user);
   const [schedules, setSchedules] = useState([]);
   const [attendanceRecords, setAttendanceRecords] = useState([]);
   const [attendanceDate, setAttendanceDate] = useState(new Date().toISOString().slice(0, 10));
@@ -97,6 +98,12 @@ export default function StudentDashboardPage({ user, onLogout }) {
   };
 
   const showClassSelector = ['attendance', 'assignments', 'submissions'].includes(activeView);
+
+  useEffect(() => {
+    axiosClient.get('/api/me')
+      .then((data) => setProfile(data || user))
+      .catch(() => message.error('Không thể tải thông tin cá nhân'));
+  }, [user]);
 
   useEffect(() => {
     axiosClient.get('/api/schedules/me')
@@ -178,7 +185,7 @@ export default function StudentDashboardPage({ user, onLogout }) {
             )}
             {workflow.notice && <div className="notice">{workflow.notice}</div>}
             {workflow.loading && <div className="loading-line">Đang tải dữ liệu...</div>}
-            {activeView === 'overview' && <StudentOverview workflow={workflow} />}
+            {activeView === 'overview' && <StudentOverview workflow={workflow} profile={profile} />}
             {activeView === 'registration' && <CourseRegistration workflow={workflow} />}
             {activeView === 'classes' && <MyClasses workflow={workflow} />}
             {activeView === 'schedule' && <StudentSchedule schedules={schedules} />}
@@ -205,8 +212,38 @@ export default function StudentDashboardPage({ user, onLogout }) {
   );
 }
 
-function StudentOverview({ workflow }) {
-  return <StudentDashboardOverview workflow={workflow} />;
+function StudentOverview({ workflow, profile }) {
+  return (
+    <div className="overview-profile-stack">
+      <ProfileSummary profile={profile} codeLabel="MSSV" title={'Th\u00f4ng tin sinh vi\u00ean'} />
+      <StudentDashboardOverview workflow={workflow} hideHeading />
+    </div>
+  );
+}
+
+function ProfileSummary({ profile, codeLabel, title }) {
+  return (
+    <section className="panel profile-summary-panel">
+      <div className="panel-heading">
+        <h2>{title}</h2>
+        <span>{profile?.role || 'STUDENT'}</span>
+      </div>
+      <div className="profile-summary-grid">
+        <div>
+          <span>{'H\u1ecd v\u00e0 t\u00ean'}</span>
+          <strong>{profile?.fullName || '-'}</strong>
+        </div>
+        <div>
+          <span>Email</span>
+          <strong>{profile?.email || '-'}</strong>
+        </div>
+        <div>
+          <span>{codeLabel}</span>
+          <strong>{profile?.username || '-'}</strong>
+        </div>
+      </div>
+    </section>
+  );
 }
 
 function CourseRegistration({ workflow }) {
@@ -820,7 +857,7 @@ function StudentTuition({ mode, user }) {
             loading={loading}
             pagination={{ pageSize: 5 }}
             columns={[
-              { title: 'Ngày tạo', dataIndex: 'createdAt', render: (value) => value ? new Date(value).toLocaleString('vi-VN') : '' },
+              { title: 'Ngày nộp', dataIndex: 'createdAt', render: (value) => value ? new Date(value).toLocaleString('vi-VN') : '' },
               { title: 'Số tiền', dataIndex: 'amount', render: formatTuitionMoney },
               { title: 'Ghi chú', dataIndex: 'note' },
               {

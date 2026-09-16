@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Tag, Button, Space, message, Modal, Form, Input, Select, Popconfirm } from 'antd';
+import { Table, Button, Space, message, Modal, Form, Input, Select, Popconfirm } from 'antd';
 import { EditOutlined, DeleteOutlined, PlusOutlined, UnlockOutlined, SearchOutlined } from '@ant-design/icons'; 
 import axiosClient from '../api/axiosClient';
 import FileUpload from './FileUpload';
@@ -91,28 +91,28 @@ export default function UserManagement() {
         );
     });
 
+    const formatLabel = (value) => {
+        const text = String(value || '').toLowerCase();
+        return text ? text.charAt(0).toUpperCase() + text.slice(1) : '';
+    };
+
     const columns = [
         { title: 'ID', dataIndex: 'id', key: 'id', width: '80px' },
-        { title: 'Username', dataIndex: 'username', key: 'username', render: (text) => <strong>{text}</strong> },
+        { title: 'MSSV/MSGV', dataIndex: 'username', key: 'username', render: (text) => <strong>{text}</strong> },
         { title: 'Họ và tên', dataIndex: 'fullName', key: 'fullName' },
         { title: 'Email', dataIndex: 'email', key: 'email' },
         {
             title: 'Vai trò',
             dataIndex: 'role',
             key: 'role',
-            render: (role) => {
-                let color = role === 'ADMIN' ? 'red' : role === 'TEACHER' ? 'green' : 'blue';
-                return <Tag color={color}>{role}</Tag>;
-            }
+            render: (role) => <strong>{formatLabel(role)}</strong>
         },
         {
             title: 'Trạng thái',
             dataIndex: 'status',
             key: 'status',
             render: (status) => (
-                <Tag color={status === 'ACTIVE' ? 'success' : 'error'}>
-                    {status}
-                </Tag>
+                <strong>{formatLabel(status)}</strong>
             )
         },
         {
@@ -150,7 +150,7 @@ export default function UserManagement() {
                 
                 {/* GIAO DIỆN THANH TÌM KIẾM */}
                 <Input.Search
-                    placeholder="Tìm kiếm Username hoặc Họ tên..."
+                    placeholder="Tìm kiếm MSSV/MSGV hoặc Họ tên..."
                     allowClear
                     enterButton={<Button type="primary" icon={<SearchOutlined />}>Tìm kiếm</Button>}
                     size="large"
@@ -192,7 +192,7 @@ export default function UserManagement() {
                 destroyOnHidden
             >
                 <Form form={form} layout="vertical" onFinish={handleModalSubmit}>
-                    <Form.Item name="username" label="Username" rules={[{ required: true, message: 'Vui lòng nhập Username!' }]}>
+                    <Form.Item name="username" label="MSSV/MSGV" rules={[{ required: true, message: 'Vui lòng nhập MSSV/MSGV!' }]}>
                         <Input disabled={!!editingUser} /> 
                     </Form.Item>
                     

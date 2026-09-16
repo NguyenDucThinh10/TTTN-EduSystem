@@ -150,7 +150,7 @@ export function AdminDashboardOverview({ dashboard }) {
   );
 }
 
-export function TeacherDashboardOverview({ workflow }) {
+export function TeacherDashboardOverview({ workflow, hideHeading = false }) {
   const analytics = workflow?.classAnalytics;
   const dashboard = workflow?.dashboard;
   const submissions = workflow?.assignmentDetail?.submissions || [];
@@ -169,7 +169,7 @@ export function TeacherDashboardOverview({ workflow }) {
   ];
 
   return (
-    <DashboardShell title="Tổng quan giảng viên" subtitle={workflow?.selectedClass?.name ? `Đang xem dữ liệu của ${workflow.selectedClass.name}.` : 'Chọn một lớp để xem thống kê chi tiết.'} stats={stats}>
+    <DashboardShell title="Tổng quan giảng viên" subtitle={workflow?.selectedClass?.name ? `Đang xem dữ liệu của ${workflow.selectedClass.name}.` : 'Chọn một lớp để xem thống kê chi tiết.'} stats={stats} hideHeading={hideHeading}>
       <div className="dashboard-chart-grid">
         <Panel title="Kết quả học tập" icon={<BarChartOutlined />}><BarChart items={distribution.length ? distribution.map((item, index) => ({ label: item.label || item.range || 'Mức điểm', value: item.count, color: colors[index % colors.length] })) : [{ label: 'Chưa có điểm', value: 0 }]} /></Panel>
         <Panel title="Điểm trung bình lớp" icon={<CheckCircleOutlined />}><RingChart value={numberValue(analytics?.classAverage) * 10} label="/ 10 điểm" caption={`${scoreText(analytics?.classAverage)} điểm trung bình`} color="#2563eb" /></Panel>
@@ -185,7 +185,7 @@ export function TeacherDashboardOverview({ workflow }) {
   );
 }
 
-export function StudentDashboardOverview({ workflow }) {
+export function StudentDashboardOverview({ workflow, hideHeading = false }) {
   const total = workflow?.assignments?.length || 0;
   const submitted = workflow?.mySubmissions?.length || 0;
   const graded = workflow?.studentGrades?.grades?.length || 0;
@@ -199,7 +199,7 @@ export function StudentDashboardOverview({ workflow }) {
   ];
 
   return (
-    <DashboardShell title="Tổng quan sinh viên" subtitle="Theo dõi tiến độ học tập và kết quả của bạn." stats={stats}>
+    <DashboardShell title="Tổng quan sinh viên" subtitle="Theo dõi tiến độ học tập và kết quả của bạn." stats={stats} hideHeading={hideHeading}>
       <div className="dashboard-chart-grid">
         <Panel title="Tiến độ bài tập" icon={<FileDoneOutlined />}><RingChart value={completion} label="đã hoàn thành" caption={`${submitted}/${total} bài đã nộp`} color="#14b8a6" /></Panel>
         <Panel title="Điểm từng bài" icon={<BarChartOutlined />}><HorizontalBars items={grades.slice(0, 6).map((grade) => ({ label: grade.assignmentTitle, value: grade.score, hint: `Tối đa ${scoreText(grade.maxScore)}` }))} /></Panel>
@@ -208,13 +208,15 @@ export function StudentDashboardOverview({ workflow }) {
   );
 }
 
-function DashboardShell({ title, subtitle, stats, children }) {
+function DashboardShell({ title, subtitle, stats, children, hideHeading = false }) {
   return (
     <div className="dashboard-overview">
-      <div className="dashboard-overview-heading">
-        <div><h2>{title}</h2><p>{subtitle}</p></div>
-        <span className="dashboard-live-dot">Dữ liệu trực tiếp</span>
-      </div>
+      {!hideHeading && (
+        <div className="dashboard-overview-heading">
+          <div><h2>{title}</h2><p>{subtitle}</p></div>
+          <span className="dashboard-live-dot">Dữ liệu trực tiếp</span>
+        </div>
+      )}
       <div className="dashboard-stats-grid">{stats.map((item) => <StatCard key={item.label} {...item} />)}</div>
       {children}
     </div>

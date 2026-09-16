@@ -19,6 +19,7 @@ export default function AuthPage({ onAuthenticated }) {
 
     // State quản lý việc xoay form
     const [isActive, setIsActive] = useState(false);
+    const [authError, setAuthError] = useState('');
 
     // 1. Khởi tạo State lưu trữ dữ liệu người dùng nhập vào Form Đăng Ký
     const [registerData, setRegisterData] = useState({
@@ -69,6 +70,11 @@ export default function AuthPage({ onAuthenticated }) {
 
     const handleLoginSubmit = async (e) => {
         e.preventDefault();
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('role');
+        sessionStorage.removeItem('username');
+        sessionStorage.removeItem('fullName');
+        sessionStorage.removeItem('user');
         try {
             const response = await axiosClient.post('/api/auth/login', loginData);
 
@@ -100,7 +106,7 @@ export default function AuthPage({ onAuthenticated }) {
             }
         } catch (error) {
             console.error("Lỗi đăng nhập:", error);
-            alert("Sai tên đăng nhập hoặc mật khẩu! Vui lòng thử lại.");
+            setAuthError("Sai tên đăng nhập hoặc mật khẩu! Vui lòng thử lại.");
         }
     };
     // ------------------------------------
@@ -185,6 +191,15 @@ export default function AuthPage({ onAuthenticated }) {
                     <p className="animation" style={{ '--i': 18, '--j': 1 }}>Đăng ký tài khoản để trải nghiệm nền tảng giáo dục tuyệt vời.</p>
                 </div>
             </div>
+            {authError && (
+                <div className="auth-error-backdrop" role="dialog" aria-modal="true" aria-labelledby="auth-error-title">
+                    <div className="auth-error-modal">
+                        <h3 id="auth-error-title">Thông báo lỗi</h3>
+                        <p>{authError}</p>
+                        <button type="button" onClick={() => setAuthError('')}>OK</button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
