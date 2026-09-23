@@ -13,6 +13,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Service
 public class GeminiAIService {
 
@@ -71,6 +74,23 @@ public class GeminiAIService {
         
         // Trả về mảng JSON rỗng nếu có lỗi để Frontend không bị sập
         return "[]"; 
+    }
+
+
+    public String removeAnswers(String quizJson) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            List<Map<String, Object>> questions = mapper.readValue(quizJson, new TypeReference<List<Map<String, Object>>>() {});
+            
+            for (Map<String, Object> q : questions) {
+                q.remove("correctAnswer");
+            }
+            
+            return mapper.writeValueAsString(questions);
+        } catch (Exception e) {
+            System.err.println("Lỗi khi lọc đáp án khỏi JSON: " + e.getMessage());
+            return quizJson;
+        }
     }
 
     public String askTutorWithContext(String documentText, String userQuestion) {

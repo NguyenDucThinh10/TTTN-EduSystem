@@ -3,6 +3,8 @@ package com.edulms.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -22,7 +24,6 @@ import com.edulms.entity.UserStatus;
 import com.edulms.repository.UserRepository;
 import com.edulms.security.JwtTokenProvider;
 
-// ĐÃ XÓA @CrossOrigin(origins = "*") ở đây để tránh xung đột với SecurityConfig
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -67,9 +68,14 @@ public class AuthController {
                     user.getFullName(),
                     user.getRole().name()));
             
+        } catch (DisabledException | LockedException ex) {
+            // XỬ LÝ KHI TÀI KHOẢN BỊ KHÓA / VÔ HIỆU HÓA (Trả về mã 403 Forbidden)
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Tài khoản của bạn đã bị khóa! Vui lòng liên hệ Quản trị viên.");
         } catch (AuthenticationException ex) {
-            // BẮT LỖI: Trả về mã 401 Unauthorized thay vì 403 Forbidden nếu sai mật khẩu
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Sai tên đăng nhập hoặc mật khẩu!");
+            // XỬ LÝ KHI SAI TÊN ĐĂNG NHẬP HOẶC MẬT KHẨU (Trả về mã 401 Unauthorized)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Sai tên đăng nhập hoặc mật khẩu!");
         }
     }
 

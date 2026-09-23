@@ -24,9 +24,12 @@ public class AIController {
     @Autowired
     private GeminiAIService geminiAIService;
 
-    // API 1: Tự động ra đề thi (Dành cho Giảng viên)
+    // API 1: Tự động ra đề thi (Dành cho Giảng viên & Học sinh)
+    // Nếu forStudent = true -> Tự động cắt bỏ hoàn toàn đáp án khỏi kết quả!
     @PostMapping("/generate-quiz")
-    public ResponseEntity<?> generateQuiz(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<?> generateQuiz(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "forStudent", defaultValue = "false") boolean forStudent) {
         try {
             String documentText = documentParserService.extractTextFromPdf(file);
             
@@ -35,6 +38,12 @@ public class AIController {
             }
 
             String quizJson = geminiAIService.generateQuizFromText(documentText);
+
+            // Nếu gọi bản cho học sinh -> Tiến hành lọc bỏ trường "correctAnswer"
+            if (forStudent) {
+                quizJson = geminiAIService.removeAnswers(quizJson);
+            }
+
             return ResponseEntity.ok(quizJson);
 
         } catch (Exception e) {
@@ -44,20 +53,24 @@ public class AIController {
         }
     }
 
+    // API 1B: Endpoint chuyên dụng lấy bài tập đã giấu đáp án cho học sinh
+    @PostMapping("/generate-quiz-student")
+    public ResponseEntity<?> generateQuizForStudent(@RequestParam("file") MultipartFile file) {
+        return generateQuiz(file, true);
+    }
+
     // API 2: Trợ giảng Ảo (Dành cho Sinh viên)
     @PostMapping("/ask-tutor")
     public ResponseEntity<?> askTutor(
             @RequestParam("file") MultipartFile file,
             @RequestParam("question") String question) {
         try {
-            // IN LOG RA CONSOLE ĐỂ BẮT LỖI
             System.out.println("=== NHẬN YÊU CẦU TỪ TRỢ GIẢNG AI ===");
             System.out.println("Tên file nhận được: " + file.getOriginalFilename());
             System.out.println("Câu hỏi nhận được: " + question);
 
             String documentText = documentParserService.extractTextFromPdf(file);
             
-            // IN THẲNG KẾT QUẢ ĐỂ BẮT TẬN TAY LỖI NẰM Ở ĐÂU
             System.out.println("--- CHI TIẾT TRẢ VỀ TỪ THƯ VIỆN PDF ---");
             System.out.println(documentText);
             System.out.println("---------------------------------------");
@@ -69,7 +82,6 @@ public class AIController {
             
             if (documentText.startsWith("Lỗi:")) {
                 System.out.println("LỖI TỪ THƯ VIỆN PDFBOX: " + documentText);
-                // TRẢ THẲNG CÂU LỖI ĐÓ VỀ FRONTEND ĐỂ HIỂN THỊ TRÊN KHUNG CHAT
                 return ResponseEntity.badRequest().body("Chi tiết lỗi PDF: " + documentText);
             }
 

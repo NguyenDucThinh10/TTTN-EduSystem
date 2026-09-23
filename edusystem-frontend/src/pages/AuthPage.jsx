@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // BỔ SUNG: Import hook điều hướng
+import { useNavigate } from 'react-router-dom';
 import './AuthPage.css';
-import axiosClient from '../api/axiosClient'; // Import file cấu hình API của chúng ta
+import axiosClient from '../api/axiosClient';
 
 const normalizeRole = (role) => String(role || '').replace(/^ROLE_/, '').toUpperCase();
 
@@ -14,14 +14,11 @@ const roleHomePath = (role) => {
 };
 
 export default function AuthPage({ onAuthenticated }) {
-    // BỔ SUNG: Khởi tạo hook điều hướng
     const navigate = useNavigate();
 
-    // State quản lý việc xoay form
     const [isActive, setIsActive] = useState(false);
     const [authError, setAuthError] = useState('');
 
-    // 1. Khởi tạo State lưu trữ dữ liệu người dùng nhập vào Form Đăng Ký
     const [registerData, setRegisterData] = useState({
         username: '',
         email: '',
@@ -30,25 +27,20 @@ export default function AuthPage({ onAuthenticated }) {
         role: 'STUDENT'
     });
 
-    // 2. Hàm bắt sự kiện khi người dùng gõ phím
     const handleRegisterChange = (e) => {
         const { name, value } = e.target;
         setRegisterData({ ...registerData, [name]: value });
     };
 
-    // 3. Hàm Xử lý khi bấm nút "Sign Up"
     const handleRegisterSubmit = async (e) => {
-        e.preventDefault(); // Chặn việc load lại trang web mặc định của form
+        e.preventDefault();
         
         try {
-            // Gọi API sang Spring Boot (Đảm bảo endpoint này khớp với AuthController của bạn)
             const response = await axiosClient.post('/api/auth/register', registerData);
             
             if(response) {
                 alert("Đăng ký tài khoản thành công! Bạn có thể đăng nhập ngay.");
-                // Chuyển form về lại mặt Login
                 setIsActive(false); 
-                // Xóa trắng form đăng ký (Đã bổ sung xóa luôn fullName)
                 setRegisterData({ username: '', email: '', password: '', fullName: '', role: 'STUDENT' });
             }
         } catch (error) {
@@ -57,7 +49,6 @@ export default function AuthPage({ onAuthenticated }) {
         }
     };
 
-    // --- BỔ SUNG: KHỐI XỬ LÝ ĐĂNG NHẬP ---
     const [loginData, setLoginData] = useState({
         username: '',
         password: ''
@@ -91,14 +82,12 @@ export default function AuthPage({ onAuthenticated }) {
                 role,
             };
 
-            // Lưu thông tin vào sessionStorage để mỗi tab có auth riêng biệt
             sessionStorage.setItem('token', token);
             sessionStorage.setItem('role', role);
             sessionStorage.setItem('username', username);
             if (fullName) sessionStorage.setItem('fullName', fullName);
             sessionStorage.setItem('user', JSON.stringify(user));
 
-            // Điều hướng dựa trên quyền
             if (onAuthenticated) {
                 onAuthenticated(user);
             } else {
@@ -106,10 +95,15 @@ export default function AuthPage({ onAuthenticated }) {
             }
         } catch (error) {
             console.error("Lỗi đăng nhập:", error);
-            setAuthError("Sai tên đăng nhập hoặc mật khẩu! Vui lòng thử lại.");
+            
+            // Đọc thông báo lỗi chính xác trả về từ Backend
+            const serverMessage = typeof error.response?.data === 'string'
+                ? error.response.data
+                : error.response?.data?.message;
+
+            setAuthError(serverMessage || "Sai tên đăng nhập hoặc mật khẩu! Vui lòng thử lại.");
         }
     };
-    // ------------------------------------
 
     return (
         <div className="auth-container">
@@ -117,7 +111,6 @@ export default function AuthPage({ onAuthenticated }) {
                 <span className="rotate-bg"></span>
                 <span className="rotate-bg2"></span>
 
-                {/* --- KHỐI FORM ĐĂNG NHẬP (Đã gắn State và API) --- */}
                 <div className="form-box login">
                     <h2 className="title animation" style={{ '--i': 0, '--j': 21 }}>Login</h2>
                     <form onSubmit={handleLoginSubmit}>
@@ -143,10 +136,8 @@ export default function AuthPage({ onAuthenticated }) {
                     <p className="animation" style={{ '--i': 1, '--j': 21 }}>Đăng nhập vào hệ thống EduSystem để tiếp tục.</p>
                 </div>
 
-                {/* --- KHỐI FORM ĐĂNG KÝ (Đã gắn API) --- */}
                 <div className="form-box register">
                     <h2 className="title animation" style={{ '--i': 17, '--j': 0 }}>Sign Up</h2>
-                    {/* Bắn sự kiện onSubmit vào đây */}
                     <form onSubmit={handleRegisterSubmit}>
 
                         <div className="input-box animation" style={{ '--i': 17.5, '--j': 0.5 }}>
@@ -156,7 +147,6 @@ export default function AuthPage({ onAuthenticated }) {
                         </div>
                         
                         <div className="input-box animation" style={{ '--i': 18, '--j': 1 }}>
-                            {/* Thêm thuộc tính name, value và onChange */}
                             <input type="text" name="username" value={registerData.username} onChange={handleRegisterChange} required />
                             <label>Username</label>
                             <i className='bx bxs-user'></i>
