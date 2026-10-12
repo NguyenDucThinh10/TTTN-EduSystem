@@ -1,18 +1,26 @@
 package com.edulms.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.edulms.dto.CreateUserRequest;
 import com.edulms.dto.JwtAuthResponse;
 import com.edulms.dto.LoginRequest;
+import com.edulms.entity.Role;
 import com.edulms.entity.User;
+import com.edulms.entity.UserStatus;
 import com.edulms.repository.UserRepository;
 import com.edulms.security.JwtTokenProvider;
 
@@ -23,29 +31,76 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public AuthController(AuthenticationManager authenticationManager, 
-                          JwtTokenProvider jwtTokenProvider, 
-                          UserRepository userRepository) {
+                            JwtTokenProvider jwtTokenProvider, 
+                            UserRepository userRepository,
+                            PasswordEncoder passwordEncoder) {
         this.authenticationManager = authenticationManager;
         this.jwtTokenProvider = jwtTokenProvider;
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<JwtAuthResponse> login(@RequestBody LoginRequest loginRequest) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        loginRequest.getUsername(),
-                        loginRequest.getPassword()
-                )
-        );
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+        try {
+            // 1. Thử xác thực tài khoản & mật khẩu
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            loginRequest.getUsername(),
+                            loginRequest.getPassword()
+                    )
+            );
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        User user = userRepository.findByUsername(loginRequest.getUsername()).get();
-        String token = jwtTokenProvider.generateToken(user.getUsername(), user.getRole().name());
+            // 2. Nếu thành công, lấy thông tin và tạo Token
+            User user = userRepository.findByUsername(loginRequest.getUsername()).get();
+            String token = jwtTokenProvider.generateToken(user.getUsername(), user.getRole().name());
 
-        return ResponseEntity.ok(new JwtAuthResponse(token, "Bearer", user.getUsername(), user.getRole().name()));
+            return ResponseEntity.ok(new JwtAuthResponse(
+                    token,
+                    "Bearer",
+                    user.getId(),
+                    user.getUsername(),
+                    user.getFullName(),
+                    user.getRole().name()));
+            
+        } catch (DisabledException | LockedException ex) {
+            // XỬ LÝ KHI TÀI KHOẢN BỊ KHÓA / VÔ HIỆU HÓA (Trả về mã 403 Forbidden)
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Tài khoản của bạn đã bị khóa! Vui lòng liên hệ Quản trị viên.");
+        } catch (AuthenticationException ex) {
+            // XỬ LÝ KHI SAI TÊN ĐĂNG NHẬP HOẶC MẬT KHẨU (Trả về mã 401 Unauthorized)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Sai tên đăng nhập hoặc mật khẩu!");
+        }
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody CreateUserRequest request) {
+        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+            return ResponseEntity.badRequest().body("Tài khoản đã tồn tại!");
+        }
+
+        User newUser = new User();
+        newUser.setUsername(request.getUsername());
+        newUser.setEmail(request.getEmail());
+        newUser.setFullName(request.getFullName());
+        newUser.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+        
+        Role requestedRole = request.getRole() == null ? Role.STUDENT : request.getRole();
+        if (requestedRole == Role.ADMIN) {
+            return ResponseEntity.badRequest().body("Khong the dang ky tai khoan quan tri vien!");
+        }
+
+        newUser.setRole(requestedRole); 
+        newUser.setStatus(UserStatus.ACTIVE); 
+
+        userRepository.save(newUser);
+
+        return ResponseEntity.ok("Đăng ký thành công!");
     }
 }
