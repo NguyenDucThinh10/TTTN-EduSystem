@@ -702,6 +702,10 @@ button:disabled {
   margin-bottom: 18px;
 }
 
+.dashboard-stats-grid--three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .dashboard-stat-card {
   display: flex;
   align-items: center;
@@ -732,6 +736,30 @@ button:disabled {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
+}
+
+.dashboard-student-grid {
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.9fr) minmax(0, 1.1fr);
+}
+
+.dashboard-student-grid .dashboard-chart-panel { min-width: 0; }
+.dashboard-student-grid .dashboard-ring-wrap { flex-direction: column; gap: 10px; }
+.dashboard-student-grid .dashboard-chart-caption { text-align: center; }
+.dashboard-student-grid .dashboard-bars { gap: 8px; overflow-x: auto; }
+.dashboard-student-grid .dashboard-bar-item { min-width: 52px; }
+.dashboard-semester-select { width: 100%; min-height: 36px; margin-bottom: 16px; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; color: #172033; }
+.dashboard-course-list { max-height: 260px; overflow-y: auto; }
+.dashboard-course-row { display: grid; grid-template-columns: minmax(0, 1fr) 60px; gap: 12px; align-items: center; padding: 10px 12px; border-bottom: 1px solid #e2e8f0; font-size: 13px; }
+.dashboard-course-row:nth-child(even) { background: #f8fafc; }
+.dashboard-course-row span:last-child { text-align: center; }
+.dashboard-course-header { font-weight: 600; background: #fff; }
+
+@media (max-width: 1200px) {
+  .dashboard-student-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 900px) {
+  .dashboard-student-grid { grid-template-columns: 1fr; }
 }
 
 .dashboard-chart-panel {
@@ -961,12 +989,12 @@ button:disabled {
 @keyframes dashboard-ring-in { from { transform: rotate(-90deg); opacity: .35; } to { transform: rotate(0); opacity: 1; } }
 
 @media (max-width: 900px) {
-  .dashboard-stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dashboard-stats-grid, .dashboard-stats-grid--three { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .dashboard-chart-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 560px) {
-  .dashboard-stats-grid { grid-template-columns: 1fr; }
+  .dashboard-stats-grid, .dashboard-stats-grid--three { grid-template-columns: 1fr; }
   .dashboard-overview-heading { display: block; }
   .dashboard-live-dot { display: inline-block; margin-top: 12px; }
   .dashboard-ring-wrap { gap: 14px; }

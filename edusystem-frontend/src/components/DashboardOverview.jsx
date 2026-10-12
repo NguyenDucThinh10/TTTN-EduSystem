@@ -1,9 +1,9 @@
 ﻿import { useMemo } from 'react';
+import { useState } from 'react';
 import {
   BarChartOutlined,
   BookOutlined,
   CheckCircleOutlined,
-  DatabaseOutlined,
   FileDoneOutlined,
   PieChartOutlined,
   RiseOutlined,
@@ -86,21 +86,6 @@ function BarChart({ items }) {
   );
 }
 
-function HorizontalBars({ items, valueSuffix = '' }) {
-  const max = Math.max(...items.map((item) => numberValue(item.value)), 1);
-  return (
-    <div className="dashboard-horizontal-bars">
-      {items.map((item, index) => (
-        <div className="dashboard-horizontal-row" key={item.label}>
-          <div className="dashboard-horizontal-label"><strong>{item.label}</strong><span>{item.hint}</span></div>
-          <div className="dashboard-horizontal-track"><i style={{ width: `${(numberValue(item.value) / max) * 100}%`, background: item.color || colors[index % colors.length] }} /></div>
-          <b>{item.value ?? 0}{valueSuffix}</b>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 function ProgressList({ items, valueKey = 'value', labelKey = 'label', emptyText = 'Chưa có dữ liệu.' }) {
   if (!items.length) return <p className="dashboard-empty">{emptyText}</p>;
   return (
@@ -125,9 +110,9 @@ function Panel({ title, icon, children, className = '' }) {
 export function AdminDashboardOverview({ dashboard }) {
   const stats = useMemo(() => [
     { icon: <UserOutlined />, label: 'Tổng tài khoản', value: dashboard?.totalUsers, hint: `${dashboard?.totalAdmins ?? 0} quản trị viên`, color: '#2563eb' },
-    { icon: <TeamOutlined />, label: 'Sinh viên', value: dashboard?.totalStudents, hint: `${dashboard?.totalTeachers ?? 0} giảng viên`, color: '#14b8a6' },
+    { icon: <TeamOutlined />, label: 'Sinh viên', value: dashboard?.totalStudents, color: '#14b8a6' },
+    { icon: <UserOutlined />, label: 'Giảng viên', value: dashboard?.totalTeachers, color: '#f97316' },
     { icon: <BookOutlined />, label: 'Lớp học', value: dashboard?.totalClasses, hint: `${dashboard?.totalCourses ?? 0} học phần`, color: '#f59e0b' },
-    { icon: <FileDoneOutlined />, label: 'Bài nộp', value: dashboard?.totalSubmissions, hint: `${dashboard?.totalGradedSubmissions ?? 0} đã chấm`, color: '#8b5cf6' },
   ], [dashboard]);
 
   return (
@@ -138,7 +123,6 @@ export function AdminDashboardOverview({ dashboard }) {
           { label: 'Giảng viên', value: dashboard?.totalTeachers },
           { label: 'Học phần', value: dashboard?.totalCourses },
           { label: 'Lớp học', value: dashboard?.totalClasses },
-          { label: 'Bài tập', value: dashboard?.totalAssignments },
         ]} /></Panel>
         <Panel title="Cơ cấu tài khoản" icon={<PieChartOutlined />}><DonutChart centerLabel="người dùng" items={[
           { label: 'Admin', value: dashboard?.totalAdmins, color: '#2563eb' },
@@ -174,7 +158,6 @@ export function TeacherDashboardOverview({ workflow, hideHeading = false }) {
         <Panel title="Kết quả học tập" icon={<BarChartOutlined />}><BarChart items={distribution.length ? distribution.map((item, index) => ({ label: item.label || item.range || 'Mức điểm', value: item.count, color: colors[index % colors.length] })) : [{ label: 'Chưa có điểm', value: 0 }]} /></Panel>
         <Panel title="Điểm trung bình lớp" icon={<CheckCircleOutlined />}><RingChart value={numberValue(analytics?.classAverage) * 10} label="/ 10 điểm" caption={`${scoreText(analytics?.classAverage)} điểm trung bình`} color="#2563eb" /></Panel>
         <Panel title="Tiến độ từng sinh viên" icon={<RiseOutlined />}><ProgressList items={progress.map((item) => ({ label: item.studentName || `SV ${item.studentId}`, value: item.completionRate }))} emptyText="Chưa có sinh viên hoặc bài tập." /></Panel>
-        <Panel title="Thống kê bài tập" icon={<DatabaseOutlined />}><HorizontalBars items={assignmentStats.slice(0, 6).map((item) => ({ label: item.assignmentTitle, value: item.submissionCount, hint: `${item.gradedCount ?? 0} chấm | TB ${scoreText(item.averageScore)}` }))} /></Panel>
         <Panel title="Tổng quan nộp/chấm" icon={<PieChartOutlined />}><DonutChart centerLabel="bài" items={[
           { label: 'Đã chấm', value: gradedCount, color: '#14b8a6' },
           { label: 'Chưa chấm', value: Math.max(numberValue(submissionCount) - numberValue(gradedCount), 0), color: '#ef4444' },
@@ -186,11 +169,31 @@ export function TeacherDashboardOverview({ workflow, hideHeading = false }) {
 }
 
 export function StudentDashboardOverview({ workflow, hideHeading = false }) {
-  const total = workflow?.assignments?.length || 0;
+  const [semester, setSemester] = useState('');
   const submitted = workflow?.mySubmissions?.length || 0;
   const graded = workflow?.studentGrades?.grades?.length || 0;
-  const completion = percent(submitted, total);
   const grades = workflow?.studentGrades?.grades || [];
+  const classes = workflow?.classes || [];
+  const semesters = [...new Set(classes.map((item) => item.semester).filter(Boolean))];
+  const selectedSemester = semesters.includes(semester) ? semester : semesters[0];
+  const semesterClasses = selectedSemester ? classes.filter((item) => item.semester === selectedSemester) : classes;
+  const scoresByClass = new Map();
+  grades.forEach((grade) => {
+    const classScores = scoresByClass.get(grade.classId) || { regular: [], midterm: [], final: [] };
+    const title = grade.assignmentTitle || '';
+    const kind = /cuối kỳ/i.test(title) ? 'final' : /giữa kỳ/i.test(title) ? 'midterm' : 'regular';
+    const maxScore = Number(grade.maxScore) || 10;
+    classScores[kind].push((Number(grade.score) || 0) / maxScore * 10);
+    scoresByClass.set(grade.classId, classScores);
+  });
+  const courseResults = semesterClasses.map((item) => {
+    const scores = scoresByClass.get(item.id);
+    if (!scores?.final.length) return { ...item, finalScore: null };
+    const average = (values) => values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
+    return { ...item, finalScore: average(scores.regular) * 0.2 + average(scores.midterm) * 0.3 + average(scores.final) * 0.5 };
+  });
+  const totalCredits = courseResults.reduce((sum, item) => sum + (Number(item.courseCredits) || 0), 0);
+  const passedCredits = courseResults.reduce((sum, item) => sum + (item.finalScore >= 5 ? Number(item.courseCredits) || 0 : 0), 0);
   const stats = [
     { icon: <BookOutlined />, label: 'Lớp đã đăng ký', value: workflow?.classes?.length, color: '#2563eb' },
     { icon: <FileDoneOutlined />, label: 'Bài đã nộp', value: submitted, color: '#14b8a6' },
@@ -200,9 +203,26 @@ export function StudentDashboardOverview({ workflow, hideHeading = false }) {
 
   return (
     <DashboardShell title="Tổng quan sinh viên" subtitle="Theo dõi tiến độ học tập và kết quả của bạn." stats={stats} hideHeading={hideHeading}>
-      <div className="dashboard-chart-grid">
-        <Panel title="Tiến độ bài tập" icon={<FileDoneOutlined />}><RingChart value={completion} label="đã hoàn thành" caption={`${submitted}/${total} bài đã nộp`} color="#14b8a6" /></Panel>
-        <Panel title="Điểm từng bài" icon={<BarChartOutlined />}><HorizontalBars items={grades.slice(0, 6).map((grade) => ({ label: grade.assignmentTitle, value: grade.score, hint: `Tối đa ${scoreText(grade.maxScore)}` }))} /></Panel>
+      <div className="dashboard-chart-grid dashboard-student-grid">
+        <Panel title="Kết quả học tập" icon={<BarChartOutlined />}>
+          <select className="dashboard-semester-select" value={selectedSemester || ''} onChange={(event) => setSemester(event.target.value)} aria-label="Học kỳ kết quả học tập">
+            {semesters.length ? semesters.map((item) => <option key={item} value={item}>{item}</option>) : <option value="">Chưa có học kỳ</option>}
+          </select>
+          {courseResults.some((item) => item.finalScore != null)
+            ? <BarChart items={courseResults.filter((item) => item.finalScore != null).map((item) => ({ label: item.courseCode || item.name, value: Number(item.finalScore.toFixed(1)), color: '#fb6b55' }))} />
+            : <p className="dashboard-empty">Chưa có điểm tổng kết.</p>}
+        </Panel>
+        <Panel title="Tiến độ học tập" icon={<PieChartOutlined />}><RingChart value={percent(passedCredits, totalCredits)} label="tín chỉ đạt" caption={`${passedCredits}/${totalCredits} tín chỉ`} color="#28d993" /></Panel>
+        <Panel title="Lớp học phần" icon={<BookOutlined />}>
+          <select className="dashboard-semester-select" value={selectedSemester || ''} onChange={(event) => setSemester(event.target.value)} aria-label="Học kỳ lớp học phần">
+            {semesters.length ? semesters.map((item) => <option key={item} value={item}>{item}</option>) : <option value="">Chưa có học kỳ</option>}
+          </select>
+          <div className="dashboard-course-list">
+            <div className="dashboard-course-row dashboard-course-header"><span>Môn học</span><span>Tín chỉ</span></div>
+            {semesterClasses.map((item) => <div className="dashboard-course-row" key={item.id}><span>{item.courseTitle || item.name}</span><span>{item.courseCredits ?? 0}</span></div>)}
+            {!semesterClasses.length && <p className="dashboard-empty">Chưa đăng ký lớp học phần.</p>}
+          </div>
+        </Panel>
       </div>
     </DashboardShell>
   );
@@ -217,7 +237,7 @@ function DashboardShell({ title, subtitle, stats, children, hideHeading = false 
           <span className="dashboard-live-dot">Dữ liệu trực tiếp</span>
         </div>
       )}
-      <div className="dashboard-stats-grid">{stats.map((item) => <StatCard key={item.label} {...item} />)}</div>
+      <div className={`dashboard-stats-grid${stats.length === 3 ? ' dashboard-stats-grid--three' : ''}`}>{stats.map((item) => <StatCard key={item.label} {...item} />)}</div>
       {children}
     </div>
   );

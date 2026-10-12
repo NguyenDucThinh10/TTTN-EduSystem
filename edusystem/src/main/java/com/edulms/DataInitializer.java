@@ -44,6 +44,7 @@ public class DataInitializer implements CommandLineRunner {
         if (userRepository.count() != 0) {
             migrateLegacyStudentUsername();
             migrateLegacySemesters();
+            backfillTeacherSchedules();
             return;
         }
 
@@ -106,6 +107,8 @@ public class DataInitializer implements CommandLineRunner {
                         "html-css-javascript.pdf", "/uploads/materials/html-css-javascript.pdf")
         ));
         scheduleRepository.saveAll(List.of(
+                schedule(oopClass, DayOfWeek.THURSDAY, "09:45", "11:45", "P102", "Xây dựng phần mềm Hướng đối tượng (XDPM-OOP)", "Buổi học lý thuyết"),
+                schedule(dbClass, DayOfWeek.FRIDAY, "09:45", "11:45", "P203", "Relational Database Theory", "Buổi học lý thuyết"),
                 schedule(it101Class, DayOfWeek.MONDAY, "07:30", "09:30", "P101", "Nhập môn Công nghệ thông tin", "Buổi học lý thuyết"),
                 schedule(it102Class, DayOfWeek.TUESDAY, "09:45", "11:45", "P202", "Kỹ thuật lập trình", "Thực hành lập trình C++"),
                 schedule(it202Class, DayOfWeek.WEDNESDAY, "13:30", "15:30", "LAB01", "Lập trình Web", "Thực hành HTML, CSS, JavaScript"),
@@ -126,6 +129,22 @@ public class DataInitializer implements CommandLineRunner {
             student.setEmail("student1@edulms.com");
             userRepository.save(student);
         });
+    }
+
+    private void backfillTeacherSchedules() {
+        classRepository.findAll().stream()
+                .filter(classEntity -> "XDPM-OOP-K1".equals(classEntity.getName())
+                        || "DB-Theory-K1".equals(classEntity.getName()))
+                .filter(classEntity -> scheduleRepository.findByClassEntityId(classEntity.getId()).isEmpty())
+                .forEach(classEntity -> {
+                    if ("XDPM-OOP-K1".equals(classEntity.getName())) {
+                        scheduleRepository.save(schedule(classEntity, DayOfWeek.THURSDAY, "09:45", "11:45", "P102",
+                                "Xây dựng phần mềm Hướng đối tượng (XDPM-OOP)", "Buổi học lý thuyết"));
+                    } else {
+                        scheduleRepository.save(schedule(classEntity, DayOfWeek.FRIDAY, "09:45", "11:45", "P203",
+                                "Relational Database Theory", "Buổi học lý thuyết"));
+                    }
+                });
     }
 
     private void migrateLegacySemesters() {

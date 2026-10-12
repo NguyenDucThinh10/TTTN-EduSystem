@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { Avatar, Badge, Breadcrumb, Button, Dropdown, Layout, Menu, Space, Table, Tag, theme, message } from 'antd';
 import {
   BarChartOutlined,
@@ -491,7 +491,9 @@ function StudentGrades({ workflow }) {
   const averageScore10 = weightedAverage(rows, 'finalSummaryScore');
   const averageScore4 = weightedAverage(rows, 'point4');
   const averageMeta = learningGradeMeta(averageScore10 || 0);
-  const semesterLabel = rows[0]?.semester || 'Tất cả học kỳ';
+  const enrolledSemesters = [...new Set((workflow.classes || []).map((item) => item.semester).filter(Boolean))];
+  const semesterLabel = rows[0]?.semester || (enrolledSemesters.length === 1 ? enrolledSemesters[0] : 'Tất cả học kỳ');
+  const formatSemester = (value) => value?.replace(/^HK\s*(\d+)\s*(\d{4}-\d{4})$/i, 'Học kỳ $1 năm học $2') || 'Học kỳ chưa xác định';
 
   return (
     <section className="panel wide feature-grades learning-result-panel">
@@ -520,7 +522,11 @@ function StudentGrades({ workflow }) {
             </thead>
             <tbody>
               {rows.length > 0 ? rows.map((row, index) => (
-                <tr key={row.key}>
+                <Fragment key={row.key}>
+                {(index === 0 || row.semester !== rows[index - 1].semester) && (
+                  <tr className="semester-row"><td colSpan="12">{formatSemester(row.semester)}</td></tr>
+                )}
+                <tr>
                   <td>{index + 1}</td>
                   <td>{row.code}</td>
                   <td>{row.title}</td>
@@ -534,10 +540,14 @@ function StudentGrades({ workflow }) {
                   <td>{row.passed ? '✓' : '-'}</td>
                   <td>{row.passed ? '' : 'Chưa đạt'}</td>
                 </tr>
+                </Fragment>
               )) : (
-                <tr>
-                  <td colSpan="12" className="learning-empty">Chưa có điểm tổng kết.</td>
-                </tr>
+                <>
+                  {(enrolledSemesters.length ? enrolledSemesters : [null]).map((item, index) => (
+                    <tr className="semester-row" key={item || index}><td colSpan="12">{formatSemester(item)}</td></tr>
+                  ))}
+                  <tr><td colSpan="12" className="learning-empty">Chưa có điểm tổng kết.</td></tr>
+                </>
               )}
             </tbody>
           </table>

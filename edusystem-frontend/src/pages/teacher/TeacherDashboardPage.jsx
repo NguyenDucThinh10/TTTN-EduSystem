@@ -348,9 +348,6 @@ function TeacherAttendance({ workflow, attendanceDate, attendanceRecords, onAtte
       </div>
       <div className="attendance-toolbar">
         <input type="date" value={attendanceDate} onChange={(event) => onAttendanceDateChange(event.target.value)} />
-        <Button type="primary" icon={<CheckSquareOutlined />} onClick={() => workflow.classStudents.forEach((student) => onTeacherMarkAttendance(student.id, 'PRESENT'))}>
-          Điểm danh nhanh
-        </Button>
         <span>{workflow.classStudents.length} học sinh</span>
       </div>
       <div className="attendance-grid" style={{ gridTemplateColumns: '220px 150px 1fr' }}>
