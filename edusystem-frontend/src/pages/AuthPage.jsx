@@ -112,43 +112,43 @@ export default function AuthPage({ onAuthenticated }) {
                 <span className="rotate-bg2"></span>
 
                 <div className="form-box login">
-                    <h2 className="title animation" style={{ '--i': 0, '--j': 21 }}>Login</h2>
+                    <h2 className="title animation" style={{ '--i': 0, '--j': 21 }}>Đăng nhập</h2>
                     <form onSubmit={handleLoginSubmit}>
                         <div className="input-box animation" style={{ '--i': 1, '--j': 22 }}>
                             <input type="text" name="username" value={loginData.username} onChange={handleLoginChange} required />
-                            <label>Username</label>
+                            <label>Tên đăng nhập</label>
                             <i className='bx bxs-user'></i>
                         </div>
                         <div className="input-box animation" style={{ '--i': 2, '--j': 23 }}>
                             <input type="password" name="password" value={loginData.password} onChange={handleLoginChange} required />
-                            <label>Password</label>
+                            <label>Mật khẩu</label>
                             <i className='bx bxs-lock-alt'></i>
                         </div>
-                        <button type="submit" className="btn animation" style={{ '--i': 3, '--j': 24 }}>Login</button>
+                        <button type="submit" className="btn animation" style={{ '--i': 3, '--j': 24 }}>Đăng nhập</button>
                         <div className="linkTxt animation" style={{ '--i': 5, '--j': 25 }}>
-                            <p>Don't have an account? <a href="#" onClick={(e) => { e.preventDefault(); setIsActive(true); }}>Sign Up</a></p>
+                            <p>Chưa có tài khoản? <a href="#" onClick={(e) => { e.preventDefault(); setIsActive(true); }}>Đăng ký</a></p>
                         </div>
                     </form>
                 </div>
 
                 <div className="info-text login">
-                    <h2 className="animation" style={{ '--i': 0, '--j': 20 }}>Welcome Back!</h2>
+                    <h2 className="animation" style={{ '--i': 0, '--j': 20 }}>Chào mừng trở lại!</h2>
                     <p className="animation" style={{ '--i': 1, '--j': 21 }}>Đăng nhập vào hệ thống EduSystem để tiếp tục.</p>
                 </div>
 
                 <div className="form-box register">
-                    <h2 className="title animation" style={{ '--i': 17, '--j': 0 }}>Sign Up</h2>
+                    <h2 className="title animation" style={{ '--i': 17, '--j': 0 }}>Đăng ký</h2>
                     <form onSubmit={handleRegisterSubmit}>
 
                         <div className="input-box animation" style={{ '--i': 17.5, '--j': 0.5 }}>
                             <input type="text" name="fullName" value={registerData.fullName} onChange={handleRegisterChange} required />
-                            <label>Full Name</label>
+                            <label>Họ và tên</label>
                             <i className='bx bxs-id-card'></i>
                         </div>
                         
                         <div className="input-box animation" style={{ '--i': 18, '--j': 1 }}>
                             <input type="text" name="username" value={registerData.username} onChange={handleRegisterChange} required />
-                            <label>Username</label>
+                            <label>Tên đăng nhập</label>
                             <i className='bx bxs-user'></i>
                         </div>
                         <div className="input-box animation" style={{ '--i': 19, '--j': 2 }}>
@@ -158,7 +158,7 @@ export default function AuthPage({ onAuthenticated }) {
                         </div>
                         <div className="input-box animation" style={{ '--i': 20, '--j': 3 }}>
                             <input type="password" name="password" value={registerData.password} onChange={handleRegisterChange} required />
-                            <label>Password</label>
+                            <label>Mật khẩu</label>
                             <i className='bx bxs-lock-alt'></i>
                         </div>
                         <div className="input-box role-box animation" style={{ '--i': 20.5, '--j': 3.5 }}>
@@ -169,9 +169,9 @@ export default function AuthPage({ onAuthenticated }) {
                             <label>Vai trò</label>
                             <i className='bx bxs-user-badge'></i>
                         </div>
-                        <button type="submit" className="btn animation" style={{ '--i': 21, '--j': 4 }}>Sign Up</button>
+                        <button type="submit" className="btn animation" style={{ '--i': 21, '--j': 4 }}>Đăng ký</button>
                         <div className="linkTxt animation" style={{ '--i': 22, '--j': 5 }}>
-                            <p>Already have an account? <a href="#" onClick={(e) => { e.preventDefault(); setIsActive(false); }}>Login</a></p>
+                            <p>Đã có tài khoản? <a href="#" onClick={(e) => { e.preventDefault(); setIsActive(false); }}>Đăng nhập</a></p>
                         </div>
                     </form>
                 </div>
