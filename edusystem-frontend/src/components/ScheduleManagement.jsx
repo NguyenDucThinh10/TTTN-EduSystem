@@ -112,8 +112,8 @@ export default function ScheduleManagement() {
   };
 
   const columns = [
-    { title: 'Lớp', dataIndex: 'className', render: (text, record) => <Text strong>{text || record.courseTitle}</Text> },
-    { title: 'Học phần', render: (_, record) => <Tag color="cyan">{record.courseCode || 'N/A'} - {record.courseTitle}</Tag> },
+    { title: 'Lớp', dataIndex: 'className', render: (text, record) => <Text strong>{text || record.subjectTitle}</Text> },
+    { title: 'Học phần', render: (_, record) => <Tag color="cyan">{record.subjectCode || 'N/A'} - {record.subjectTitle}</Tag> },
     { title: 'Giảng viên', dataIndex: 'teacherName' },
     { title: 'Ngày', dataIndex: 'dayOfWeek', render: dayLabel },
     { title: 'Giờ học', render: (_, record) => `${record.startTime?.slice(0, 5)} - ${record.endTime?.slice(0, 5)}` },
@@ -159,8 +159,8 @@ export default function ScheduleManagement() {
           <Form.Item name="classId" label="Lớp học" rules={[{ required: true, message: 'Chọn lớp học!' }]}>
             <Select placeholder="Chọn lớp" showSearch optionFilterProp="label">
               {classes.map((classItem) => (
-                <Option key={classItem.id} value={classItem.id} label={`${classItem.name} - ${classItem.courseTitle}`}>
-                  {classItem.name} - {classItem.courseTitle}
+                <Option key={classItem.id} value={classItem.id} label={`${classItem.name} - ${classItem.subjectTitle}`}>
+                  {classItem.name} - {classItem.subjectTitle}
                 </Option>
               ))}
             </Select>

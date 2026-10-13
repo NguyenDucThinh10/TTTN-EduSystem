@@ -265,7 +265,7 @@ function TeacherClasses({ workflow }) {
           {workflow.classes.map((item) => (
             <article key={item.id}>
               <strong>{item.name}</strong>
-              <span>{item.courseCode || 'N/A'} - {item.courseTitle} | {item.courseCredits || 0} tín chỉ</span>
+              <span>{item.subjectCode || 'N/A'} - {item.subjectTitle} | {item.subjectCredits || 0} tín chỉ</span>
               <span>{item.semester || 'Học kỳ'} | {statusLabel(item.status)} | {item.studentCount ?? 0} sinh viên</span>
               <button type="button" onClick={() => workflow.setSelectedClassId(item.id)}>Chọn lớp</button>
             </article>
@@ -320,7 +320,7 @@ function TeacherSchedule({ workflow, schedules }) {
                   {slots.map((slot) => (
                     <article className="schedule-slot" key={slot.id}>
                       <strong>{slot.startTime?.slice(0, 5)} - {slot.endTime?.slice(0, 5)}</strong>
-                      <span>{slot.subject || slot.courseTitle}</span>
+                      <span>{slot.subject || slot.subjectTitle}</span>
                       <span>{slot.room || 'Chưa có phòng'}</span>
                     </article>
                   ))}

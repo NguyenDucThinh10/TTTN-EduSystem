@@ -13,42 +13,42 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.edulms.dto.CourseRequest;
-import com.edulms.dto.CourseResponse;
-import com.edulms.service.CourseService;
+import com.edulms.dto.SubjectRequest;
+import com.edulms.dto.SubjectResponse;
+import com.edulms.service.SubjectService;
 
 @RestController
-@RequestMapping("/api/admin/courses")
+@RequestMapping("/api/admin/subjects")
 @CrossOrigin(origins = "*") // Bổ sung cấu hình CORS để Frontend (React) không bị chặn
-public class AdminCourseController {
+public class AdminSubjectController {
 
-    private final CourseService courseService;
+    private final SubjectService subjectService;
 
-    public AdminCourseController(CourseService courseService) {
-        this.courseService = courseService;
+    public AdminSubjectController(SubjectService subjectService) {
+        this.subjectService = subjectService;
     }
 
     // API Tạo môn học mới (Code cũ của bạn giữ nguyên)
     @PostMapping
-    public ResponseEntity<CourseResponse> createCourse(@RequestBody CourseRequest request) {
-        CourseResponse response = courseService.createCourse(request);
+    public ResponseEntity<SubjectResponse> createSubject(@RequestBody SubjectRequest request) {
+        SubjectResponse response = subjectService.createSubject(request);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping
-    public ResponseEntity<List<CourseResponse>> getAllCourses() {
-        List<CourseResponse> courses = courseService.getAllCourses();
-        return ResponseEntity.ok(courses);
+    public ResponseEntity<List<SubjectResponse>> getAllSubjects() {
+        List<SubjectResponse> subjects = subjectService.getAllSubjects();
+        return ResponseEntity.ok(subjects);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CourseResponse> updateCourse(@PathVariable Long id, @RequestBody CourseRequest request) {
-        return ResponseEntity.ok(courseService.updateCourse(id, request));
+    public ResponseEntity<SubjectResponse> updateSubject(@PathVariable Long id, @RequestBody SubjectRequest request) {
+        return ResponseEntity.ok(subjectService.updateSubject(id, request));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCourse(@PathVariable Long id) {
-        courseService.deleteCourse(id);
+    public ResponseEntity<Void> deleteSubject(@PathVariable Long id) {
+        subjectService.deleteSubject(id);
         return ResponseEntity.noContent().build();
     }
 }

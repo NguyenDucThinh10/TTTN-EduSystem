@@ -20,7 +20,7 @@ const { Header, Sider, Content, Footer } = Layout;
 const breadcrumbMap = {
     '/admin': 'Tổng quan',
     '/admin/users': 'Quản lý Tài khoản',
-    '/admin/courses': 'Quản lý Học phần',
+    '/admin/subjects': 'Quản lý Học phần',
     '/admin/classes': 'Quản lý Lớp học',
     '/admin/schedules': 'Quản lý thời khóa biểu',
     '/admin/tuitions': 'Quản lý học phí',
@@ -60,7 +60,7 @@ export default function AdminDashboard({ onLogout }) {
     const menuItems = [
         { key: '/admin', icon: <DashboardOutlined />, label: 'Tổng quan', onClick: () => navigate('/admin') },
         { key: '/admin/users', icon: <UserOutlined />, label: 'Quản lý Tài khoản', onClick: () => navigate('/admin/users') },
-        { key: '/admin/courses', icon: <ReadOutlined />, label: 'Quản lý Học phần', onClick: () => navigate('/admin/courses') },
+        { key: '/admin/subjects', icon: <ReadOutlined />, label: 'Quản lý Học phần', onClick: () => navigate('/admin/subjects') },
         { key: '/admin/classes', icon: <BookOutlined />, label: 'Quản lý Lớp học', onClick: () => navigate('/admin/classes') },
         { key: '/admin/schedules', icon: <CalendarOutlined />, label: 'Quản lý thời khóa biểu', onClick: () => navigate('/admin/schedules') },
         { key: '/admin/tuitions', icon: <DollarOutlined />, label: 'Quản lý học phí', onClick: () => navigate('/admin/tuitions') },

@@ -98,6 +98,10 @@ export default function StudentDashboardPage({ user, onLogout }) {
   };
 
   const showClassSelector = ['attendance', 'assignments', 'submissions'].includes(activeView);
+  const selectedClassAttendance = useMemo(
+    () => attendanceRecords.filter((item) => String(item.classId) === String(workflow.selectedClassId)),
+    [attendanceRecords, workflow.selectedClassId],
+  );
 
   useEffect(() => {
     axiosClient.get('/api/me')
@@ -186,14 +190,14 @@ export default function StudentDashboardPage({ user, onLogout }) {
             {workflow.notice && <div className="notice">{workflow.notice}</div>}
             {workflow.loading && <div className="loading-line">Đang tải dữ liệu...</div>}
             {activeView === 'overview' && <StudentOverview workflow={workflow} profile={profile} />}
-            {activeView === 'registration' && <CourseRegistration workflow={workflow} />}
+            {activeView === 'registration' && <SubjectRegistration workflow={workflow} />}
             {activeView === 'classes' && <MyClasses workflow={workflow} />}
             {activeView === 'schedule' && <StudentSchedule schedules={schedules} />}
             {activeView === 'attendance' && (
               <StudentAttendance
                 workflow={workflow}
                 attendanceDate={attendanceDate}
-                attendanceRecords={attendanceRecords}
+                attendanceRecords={selectedClassAttendance}
                 onAttendanceDateChange={setAttendanceDate}
                 onSelfSubmitAttendance={onSelfSubmitAttendance}
               />
@@ -246,7 +250,7 @@ function ProfileSummary({ profile, codeLabel, title }) {
   );
 }
 
-function CourseRegistration({ workflow }) {
+function SubjectRegistration({ workflow }) {
   return (
     <section className="panel wide feature-registration">
       <div className="panel-heading">
@@ -257,8 +261,8 @@ function CourseRegistration({ workflow }) {
         {workflow.openClasses.map((classItem) => (
           <article className="student-assignment" key={classItem.id}>
             <div>
-              <h3>{classItem.courseCode || 'N/A'} - {classItem.courseTitle}</h3>
-              <p>{classItem.name} | {classItem.courseCredits || 0} tín chỉ</p>
+              <h3>{classItem.subjectCode || 'N/A'} - {classItem.subjectTitle}</h3>
+              <p>{classItem.name} | {classItem.subjectCredits || 0} tín chỉ</p>
               <span>{classItem.teacherName || 'Chưa phân công'} | {classItem.semester || 'Học kỳ'} | {classItem.studentCount ?? 0} sinh viên</span>
             </div>
             <div className="submit-box">
@@ -289,8 +293,8 @@ function MyClasses({ workflow }) {
           <article className="student-assignment" key={classItem.id}>
             <div>
               <h3>{classItem.name}</h3>
-              <p>{classItem.courseCode || 'N/A'} - {classItem.courseTitle}</p>
-              <span>{classItem.courseCredits || 0} tín chỉ | {classItem.teacherName || 'Chưa phân công'} | {classItem.semester || 'Học kỳ'} | {statusLabel(classItem.status)}</span>
+              <p>{classItem.subjectCode || 'N/A'} - {classItem.subjectTitle}</p>
+              <span>{classItem.subjectCredits || 0} tín chỉ | {classItem.teacherName || 'Chưa phân công'} | {classItem.semester || 'Học kỳ'} | {statusLabel(classItem.status)}</span>
             </div>
             <div className="submit-box">
               <span className="badge GRADED">Đã đăng ký</span>
@@ -313,7 +317,9 @@ function StudentSchedule({ schedules }) {
       </div>
       <div className="student-schedule-list">
         {days.map((day) => {
-          const lessons = schedules.filter((item) => dayLabels[item.dayOfWeek] === day);
+          const lessons = schedules
+            .filter((item) => dayLabels[item.dayOfWeek] === day)
+            .sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
           return (
             <article className="student-day-card" key={day}>
               <div className="student-day-title">
@@ -324,7 +330,7 @@ function StudentSchedule({ schedules }) {
                 {lessons.map((lesson) => (
                   <div className="schedule-slot" key={lesson.id}>
                     <strong>{lesson.startTime?.slice(0, 5)} - {lesson.endTime?.slice(0, 5)}</strong>
-                    <span>{lesson.className} | {lesson.subject || lesson.courseTitle}</span>
+                    <span>{lesson.className} | {lesson.subject || lesson.subjectTitle}</span>
                     <span>{lesson.room || 'Chưa có phòng'} | {lesson.teacherName}</span>
                   </div>
                 ))}
@@ -572,14 +578,14 @@ function StudentGrades({ workflow }) {
 const buildLearningRows = (grades) => {
   const groups = new Map();
   grades.forEach((grade) => {
-    const key = grade.classId || grade.courseId || grade.assignmentId;
+    const key = grade.classId || grade.subjectId || grade.assignmentId;
     if (!groups.has(key)) {
       groups.set(key, {
         key,
         classId: grade.classId,
-        code: grade.courseCode || grade.className || '-',
-        title: grade.courseTitle || grade.className || '-',
-        credits: grade.courseCredits ?? '-',
+        code: grade.subjectCode || grade.className || '-',
+        title: grade.subjectTitle || grade.className || '-',
+        credits: grade.subjectCredits ?? '-',
         semester: grade.semester,
         grades: [],
       });
@@ -684,8 +690,8 @@ function StudentTuition({ mode, user }) {
     try {
       const data = await getMyTuitionSummary();
       setSummary(data);
-      setSelectedLineKeys((data?.lines || []).map((line) => `${line.classId}-${line.courseId}`));
-      setLineAmounts(Object.fromEntries((data?.lines || []).map((line) => [`${line.classId}-${line.courseId}`, Number(line.amount || 0)])));
+      setSelectedLineKeys((data?.lines || []).map((line) => `${line.classId}-${line.subjectId}`));
+      setLineAmounts(Object.fromEntries((data?.lines || []).map((line) => [`${line.classId}-${line.subjectId}`, Number(line.amount || 0)])));
     } catch (error) {
       console.error(error);
       message.error('Không thể tải dữ liệu học phí');
@@ -699,7 +705,7 @@ function StudentTuition({ mode, user }) {
   }, []);
 
   const lines = summary?.lines || [];
-  const lineKey = (line) => `${line.classId}-${line.courseId}`;
+  const lineKey = (line) => `${line.classId}-${line.subjectId}`;
   const selectedLines = lines.filter((line) => selectedLineKeys.includes(lineKey(line)));
   const selectedAmount = selectedLines.reduce((total, line) => total + Number(lineAmounts[lineKey(line)] ?? line.amount ?? 0), 0);
   const paidAmount = Number(summary?.paidAmount || 0);
@@ -784,7 +790,7 @@ function StudentTuition({ mode, user }) {
                         checked={selectedLineKeys.includes(key)}
                         onChange={() => toggleLine(key)}
                       />
-                      <span>{line.courseTitle || line.className}</span>
+                      <span>{line.subjectTitle || line.className}</span>
                       <input
                         className="online-money-input"
                         value={lineAmounts[key] ?? line.amount ?? 0}
@@ -845,12 +851,12 @@ function StudentTuition({ mode, user }) {
           <Table
             title={() => 'Chi tiết học phí theo học phần'}
             size="small"
-            rowKey={(line) => `${line.classId}-${line.courseId}`}
+            rowKey={(line) => `${line.classId}-${line.subjectId}`}
             dataSource={summary?.lines || []}
             loading={loading}
             pagination={false}
             columns={[
-              { title: 'Học phần', render: (_, line) => `${line.courseCode} - ${line.courseTitle}` },
+              { title: 'Học phần', render: (_, line) => `${line.subjectCode} - ${line.subjectTitle}` },
               { title: 'Lớp', dataIndex: 'className' },
               { title: 'Học kỳ', dataIndex: 'semester' },
               { title: 'Tín chỉ', dataIndex: 'credits', width: 90 },

@@ -123,11 +123,11 @@ export default function TuitionManagement() {
     <Space direction="vertical" style={{ width: '100%' }} size="middle">
       <Table
         size="small"
-        rowKey={(line) => `${line.classId}-${line.courseId}`}
+        rowKey={(line) => `${line.classId}-${line.subjectId}`}
         pagination={false}
         dataSource={record.lines || []}
         columns={[
-          { title: 'Học phần', render: (_, line) => `${line.courseCode} - ${line.courseTitle}` },
+          { title: 'Học phần', render: (_, line) => `${line.subjectCode} - ${line.subjectTitle}` },
           { title: 'Lớp', dataIndex: 'className' },
           { title: 'Học kỳ', dataIndex: 'semester' },
           { title: 'Tín chỉ', dataIndex: 'credits', width: 90 },

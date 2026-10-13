@@ -110,8 +110,8 @@ public class ScheduleServiceImpl implements ScheduleService {
         response.setId(schedule.getId());
         response.setClassId(classEntity.getId());
         response.setClassName(classEntity.getName());
-        response.setCourseCode(classEntity.getCourse().getCode());
-        response.setCourseTitle(classEntity.getCourse().getTitle());
+        response.setSubjectCode(classEntity.getSubject().getCode());
+        response.setSubjectTitle(classEntity.getSubject().getTitle());
         response.setTeacherId(classEntity.getTeacher().getId());
         response.setTeacherName(classEntity.getTeacher().getFullName() != null ? classEntity.getTeacher().getFullName() : classEntity.getTeacher().getUsername());
         response.setDayOfWeek(schedule.getDayOfWeek());

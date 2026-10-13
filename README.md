@@ -153,7 +153,7 @@ POST   /api/auth/login
 GET    /api/me
 
 GET    /api/admin/users
-GET    /api/admin/courses
+GET    /api/admin/subjects
 GET    /api/admin/classes
 GET    /api/admin/schedules
 

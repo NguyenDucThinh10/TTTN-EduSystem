@@ -153,7 +153,7 @@ public class GradeServiceImpl implements GradeService {
         Submission submission = grade.getSubmission();
         Assignment assignment = submission.getAssignment();
         var classEntity = assignment.getClassEntity();
-        var course = classEntity.getCourse();
+        var subject = classEntity.getSubject();
         GradeResponse response = new GradeResponse();
         response.setId(grade.getId());
         response.setSubmissionId(submission.getId());
@@ -162,10 +162,10 @@ public class GradeServiceImpl implements GradeService {
         response.setClassId(classEntity.getId());
         response.setClassName(classEntity.getName());
         response.setSemester(classEntity.getSemester());
-        response.setCourseId(course.getId());
-        response.setCourseCode(course.getCode());
-        response.setCourseTitle(course.getTitle());
-        response.setCourseCredits(course.getCredits());
+        response.setSubjectId(subject.getId());
+        response.setSubjectCode(subject.getCode());
+        response.setSubjectTitle(subject.getTitle());
+        response.setSubjectCredits(subject.getCredits());
         response.setStudentId(submission.getStudent().getId());
         response.setStudentName(displayName(submission.getStudent()));
         response.setScore(grade.getScore());

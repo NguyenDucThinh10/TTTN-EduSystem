@@ -5,7 +5,7 @@ const { Text } = Typography;
 export default function ClassSelectorPanel({ classes, selectedClassId, onClassChange }) {
   const options = classes.map((item) => ({
     value: item.id,
-    label: `${item.name} - ${item.courseCode || item.courseTitle || 'Học phần'} - ${item.semester || 'Học kỳ'}`,
+    label: `${item.name} - ${item.subjectCode || item.subjectTitle || 'Học phần'} - ${item.semester || 'Học kỳ'}`,
   }));
 
   return (

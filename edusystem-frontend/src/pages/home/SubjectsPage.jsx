@@ -1,21 +1,21 @@
 import { useMemo, useState } from 'react';
 import HomeLayout from './HomeLayout';
-import { featuredCourses } from './homeContent';
+import { featuredSubjects } from './homeContent';
 
 const allFilter = 'Tất cả';
-const courseFilters = [allFilter, 'AI', 'Web', 'App', 'Dữ liệu', 'Bảo mật'];
+const subjectFilters = [allFilter, 'AI', 'Web', 'App', 'Dữ liệu', 'Bảo mật'];
 
-export default function CoursesPage({ user, onLogout }) {
+export default function SubjectsPage({ user, onLogout }) {
   const [activeFilter, setActiveFilter] = useState(allFilter);
-  const visibleCourses = useMemo(() => {
-    if (activeFilter === allFilter) return featuredCourses;
-    return featuredCourses.filter((course) => course.category === activeFilter);
+  const visibleSubjects = useMemo(() => {
+    if (activeFilter === allFilter) return featuredSubjects;
+    return featuredSubjects.filter((subject) => subject.category === activeFilter);
   }, [activeFilter]);
 
   return (
     <HomeLayout user={user} onLogout={onLogout}>
       <main>
-        <section className="home-page-hero courses">
+        <section className="home-page-hero subjects">
           <p className="home-eyebrow">Danh mục đào tạo</p>
           <h1>Ngành Công nghệ thông tin</h1>
           <p>Các học phần mẫu được tổ chức theo chuyên ngành AI, Web, App, Dữ liệu và Bảo mật, có thông tin thời lượng, cấp độ và nội dung trọng tâm.</p>
@@ -23,7 +23,7 @@ export default function CoursesPage({ user, onLogout }) {
 
         <section className="home-section">
           <div className="home-toolbar" role="tablist" aria-label="Lọc học phần theo chuyên ngành">
-            {courseFilters.map((filter) => (
+            {subjectFilters.map((filter) => (
               <button
                 type="button"
                 key={filter}
@@ -36,22 +36,22 @@ export default function CoursesPage({ user, onLogout }) {
             ))}
           </div>
 
-          <div className="home-card-grid courses">
-            {visibleCourses.map((course) => (
-              <article className="home-course-card" key={course.title}>
-                <img alt={course.title} src={course.image} />
+          <div className="home-card-grid subjects">
+            {visibleSubjects.map((subject) => (
+              <article className="home-subject-card" key={subject.title}>
+                <img alt={subject.title} src={subject.image} />
                 <div>
-                  <span className="home-tag">{course.category}</span>
-                  <h2>{course.title}</h2>
-                  <p>{course.description}</p>
+                  <span className="home-tag">{subject.category}</span>
+                  <h2>{subject.title}</h2>
+                  <p>{subject.description}</p>
                   <dl>
                     <div>
                       <dt>Thời lượng</dt>
-                      <dd>{course.duration}</dd>
+                      <dd>{subject.duration}</dd>
                     </div>
                     <div>
                       <dt>Cấp độ</dt>
-                      <dd>{course.level}</dd>
+                      <dd>{subject.level}</dd>
                     </div>
                   </dl>
                 </div>

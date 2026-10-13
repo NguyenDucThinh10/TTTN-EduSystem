@@ -4,7 +4,7 @@ import axiosClient from './api/axiosClient';
 import AdminDashboard from './components/AdminDashboard';
 import AdminOverview from './components/AdminOverview';
 import ClassManagement from './components/ClassManagement';
-import CourseManagement from './components/CourseManagement';
+import SubjectManagement from './components/SubjectManagement';
 import ProtectedRoute from './components/ProtectedRoute';
 import ScheduleManagement from './components/ScheduleManagement';
 import TuitionManagement from './components/TuitionManagement';
@@ -12,7 +12,7 @@ import UserManagement from './components/UserManagement';
 import AuthPage from './pages/AuthPage';
 import AboutPage from './pages/home/AboutPage';
 import ContactPage from './pages/home/ContactPage';
-import CoursesPage from './pages/home/CoursesPage';
+import SubjectsPage from './pages/home/SubjectsPage';
 import HomePage from './pages/home/HomePage';
 import NewsPage from './pages/home/NewsPage';
 import StudentDashboardPage from './pages/student/StudentDashboardPage';
@@ -136,7 +136,7 @@ function AppRoutes({ user, setUser }) {
     <Routes>
       <Route path="/" element={<HomePage user={user} onLogout={handleLogout} />} />
       <Route path="/gioi-thieu" element={<AboutPage user={user} onLogout={handleLogout} />} />
-      <Route path="/khoa-hoc" element={<CoursesPage user={user} onLogout={handleLogout} />} />
+      <Route path="/khoa-hoc" element={<SubjectsPage user={user} onLogout={handleLogout} />} />
       <Route path="/tin-tuc" element={<NewsPage user={user} onLogout={handleLogout} />} />
       <Route path="/lien-he" element={<ContactPage user={user} onLogout={handleLogout} />} />
       <Route
@@ -157,7 +157,7 @@ function AppRoutes({ user, setUser }) {
       >
         <Route index element={<AdminOverview />} />
         <Route path="users" element={<UserManagement />} />
-        <Route path="courses" element={<CourseManagement />} />
+        <Route path="subjects" element={<SubjectManagement />} />
         <Route path="classes" element={<ClassManagement />} />
         <Route path="schedules" element={<ScheduleManagement />} />
         <Route path="tuitions" element={<TuitionManagement />} />

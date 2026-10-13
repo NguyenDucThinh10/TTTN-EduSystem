@@ -8,7 +8,7 @@ public class AdminDashboardResponse {
     private long totalAdmins;
     private long totalTeachers;
     private long totalStudents;
-    private long totalCourses;
+    private long totalSubjects;
     private long totalClasses;
     private long totalAssignments;
     private long totalSubmissions;

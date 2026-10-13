@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.edulms.entity.ClassEntity;
 import com.edulms.entity.ClassStatus;
-import com.edulms.entity.Course;
+import com.edulms.entity.Subject;
 import com.edulms.entity.Enrollment;
 import com.edulms.entity.Material;
 import com.edulms.entity.Role;
@@ -19,7 +19,7 @@ import com.edulms.entity.Schedule;
 import com.edulms.entity.User;
 import com.edulms.entity.UserStatus;
 import com.edulms.repository.ClassRepository;
-import com.edulms.repository.CourseRepository;
+import com.edulms.repository.SubjectRepository;
 import com.edulms.repository.EnrollmentRepository;
 import com.edulms.repository.MaterialRepository;
 import com.edulms.repository.ScheduleRepository;
@@ -32,7 +32,7 @@ import lombok.RequiredArgsConstructor;
 public class DataInitializer implements CommandLineRunner {
 
     private final UserRepository userRepository;
-    private final CourseRepository courseRepository;
+    private final SubjectRepository subjectRepository;
     private final ClassRepository classRepository;
     private final EnrollmentRepository enrollmentRepository;
     private final MaterialRepository materialRepository;
@@ -60,19 +60,19 @@ public class DataInitializer implements CommandLineRunner {
 
         userRepository.saveAll(List.of(admin, teacher, teacher2, teacher3, student, student2, student3, student4, student5));
 
-        Course course1 = new Course(null, "IT001", "Xây dựng phần mềm Hướng đối tượng (XDPM-OOP)", 3);
-        Course course2 = new Course(null, "IT002", "Relational Database Theory", 3);
-        Course course3 = new Course(null, "IT003", "Data Engineering Fundamentals", 4);
-        Course it101 = new Course(null, "IT101", "Nhập môn Công nghệ thông tin", 3);
-        Course it102 = new Course(null, "IT102", "Kỹ thuật lập trình", 3);
-        Course it202 = new Course(null, "IT202", "Lập trình Web", 3);
-        Course it303 = new Course(null, "IT303", "Cơ sở dữ liệu", 3);
-        Course it304 = new Course(null, "IT304", "Phân tích thiết kế hệ thống", 3);
+        Subject subject1 = new Subject(null, "IT001", "Xây dựng phần mềm Hướng đối tượng (XDPM-OOP)", 3);
+        Subject subject2 = new Subject(null, "IT002", "Relational Database Theory", 3);
+        Subject subject3 = new Subject(null, "IT003", "Data Engineering Fundamentals", 4);
+        Subject it101 = new Subject(null, "IT101", "Nhập môn Công nghệ thông tin", 3);
+        Subject it102 = new Subject(null, "IT102", "Kỹ thuật lập trình", 3);
+        Subject it202 = new Subject(null, "IT202", "Lập trình Web", 3);
+        Subject it303 = new Subject(null, "IT303", "Cơ sở dữ liệu", 3);
+        Subject it304 = new Subject(null, "IT304", "Phân tích thiết kế hệ thống", 3);
 
-        courseRepository.saveAll(List.of(course1, course2, course3, it101, it102, it202, it303, it304));
+        subjectRepository.saveAll(List.of(subject1, subject2, subject3, it101, it102, it202, it303, it304));
 
-        ClassEntity oopClass = new ClassEntity(null, course1, teacher, "XDPM-OOP-K1", "HK1 2026-2027", ClassStatus.ONGOING);
-        ClassEntity dbClass = new ClassEntity(null, course2, teacher, "DB-Theory-K1", "HK1 2026-2027", ClassStatus.ONGOING);
+        ClassEntity oopClass = new ClassEntity(null, subject1, teacher, "XDPM-OOP-K1", "HK1 2026-2027", ClassStatus.ONGOING);
+        ClassEntity dbClass = new ClassEntity(null, subject2, teacher, "DB-Theory-K1", "HK1 2026-2027", ClassStatus.ONGOING);
         ClassEntity it101Class = new ClassEntity(null, it101, teacher, "IT101-01", "HK1 2026-2027", ClassStatus.ONGOING);
         ClassEntity it102Class = new ClassEntity(null, it102, teacher, "IT102-01", "HK1 2026-2027", ClassStatus.ONGOING);
         ClassEntity it202Class = new ClassEntity(null, it202, teacher, "IT202-01", "HK1 2026-2027", ClassStatus.ONGOING);

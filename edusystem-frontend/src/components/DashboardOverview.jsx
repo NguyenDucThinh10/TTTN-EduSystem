@@ -112,7 +112,7 @@ export function AdminDashboardOverview({ dashboard }) {
     { icon: <UserOutlined />, label: 'Tổng tài khoản', value: dashboard?.totalUsers, hint: `${dashboard?.totalAdmins ?? 0} quản trị viên`, color: '#2563eb' },
     { icon: <TeamOutlined />, label: 'Sinh viên', value: dashboard?.totalStudents, color: '#14b8a6' },
     { icon: <UserOutlined />, label: 'Giảng viên', value: dashboard?.totalTeachers, color: '#f97316' },
-    { icon: <BookOutlined />, label: 'Lớp học', value: dashboard?.totalClasses, hint: `${dashboard?.totalCourses ?? 0} học phần`, color: '#f59e0b' },
+    { icon: <BookOutlined />, label: 'Lớp học', value: dashboard?.totalClasses, hint: `${dashboard?.totalSubjects ?? 0} học phần`, color: '#f59e0b' },
   ], [dashboard]);
 
   return (
@@ -121,7 +121,7 @@ export function AdminDashboardOverview({ dashboard }) {
         <Panel title="Quy mô hệ thống" icon={<TeamOutlined />}><BarChart items={[
           { label: 'Sinh viên', value: dashboard?.totalStudents },
           { label: 'Giảng viên', value: dashboard?.totalTeachers },
-          { label: 'Học phần', value: dashboard?.totalCourses },
+          { label: 'Học phần', value: dashboard?.totalSubjects },
           { label: 'Lớp học', value: dashboard?.totalClasses },
         ]} /></Panel>
         <Panel title="Cơ cấu tài khoản" icon={<PieChartOutlined />}><DonutChart centerLabel="người dùng" items={[
@@ -186,14 +186,14 @@ export function StudentDashboardOverview({ workflow, hideHeading = false }) {
     classScores[kind].push((Number(grade.score) || 0) / maxScore * 10);
     scoresByClass.set(grade.classId, classScores);
   });
-  const courseResults = semesterClasses.map((item) => {
+  const subjectResults = semesterClasses.map((item) => {
     const scores = scoresByClass.get(item.id);
     if (!scores?.final.length) return { ...item, finalScore: null };
     const average = (values) => values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
     return { ...item, finalScore: average(scores.regular) * 0.2 + average(scores.midterm) * 0.3 + average(scores.final) * 0.5 };
   });
-  const totalCredits = courseResults.reduce((sum, item) => sum + (Number(item.courseCredits) || 0), 0);
-  const passedCredits = courseResults.reduce((sum, item) => sum + (item.finalScore >= 5 ? Number(item.courseCredits) || 0 : 0), 0);
+  const totalCredits = subjectResults.reduce((sum, item) => sum + (Number(item.subjectCredits) || 0), 0);
+  const passedCredits = subjectResults.reduce((sum, item) => sum + (item.finalScore >= 5 ? Number(item.subjectCredits) || 0 : 0), 0);
   const stats = [
     { icon: <BookOutlined />, label: 'Lớp đã đăng ký', value: workflow?.classes?.length, color: '#2563eb' },
     { icon: <FileDoneOutlined />, label: 'Bài đã nộp', value: submitted, color: '#14b8a6' },
@@ -208,8 +208,8 @@ export function StudentDashboardOverview({ workflow, hideHeading = false }) {
           <select className="dashboard-semester-select" value={selectedSemester || ''} onChange={(event) => setSemester(event.target.value)} aria-label="Học kỳ kết quả học tập">
             {semesters.length ? semesters.map((item) => <option key={item} value={item}>{item}</option>) : <option value="">Chưa có học kỳ</option>}
           </select>
-          {courseResults.some((item) => item.finalScore != null)
-            ? <BarChart items={courseResults.filter((item) => item.finalScore != null).map((item) => ({ label: item.courseCode || item.name, value: Number(item.finalScore.toFixed(1)), color: '#fb6b55' }))} />
+          {subjectResults.some((item) => item.finalScore != null)
+            ? <BarChart items={subjectResults.filter((item) => item.finalScore != null).map((item) => ({ label: item.subjectCode || item.name, value: Number(item.finalScore.toFixed(1)), color: '#fb6b55' }))} />
             : <p className="dashboard-empty">Chưa có điểm tổng kết.</p>}
         </Panel>
         <Panel title="Tiến độ học tập" icon={<PieChartOutlined />}><RingChart value={percent(passedCredits, totalCredits)} label="tín chỉ đạt" caption={`${passedCredits}/${totalCredits} tín chỉ`} color="#28d993" /></Panel>
@@ -217,9 +217,9 @@ export function StudentDashboardOverview({ workflow, hideHeading = false }) {
           <select className="dashboard-semester-select" value={selectedSemester || ''} onChange={(event) => setSemester(event.target.value)} aria-label="Học kỳ lớp học phần">
             {semesters.length ? semesters.map((item) => <option key={item} value={item}>{item}</option>) : <option value="">Chưa có học kỳ</option>}
           </select>
-          <div className="dashboard-course-list">
-            <div className="dashboard-course-row dashboard-course-header"><span>Môn học</span><span>Tín chỉ</span></div>
-            {semesterClasses.map((item) => <div className="dashboard-course-row" key={item.id}><span>{item.courseTitle || item.name}</span><span>{item.courseCredits ?? 0}</span></div>)}
+          <div className="dashboard-subject-list">
+            <div className="dashboard-subject-row dashboard-subject-header"><span>Môn học</span><span>Tín chỉ</span></div>
+            {semesterClasses.map((item) => <div className="dashboard-subject-row" key={item.id}><span>{item.subjectTitle || item.name}</span><span>{item.subjectCredits ?? 0}</span></div>)}
             {!semesterClasses.length && <p className="dashboard-empty">Chưa đăng ký lớp học phần.</p>}
           </div>
         </Panel>

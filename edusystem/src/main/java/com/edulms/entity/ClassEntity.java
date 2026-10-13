@@ -26,8 +26,8 @@ public class ClassEntity {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "course_id", nullable = false)
-    private Course course;
+    @JoinColumn(name = "subject_id", nullable = false)
+    private Subject subject;
 
     @ManyToOne
     @JoinColumn(name = "teacher_id", nullable = false)

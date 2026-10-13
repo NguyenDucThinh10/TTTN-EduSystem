@@ -17,7 +17,7 @@ DROP TABLE IF EXISTS materials;
 DROP TABLE IF EXISTS schedules;
 DROP TABLE IF EXISTS enrollments;
 DROP TABLE IF EXISTS classes;
-DROP TABLE IF EXISTS courses;
+DROP TABLE IF EXISTS subjects;
 DROP TABLE IF EXISTS users;
 
 SET FOREIGN_KEY_CHECKS = 1;
@@ -35,27 +35,27 @@ CREATE TABLE users (
   UNIQUE KEY uk_users_email (email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE courses (
+CREATE TABLE subjects (
   id BIGINT NOT NULL AUTO_INCREMENT,
   code VARCHAR(20) NOT NULL,
   title VARCHAR(255) NOT NULL,
   credits INT NOT NULL,
   PRIMARY KEY (id),
-  UNIQUE KEY uk_courses_code (code)
+  UNIQUE KEY uk_subjects_code (code)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE classes (
   id BIGINT NOT NULL AUTO_INCREMENT,
-  course_id BIGINT NOT NULL,
+  subject_id BIGINT NOT NULL,
   teacher_id BIGINT NOT NULL,
   name VARCHAR(255) NOT NULL,
   semester VARCHAR(255) DEFAULT NULL,
   status ENUM('ONGOING', 'COMPLETED') DEFAULT 'ONGOING',
   PRIMARY KEY (id),
-  KEY idx_classes_course_id (course_id),
+  KEY idx_classes_subject_id (subject_id),
   KEY idx_classes_teacher_id (teacher_id),
-  CONSTRAINT fk_classes_course
-    FOREIGN KEY (course_id) REFERENCES courses(id),
+  CONSTRAINT fk_classes_subject
+    FOREIGN KEY (subject_id) REFERENCES subjects(id),
   CONSTRAINT fk_classes_teacher
     FOREIGN KEY (teacher_id) REFERENCES users(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -177,7 +177,7 @@ INSERT INTO users (id, username, email, password_hash, full_name, role, status) 
   (8, 'student4', 'student4@edulms.com', '$2a$10$0pb/g8krAYiINpdSks0jQOY0YuwEqzMxPlXCI.mIUjvi/.j3y7l1O', 'Phạm Thảo Vy', 'STUDENT', 'ACTIVE'),
   (9, 'student5', 'student5@edulms.com', '$2a$10$0pb/g8krAYiINpdSks0jQOY0YuwEqzMxPlXCI.mIUjvi/.j3y7l1O', 'Trần Minh Châu', 'STUDENT', 'ACTIVE');
 
-INSERT INTO courses (id, code, title, credits) VALUES
+INSERT INTO subjects (id, code, title, credits) VALUES
   (1, 'IT001', 'Xây dựng phần mềm Hướng đối tượng (XDPM-OOP)', 3),
   (2, 'IT002', 'Relational Database Theory', 3),
   (3, 'IT003', 'Data Engineering Fundamentals', 4),
@@ -187,7 +187,7 @@ INSERT INTO courses (id, code, title, credits) VALUES
   (7, 'IT303', 'Cơ sở dữ liệu', 3),
   (8, 'IT304', 'Phân tích thiết kế hệ thống', 3);
 
-INSERT INTO classes (id, course_id, teacher_id, name, semester, status) VALUES
+INSERT INTO classes (id, subject_id, teacher_id, name, semester, status) VALUES
   (1, 1, 2, 'XDPM-OOP-K1', 'HK1 2026-2027', 'ONGOING'),
   (2, 2, 2, 'DB-Theory-K1', 'HK1 2026-2027', 'ONGOING'),
   (3, 4, 2, 'IT101-01', 'HK1 2026-2027', 'ONGOING'),
@@ -222,7 +222,7 @@ INSERT INTO materials (id, class_id, uploader_id, title, description, file_name,
   (3, 5, 2, 'Tài liệu HTML, CSS và JavaScript', 'Tài liệu phục vụ học phần lập trình web.', 'html-css-javascript.pdf', '/uploads/materials/html-css-javascript.pdf', 'PDF', 1, '2026-09-01 08:30:00');
 
 ALTER TABLE users AUTO_INCREMENT = 10;
-ALTER TABLE courses AUTO_INCREMENT = 9;
+ALTER TABLE subjects AUTO_INCREMENT = 9;
 ALTER TABLE classes AUTO_INCREMENT = 8;
 ALTER TABLE enrollments AUTO_INCREMENT = 12;
 ALTER TABLE schedules AUTO_INCREMENT = 6;

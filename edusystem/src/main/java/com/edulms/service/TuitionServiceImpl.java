@@ -143,16 +143,16 @@ public class TuitionServiceImpl implements TuitionService {
 
     private TuitionLineResponse mapLine(Enrollment enrollment) {
         var classEntity = enrollment.getClassEntity();
-        var course = classEntity.getCourse();
-        int credits = course.getCredits() == null ? 0 : course.getCredits();
+        var subject = classEntity.getSubject();
+        int credits = subject.getCredits() == null ? 0 : subject.getCredits();
 
         TuitionLineResponse response = new TuitionLineResponse();
         response.setClassId(classEntity.getId());
         response.setClassName(classEntity.getName());
         response.setSemester(classEntity.getSemester());
-        response.setCourseId(course.getId());
-        response.setCourseCode(course.getCode());
-        response.setCourseTitle(course.getTitle());
+        response.setSubjectId(subject.getId());
+        response.setSubjectCode(subject.getCode());
+        response.setSubjectTitle(subject.getTitle());
         response.setCredits(credits);
         response.setAmount(credits * TUITION_PER_CREDIT);
         return response;

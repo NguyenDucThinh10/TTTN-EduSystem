@@ -6,18 +6,18 @@ import axiosClient from '../api/axiosClient';
 
 const formatMoney = (value) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value || 0);
 
-export default function CourseManagement() {
-    const [courses, setCourses] = useState([]);
+export default function SubjectManagement() {
+    const [subjects, setSubjects] = useState([]);
     const [loading, setLoading] = useState(false);
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [editingCourse, setEditingCourse] = useState(null);
+    const [editingSubject, setEditingSubject] = useState(null);
     const [form] = Form.useForm();
 
-    const fetchCourses = async () => {
+    const fetchSubjects = async () => {
         setLoading(true);
         try {
-            const response = await axiosClient.get('/api/admin/courses');
-            setCourses(Array.isArray(response) ? response : []);
+            const response = await axiosClient.get('/api/admin/subjects');
+            setSubjects(Array.isArray(response) ? response : []);
         } catch (error) {
             console.error(error);
             message.error('Không thể tải danh sách học phần!');
@@ -27,32 +27,32 @@ export default function CourseManagement() {
     };
 
     useEffect(() => {
-        fetchCourses();
+        fetchSubjects();
     }, []);
 
     const showAddModal = () => {
-        setEditingCourse(null);
+        setEditingSubject(null);
         form.resetFields();
         setIsModalVisible(true);
     };
 
     const showEditModal = (record) => {
-        setEditingCourse(record);
+        setEditingSubject(record);
         form.setFieldsValue(record);
         setIsModalVisible(true);
     };
 
     const handleSubmit = async (values) => {
         try {
-            if (editingCourse) {
-                await axiosClient.put(`/api/admin/courses/${editingCourse.id}`, values);
+            if (editingSubject) {
+                await axiosClient.put(`/api/admin/subjects/${editingSubject.id}`, values);
                 message.success('Cập nhật học phần thành công!');
             } else {
-                await axiosClient.post('/api/admin/courses', values);
+                await axiosClient.post('/api/admin/subjects', values);
                 message.success('Thêm học phần thành công!');
             }
             setIsModalVisible(false);
-            fetchCourses();
+            fetchSubjects();
         } catch (error) {
             console.error(error);
             message.error(error.response?.data?.message || error.response?.data || 'Lưu học phần thất bại!');
@@ -61,9 +61,9 @@ export default function CourseManagement() {
 
     const handleDelete = async (id) => {
         try {
-            await axiosClient.delete(`/api/admin/courses/${id}`);
+            await axiosClient.delete(`/api/admin/subjects/${id}`);
             message.success('Đã xóa học phần!');
-            fetchCourses();
+            fetchSubjects();
         } catch (error) {
             console.error(error);
             message.error('Không thể xóa học phần đang được dùng bởi lớp học.');
@@ -108,7 +108,7 @@ export default function CourseManagement() {
 
             <Table
                 columns={columns}
-                dataSource={courses}
+                dataSource={subjects}
                 rowKey="id"
                 loading={loading}
                 bordered
@@ -116,7 +116,7 @@ export default function CourseManagement() {
             />
 
             <Modal
-                title={editingCourse ? 'Sửa học phần' : 'Thêm học phần'}
+                title={editingSubject ? 'Sửa học phần' : 'Thêm học phần'}
                 open={isModalVisible}
                 onCancel={() => setIsModalVisible(false)}
                 onOk={() => form.submit()}

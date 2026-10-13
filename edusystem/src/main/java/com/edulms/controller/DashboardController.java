@@ -12,7 +12,7 @@ import com.edulms.entity.ClassEntity;
 import com.edulms.entity.Role;
 import com.edulms.entity.User;
 import com.edulms.repository.ClassRepository;
-import com.edulms.repository.CourseRepository;
+import com.edulms.repository.SubjectRepository;
 import com.edulms.repository.UserRepository;
 
 @RestController
@@ -21,12 +21,12 @@ public class DashboardController {
 
     private final UserRepository userRepository;
     private final ClassRepository classRepository;
-    private final CourseRepository courseRepository;
+    private final SubjectRepository subjectRepository;
 
-    public DashboardController(UserRepository userRepository, ClassRepository classRepository, CourseRepository courseRepository) {
+    public DashboardController(UserRepository userRepository, ClassRepository classRepository, SubjectRepository subjectRepository) {
         this.userRepository = userRepository;
         this.classRepository = classRepository;
-        this.courseRepository = courseRepository;
+        this.subjectRepository = subjectRepository;
     }
 
     @GetMapping("/stats")
@@ -58,7 +58,7 @@ public class DashboardController {
         stats.setOngoingClasses(ongoingClasses);
         
         // Đếm tổng số môn học (Hàm count() này là của hệ thống, luôn tồn tại)
-        stats.setTotalCourses(courseRepository.count());
+        stats.setTotalSubjects(subjectRepository.count());
 
         return ResponseEntity.ok(stats);
     }

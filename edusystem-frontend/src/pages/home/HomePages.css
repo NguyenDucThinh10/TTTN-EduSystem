@@ -242,7 +242,7 @@
 }
 
 .home-card,
-.home-course-card,
+.home-subject-card,
 .home-featured-news,
 .home-contact-card,
 .home-guide-panel,
@@ -261,7 +261,7 @@
 }
 
 .home-card div,
-.home-course-card div,
+.home-subject-card div,
 .home-featured-news div {
   padding: 22px;
 }
@@ -279,7 +279,7 @@
 
 .home-card h3,
 .home-news-row h3,
-.home-course-card h2,
+.home-subject-card h2,
 .home-featured-news h2,
 .home-contact-card h2 {
   color: #123b63;
@@ -289,7 +289,7 @@
 
 .home-card p,
 .home-news-row p,
-.home-course-card p,
+.home-subject-card p,
 .home-featured-news p,
 .home-contact-card p {
   color: #66798b;
@@ -341,7 +341,7 @@
   background-image: linear-gradient(90deg, rgba(9, 30, 66, 0.84), rgba(9, 30, 66, 0.38)), url('https://lh3.googleusercontent.com/aida-public/AB6AXuBmMAyXVl7VnsaG8u2Z9GosBBSF9E5x2febGTAls_G94zU2HWe5a8D5UGkDxWaWb4GcAQv63DhJRzRlwktNkTeiqzq-y01bQ4ScXd1CeXlztw57Z16L0uxfIlJXvpcJSymigr3xQEmJ0jCCE7DhA9Hc7nOkzDzev4fsx9F09NCt7HYX3p9EUBBsRm2LaerAeCXel8Plqr-xUxmv0008IQP-kN0S3LpsVxhsEsh4D_vlFpOATjnvV3u8');
 }
 
-.home-page-hero.courses {
+.home-page-hero.subjects {
   background-image: linear-gradient(90deg, rgba(9, 30, 66, 0.82), rgba(9, 30, 66, 0.22)), url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1800&q=85');
   background-position: center 44%;
 }
@@ -415,31 +415,31 @@
   color: #fff;
 }
 
-.home-card-grid.courses {
+.home-card-grid.subjects {
   grid-template-columns: repeat(2, 1fr);
 }
 
-.home-course-card img {
+.home-subject-card img {
   aspect-ratio: 16 / 9;
   display: block;
   object-fit: cover;
   width: 100%;
 }
 
-.home-course-card dl {
+.home-subject-card dl {
   display: grid;
   gap: 12px;
   grid-template-columns: repeat(2, 1fr);
   margin: 22px 0 0;
 }
 
-.home-course-card dt {
+.home-subject-card dt {
   color: #758596;
   font-size: 0.78rem;
   font-weight: 800;
 }
 
-.home-course-card dd {
+.home-subject-card dd {
   color: #123b63;
   font-weight: 900;
   margin: 4px 0 0;
@@ -602,7 +602,7 @@
   .home-stat-band,
   .home-split,
   .home-card-grid.three,
-  .home-card-grid.courses,
+  .home-card-grid.subjects,
   .home-process,
   .home-featured-news,
   .home-news-layout,

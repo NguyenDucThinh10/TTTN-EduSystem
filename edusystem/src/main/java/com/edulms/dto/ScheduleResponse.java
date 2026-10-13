@@ -10,8 +10,8 @@ public class ScheduleResponse {
     private Long id;
     private Long classId;
     private String className;
-    private String courseCode;
-    private String courseTitle;
+    private String subjectCode;
+    private String subjectTitle;
     private Long teacherId;
     private String teacherName;
     private DayOfWeek dayOfWeek;

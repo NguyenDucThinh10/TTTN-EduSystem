@@ -1,4 +1,4 @@
-const courseImage = ({ title, subtitle, icon, from, to, accent = '#0f6eb8' }) => {
+const subjectImage = ({ title, subtitle, icon, from, to, accent = '#0f6eb8' }) => {
   const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540">
       <defs>
@@ -35,13 +35,13 @@ export const navItems = [
   { label: 'LIÊN HỆ', path: '/lien-he' },
 ];
 
-export const featuredCourses = [
+export const featuredSubjects = [
   {
     title: 'Lập trình Web',
     category: 'Web',
     duration: '12 tuần',
     level: 'Cơ bản đến nâng cao',
-    image: courseImage({ title: 'Web Development', subtitle: 'HTML, CSS, React, API', icon: '💻', from: '#0f6eb8', to: '#1db7a6' }),
+    image: subjectImage({ title: 'Web Development', subtitle: 'HTML, CSS, React, API', icon: '💻', from: '#0f6eb8', to: '#1db7a6' }),
     description: 'Xây dựng giao diện hiện đại, API và quy trình triển khai ứng dụng web.',
   },
   {
@@ -49,7 +49,7 @@ export const featuredCourses = [
     category: 'Web',
     duration: '8 tuần',
     level: 'Trung cấp',
-    image: courseImage({ title: 'React UI', subtitle: 'Component, State, Router', icon: '⚛️', from: '#2563eb', to: '#7c3aed' }),
+    image: subjectImage({ title: 'React UI', subtitle: 'Component, State, Router', icon: '⚛️', from: '#2563eb', to: '#7c3aed' }),
     description: 'Thiết kế giao diện tương tác, quản lý state và tối ưu trải nghiệm người dùng.',
   },
   {
@@ -57,7 +57,7 @@ export const featuredCourses = [
     category: 'Web',
     duration: '10 tuần',
     level: 'Trung cấp',
-    image: courseImage({ title: 'Backend API', subtitle: 'REST, Auth, Services', icon: '🧩', from: '#0f766e', to: '#84cc16' }),
+    image: subjectImage({ title: 'Backend API', subtitle: 'REST, Auth, Services', icon: '🧩', from: '#0f766e', to: '#84cc16' }),
     description: 'Xây dựng API, phân quyền, xử lý nghiệp vụ và kết nối cơ sở dữ liệu.',
   },
   {
@@ -65,7 +65,7 @@ export const featuredCourses = [
     category: 'App',
     duration: '10 tuần',
     level: 'Cơ bản đến trung cấp',
-    image: courseImage({ title: 'Mobile App', subtitle: 'Flutter, UI, Firebase', icon: '📱', from: '#0284c7', to: '#22c55e' }),
+    image: subjectImage({ title: 'Mobile App', subtitle: 'Flutter, UI, Firebase', icon: '📱', from: '#0284c7', to: '#22c55e' }),
     description: 'Phát triển ứng dụng di động đa nền tảng với giao diện đẹp và dữ liệu thời gian thực.',
   },
   {
@@ -73,7 +73,7 @@ export const featuredCourses = [
     category: 'App',
     duration: '9 tuần',
     level: 'Trung cấp',
-    image: courseImage({ title: 'Android', subtitle: 'Kotlin, API, Storage', icon: '🤖', from: '#16a34a', to: '#facc15' }),
+    image: subjectImage({ title: 'Android', subtitle: 'Kotlin, API, Storage', icon: '🤖', from: '#16a34a', to: '#facc15' }),
     description: 'Xây dựng ứng dụng Android, xử lý vòng đời màn hình, lưu trữ và gọi API.',
   },
   {
@@ -81,7 +81,7 @@ export const featuredCourses = [
     category: 'AI',
     duration: '14 tuần',
     level: 'Nâng cao',
-    image: courseImage({ title: 'Artificial Intelligence', subtitle: 'Search, ML, Prediction', icon: '🧠', from: '#7c3aed', to: '#ef4444' }),
+    image: subjectImage({ title: 'Artificial Intelligence', subtitle: 'Search, ML, Prediction', icon: '🧠', from: '#7c3aed', to: '#ef4444' }),
     description: 'Nền tảng học máy, xử lý dữ liệu và ứng dụng AI trong sản phẩm số.',
   },
   {
@@ -89,7 +89,7 @@ export const featuredCourses = [
     category: 'AI',
     duration: '12 tuần',
     level: 'Trung cấp',
-    image: courseImage({ title: 'Machine Learning', subtitle: 'Model, Training, Metrics', icon: '📊', from: '#0891b2', to: '#f59e0b' }),
+    image: subjectImage({ title: 'Machine Learning', subtitle: 'Model, Training, Metrics', icon: '📊', from: '#0891b2', to: '#f59e0b' }),
     description: 'Huấn luyện mô hình, đánh giá chất lượng và áp dụng thuật toán vào dữ liệu thực tế.',
   },
   {
@@ -97,7 +97,7 @@ export const featuredCourses = [
     category: 'AI',
     duration: '12 tuần',
     level: 'Nâng cao',
-    image: courseImage({ title: 'Deep Learning', subtitle: 'Neural Network, Vision, NLP', icon: '🔬', from: '#4f46e5', to: '#db2777' }),
+    image: subjectImage({ title: 'Deep Learning', subtitle: 'Neural Network, Vision, NLP', icon: '🔬', from: '#4f46e5', to: '#db2777' }),
     description: 'Tìm hiểu mạng nơ-ron, mô hình thị giác máy tính và xử lý ngôn ngữ tự nhiên.',
   },
   {
@@ -105,7 +105,7 @@ export const featuredCourses = [
     category: 'Dữ liệu',
     duration: '10 tuần',
     level: 'Trung cấp',
-    image: courseImage({ title: 'Database', subtitle: 'SQL, Design, Optimize', icon: '🗄️', from: '#334155', to: '#0ea5e9' }),
+    image: subjectImage({ title: 'Database', subtitle: 'SQL, Design, Optimize', icon: '🗄️', from: '#334155', to: '#0ea5e9' }),
     description: 'Thiết kế, truy vấn, tối ưu và quản lý cơ sở dữ liệu cho hệ thống giáo dục.',
   },
   {
@@ -113,7 +113,7 @@ export const featuredCourses = [
     category: 'Dữ liệu',
     duration: '9 tuần',
     level: 'Trung cấp',
-    image: courseImage({ title: 'Data Analysis', subtitle: 'Python, Pandas, Chart', icon: '📈', from: '#0d9488', to: '#f97316' }),
+    image: subjectImage({ title: 'Data Analysis', subtitle: 'Python, Pandas, Chart', icon: '📈', from: '#0d9488', to: '#f97316' }),
     description: 'Làm sạch, phân tích, trực quan hóa dữ liệu và xây dựng báo cáo phục vụ ra quyết định.',
   },
   {
@@ -121,7 +121,7 @@ export const featuredCourses = [
     category: 'Bảo mật',
     duration: '9 tuần',
     level: 'Trung cấp',
-    image: courseImage({ title: 'Cyber Security', subtitle: 'Risk, Defense, Audit', icon: '🛡️', from: '#111827', to: '#dc2626' }),
+    image: subjectImage({ title: 'Cyber Security', subtitle: 'Risk, Defense, Audit', icon: '🛡️', from: '#111827', to: '#dc2626' }),
     description: 'Nhận diện rủi ro, bảo vệ dữ liệu và vận hành hệ thống an toàn.',
   },
   {
@@ -129,7 +129,7 @@ export const featuredCourses = [
     category: 'Bảo mật',
     duration: '8 tuần',
     level: 'Nâng cao',
-    image: courseImage({ title: 'Web Security', subtitle: 'OWASP, Auth, Testing', icon: '🔐', from: '#7f1d1d', to: '#f59e0b' }),
+    image: subjectImage({ title: 'Web Security', subtitle: 'OWASP, Auth, Testing', icon: '🔐', from: '#7f1d1d', to: '#f59e0b' }),
     description: 'Phòng chống lỗ hổng phổ biến, kiểm thử bảo mật và bảo vệ luồng đăng nhập.',
   },
 ];

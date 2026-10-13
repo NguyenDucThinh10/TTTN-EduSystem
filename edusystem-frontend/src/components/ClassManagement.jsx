@@ -12,7 +12,7 @@ export default function ClassManagement() {
     const [classes, setClasses] = useState([]);
     const [students, setStudents] = useState([]);
     const [teachers, setTeachers] = useState([]);
-    const [courses, setCourses] = useState([]);
+    const [subjects, setSubjects] = useState([]);
     const [classStudents, setClassStudents] = useState([]);
     const [loading, setLoading] = useState(false);
     const [isEnrollModalVisible, setIsEnrollModalVisible] = useState(false);
@@ -27,16 +27,16 @@ export default function ClassManagement() {
     const fetchData = async () => {
         setLoading(true);
         try {
-            const [classRes, userRes, courseRes] = await Promise.all([
+            const [classRes, userRes, subjectRes] = await Promise.all([
                 axiosClient.get('/api/admin/classes'),
                 axiosClient.get('/api/admin/users?size=1000'),
-                axiosClient.get('/api/admin/courses'),
+                axiosClient.get('/api/admin/subjects'),
             ]);
             const allUsers = userRes.content || userRes || [];
             setClasses(Array.isArray(classRes) ? classRes : (classRes.content || []));
             setStudents(allUsers.filter((user) => user.role === 'STUDENT' && user.status === 'ACTIVE'));
             setTeachers(allUsers.filter((user) => user.role === 'TEACHER' && user.status === 'ACTIVE'));
-            setCourses(Array.isArray(courseRes) ? courseRes : (courseRes.content || []));
+            setSubjects(Array.isArray(subjectRes) ? subjectRes : (subjectRes.content || []));
         } catch (error) {
             console.error(error);
             message.error('Có lỗi xảy ra khi tải dữ liệu từ máy chủ!');
@@ -60,7 +60,7 @@ export default function ClassManagement() {
         setEditingClass(record);
         form.setFieldsValue({
             name: record.name,
-            courseId: record.courseId,
+            subjectId: record.subjectId,
             teacherId: record.teacherId,
             semester: record.semester,
             status: record.status,
@@ -146,9 +146,9 @@ export default function ClassManagement() {
             title: 'Học phần',
             render: (_, record) => (
                 <Space direction="vertical" size={0}>
-                    <Tag icon={<BookOutlined />} color="cyan">{record.courseCode || 'N/A'}</Tag>
-                    <Text>{record.courseTitle || 'Chưa có'}</Text>
-                    <Text type="secondary">{record.courseCredits ? `${record.courseCredits} tín chỉ` : ''}</Text>
+                    <Tag icon={<BookOutlined />} color="cyan">{record.subjectCode || 'N/A'}</Tag>
+                    <Text>{record.subjectTitle || 'Chưa có'}</Text>
+                    <Text type="secondary">{record.subjectCredits ? `${record.subjectCredits} tín chỉ` : ''}</Text>
                 </Space>
             ),
         },
@@ -232,11 +232,11 @@ export default function ClassManagement() {
                     <Form.Item name="name" label="Tên lớp học" rules={[{ required: true, message: 'Vui lòng nhập tên lớp!' }]}>
                         <Input placeholder="VD: CS101-01" />
                     </Form.Item>
-                    <Form.Item name="courseId" label="Học phần" rules={[{ required: true, message: 'Vui lòng chọn học phần!' }]}>
+                    <Form.Item name="subjectId" label="Học phần" rules={[{ required: true, message: 'Vui lòng chọn học phần!' }]}>
                         <Select placeholder="Chọn học phần" showSearch optionFilterProp="label">
-                            {courses.map((course) => (
-                                <Option key={course.id} value={course.id} label={`${course.code} - ${course.title}`}>
-                                    {course.code} - {course.title} ({course.credits} tín chỉ)
+                            {subjects.map((subject) => (
+                                <Option key={subject.id} value={subject.id} label={`${subject.code} - ${subject.title}`}>
+                                    {subject.code} - {subject.title} ({subject.credits} tín chỉ)
                                 </Option>
                             ))}
                         </Select>

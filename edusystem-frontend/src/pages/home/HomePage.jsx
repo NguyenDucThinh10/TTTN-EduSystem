@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import HomeLayout from './HomeLayout';
-import { featuredCourses, latestNews } from './homeContent';
+import { featuredSubjects, latestNews } from './homeContent';
 
 const stats = [
   { value: '12+', label: 'học phần nổi bật' },
@@ -79,13 +79,13 @@ export default function HomePage({ user, onLogout }) {
             <Link to="/khoa-hoc">Xem tất cả</Link>
           </div>
           <div className="home-card-grid three">
-            {featuredCourses.slice(0, 3).map((course) => (
-              <article className="home-card" key={course.title}>
-                <img alt={course.title} src={course.image} />
+            {featuredSubjects.slice(0, 3).map((subject) => (
+              <article className="home-card" key={subject.title}>
+                <img alt={subject.title} src={subject.image} />
                 <div>
-                  <span className="home-tag">{course.category}</span>
-                  <h3>{course.title}</h3>
-                  <p>{course.description}</p>
+                  <span className="home-tag">{subject.category}</span>
+                  <h3>{subject.title}</h3>
+                  <p>{subject.description}</p>
                 </div>
               </article>
             ))}

@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 public class ClassRequest {
-    private Long courseId;
+    private Long subjectId;
     private Long teacherId;
     private String name;
     private String semester;

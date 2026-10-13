@@ -7,9 +7,9 @@ public class TuitionLineResponse {
     private Long classId;
     private String className;
     private String semester;
-    private Long courseId;
-    private String courseCode;
-    private String courseTitle;
+    private Long subjectId;
+    private String subjectCode;
+    private String subjectTitle;
     private Integer credits;
     private Long amount;
 }
